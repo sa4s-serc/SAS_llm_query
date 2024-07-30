@@ -1,20 +1,10 @@
 #!/usr/bin/env python
 import sys
-from test_project_crewai.crew import FibonacciCrew
+from test_project_crewai.server import app
 
 
 def run():
-    """
-    Run the crew.
-    """
-    # task_description = input(
-    #     "Enter the task description (e.g., Write a Python function to calculate the nth Fibonacci number): "
-    # )
-    task_description = "Calclulate the n'th fibbonaci number"
-
-    crew = FibonacciCrew()
-    result = crew.kickoff(task_description=task_description)
-    print(result)
+    app.run(debug=True, host="0.0.0.0", port=5000)
 
 
 if __name__ == "__main__":
