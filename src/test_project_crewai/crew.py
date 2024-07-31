@@ -1,103 +1,134 @@
+import re
 from crewai import Agent, Task, Crew
 from langchain_openai import ChatOpenAI
+from test_project_crewai.service_manager import ServiceManager
 import json
-from fuzzywuzzy import fuzz
 
-# Initialize the LLM model
 LLM_MODEL = ChatOpenAI(model_name="gpt-4o-mini")
-
-# Cache to store generated functions
-function_cache = {}
-
-# Define the Query Agent
-query_agent = Agent(
-    role="Query Analyzer and Router",
-    goal="Accurately analyze incoming queries and route them to appropriate endpoints or the Function Generator Agent",
-    backstory="""You are an expert in query analysis and routing with extensive knowledge of the current system's capabilities.
-    The existing endpoints are:
-    1. /sqrt/<float:number> (GET): Calculates the square root of a given number.
-    2. /prime/<int:number> (GET): Checks if a given number is prime.
-    3. /factorial/<int:number> (GET): Calculates the factorial of a given number.
-    4. /query (POST): Handles general queries that don't fit the above endpoints.
-
-    Your job is to understand the user's query, check if existing endpoints can handle it, and if not, refine the query for the Function Generator Agent.
-    You must NEVER write code yourself. You must ALWAYS consider the existing endpoints first before suggesting a new function.""",
-    verbose=True,
-    allow_delegation=False,
-    llm=LLM_MODEL,
-)
-
-# Define the Function Generator Agent
-function_generator_agent = Agent(
-    role="Function Implementer",
-    goal="Generate Python code based on refined queries",
-    backstory="""You are a skilled Python programmer. Your task is to implement Python functions based on refined queries that cannot be handled by existing endpoints.
-    You must ONLY provide the Python function code, without any explanations, usage examples, or test cases.""",
-    verbose=True,
-    allow_delegation=False,
-    llm=LLM_MODEL,
-)
-
-analyze_query_task = Task(
-    description="Analyze the incoming query: '{query}'. Follow these steps:\n"
-    "1. Understand the query's intent and required computation.\n"
-    "2. Check if any existing endpoints (sqrt, prime, factorial) can handle the query.\n"
-    "3. If an existing endpoint can handle it, return a JSON object with the 'endpoint' key and the endpoint as the value.\n"
-    "4. If no existing endpoint is suitable, return a JSON object with the 'refined_query' key and the refined query as the value.\n"
-    "5. NEVER write code in your response.\n"
-    "6. ALWAYS consider the limitations and capabilities of the existing endpoints before suggesting a new function.",
-    agent=query_agent,
-    expected_output="A JSON object with either an 'endpoint' or a 'refined_query' key",
-)
-
-generate_function_task = Task(
-    description="Based on the refined query: '{query}', implement a Python function.\n"
-    "Provide ONLY the Python function code, without any explanations, usage examples, or test cases.",
-    agent=function_generator_agent,
-    expected_output="A Python function implementation without any additional text",
-)
-
-route_query_task = Task(
-    description="Based on the analysis of the query: '{query}' or new function:\n"
-    "1. If an existing endpoint can handle the query, return the JSON object with the 'endpoint' key.\n"
-    "2. If a new function was implemented, return the JSON object with the 'function_code' key and the function code as the value.\n"
-    "3. NEVER generate code yourself. Only use the function provided by the Function Generator Agent.",
-    agent=query_agent,
-    expected_output="A JSON object with either an 'endpoint' or a 'function_code' key",
-)
-# Create the crew
-query_processing_crew = Crew(
-    agents=[query_agent, function_generator_agent],
-    tasks=[analyze_query_task, generate_function_task, route_query_task],
-    verbose=2,  # You can adjust this for different levels of output
-)
+service_manager = ServiceManager()
 
 
-def find_similar_query(query, threshold=80):
-    for cached_query in function_cache:
-        similarity = fuzz.ratio(query.lower(), cached_query.lower())
-        if similarity >= threshold:
-            return cached_query
-    return None
+def create_agents():
+    query_agent = Agent(
+        role="Query Analyzer and Router",
+        goal="Analyze queries and route to appropriate services ",
+        backstory=f"""You route queries to services. Available services: {service_manager.get_services()}. You never generate code
+       and the code will always be geneated by refined aganet, your job is to pass a prompt to the function generator agent based on the query
+      if the query is to calculate the square root of 49, the prompt would be to set up a service to calculuate square root """,
+        verbose=True,
+        allow_delegation=False,
+        llm=LLM_MODEL,
+    )
+
+    function_generator_agent = Agent(
+        role="Service Creator",
+        goal="Create new Flask services for unhandled queries",
+        backstory="You create complete Flask applications for new types of queries",
+        verbose=True,
+        allow_delegation=False,
+        llm=LLM_MODEL,
+    )
+
+    return query_agent, function_generator_agent
+
+
+def create_tasks(query, query_agent, function_generator_agent):
+    analyze_query_task = Task(
+        description=f"""Analyze the query: '{query}'.
+        Determine the type of function needed to handle this query.
+        Return a JSON string with 'query_type' and 'refined_query' keys.
+        Ensure your response is a valid JSON string. The refined query should be generic
+        and not contain a value, for eg: calculuate square root of 49 should be refined to generate a service
+        to calculuate square rooot""",
+        agent=query_agent,
+        expected_output="""A JSON string with:
+        {
+            "query_type": "descriptive name for the query type",
+            "refined_query": "refined query for new service"
+        }""",
+    )
+
+    generate_service_task = Task(
+        description=f"""Create a new Flask service based on the refined query and query type.
+        The service should run on port {{port}}.
+        Return a JSON  with 'new_service_code' and 'endpoint_format' keys.
+        The 'new_service_code' should be a complete Flask application that can handle the query.
+        Include all necessary imports, route definitions, and the main function to run the app.
+        The main route should accept POST requests with a JSON body containing a 'query' key.
+        The 'endpoint_format' should describe the expected JSON format for the request.
+        """,
+        agent=function_generator_agent,
+        expected_output="""A JSON string with:
+        {
+            "new_service_code": "Complete Flask application code as a string",
+            "endpoint_format": "{"query": "input_value"}"
+        }""",
+    )
+
+    return [analyze_query_task, generate_service_task]
+
+
+def parse_raw_string(raw_string):
+    # Remove triple backticks and "json" if present
+    cleaned_string = re.sub(r"^```json\s*|\s*```$", "", raw_string.strip())
+
+    try:
+        # Attempt to parse the cleaned string as JSON
+        json_object = json.loads(cleaned_string)
+        return json_object
+    except json.JSONDecodeError as e:
+        print(f"Error parsing JSON: {e}")
+        return None
 
 
 def process_query(query):
-    # Check if a similar query exists in the cache
-    similar_query = find_similar_query(query)
-    if similar_query:
-        return {"function_code": function_cache[similar_query]}
+    query_agent, function_generator_agent = create_agents()
+    tasks = create_tasks(query, query_agent, function_generator_agent)
 
-    crew_output = query_processing_crew.kickoff(inputs={"query": query})
+    crew = Crew(
+        agents=[query_agent, function_generator_agent],
+        tasks=tasks,
+        verbose=2,
+    )
 
+    result = crew.kickoff()
+    result_str = parse_raw_string(result.raw)
+    if result_str:
+        print(json.dumps(result_str, indent=2))
+    print("raw result:", result.raw)
+    print("Current services: ", service_manager.get_services())
     try:
-        result = json.loads(crew_output.raw)
-        print(result)
-        if "endpoint" in result:
-            return {"endpoint": result["endpoint"]}
-        elif "function_code" in result:
-            function_cache[query] = result["function_code"]
-            return {"function_code": result["function_code"]}
-    except json.JSONDecodeError:
-        pass
+        result_dict = result_str
 
-    return {"error": "Unable to process query"}
+        if (
+            isinstance(result_dict, dict)
+            and "new_service_code" in result_dict
+            and "endpoint_format" in result_dict
+        ):
+            service_code = result_dict["new_service_code"]
+            endpoint_format = result_dict["endpoint_format"]
+            query_type = "square_root"  # You might want to determine this dynamically
+
+            # Get the next available port
+            port = service_manager.next_port
+
+            # Replace the hardcoded port in the service code
+            service_code = service_code.replace(
+                "app.run(port=5000)", f"app.run(port={port})"
+            )
+
+            new_endpoint = service_manager.create_service(service_code, query_type)
+            return {
+                "endpoint": new_endpoint,
+                "message": "New service created",
+                "endpoint_format": (
+                    json.loads(endpoint_format)
+                    if isinstance(endpoint_format, str)
+                    else endpoint_format
+                ),
+            }
+        else:
+            return {"error": "Unexpected result format from crew"}
+
+    except Exception as e:
+        return {"error": f"An error occurred: {str(e)}"}
