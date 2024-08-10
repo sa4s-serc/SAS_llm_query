@@ -10,16 +10,17 @@ service_generator = ServiceGenerator(service_manager)
 
 @app.route("/query", methods=["POST"])
 def handle_query():
-    data = request.json
-    query = data.get("query")
+    query = request.json.get("query", "")
+    refiner_result = query_refiner.refine(query)
 
-    refined_result = query_refiner.refine(query)
-
-    if refined_result["service_exists"]:
-        return jsonify(refined_result)
+    if refiner_result["service_exists"]:
+        return jsonify(refiner_result)
     else:
         generator_result = service_generator.generate(
-            refined_result["refined_query"], refined_result["suggested_port"]
+            refiner_result["refined_query"],
+            refiner_result["suggested_port"],
+            refiner_result["needs_database"],
+            refiner_result.get("database_info"),
         )
         return jsonify(generator_result)
 
