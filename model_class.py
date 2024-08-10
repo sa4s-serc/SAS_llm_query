@@ -6,6 +6,7 @@ from langchain.chains import LLMChain
 from langchain.output_parsers import StructuredOutputParser, ResponseSchema
 import json
 import subprocess
+import ast
 
 load_dotenv()
 API_KEY = os.getenv("OPEN_AI_API_KEY")
@@ -28,6 +29,7 @@ class QueryRefiner:
                 "service_endpoint": existing_service["service_endpoint"],
                 "service_method": existing_service["service_method"],
                 "request_body": existing_service["request_body"],
+                "service_description": existing_service["service_description"],
             }
         else:
             print(f"Refined query --> {refined_query}")
@@ -134,43 +136,86 @@ class ServiceGenerator:
         self.llm = ChatOpenAI(model_name=MODEL, temperature=0.7)
 
     def generate(self, refined_query, port):
-        code = self._generate_service(refined_query, port)
-        clean_code = self._clean_generated_code(code)
+        service_info = self._generate_service_info(refined_query, port)
 
-        filename = f"service_{port}.py"
-        with open(filename, "w") as f:
-            f.write(clean_code)
+        if service_info:
+            code = service_info.pop("code", None)  # Remove code from service_info
+            if code:
+                clean_code = self._clean_generated_code(code)
+                filename = f"service_{port}.py"
+                with open(filename, "w") as f:
+                    f.write(clean_code)
+                subprocess.Popen(["python", filename])
 
-        subprocess.Popen(["python", filename])
-
-        service_info = {
-            "service_endpoint": f"http://localhost:{port}/",
-            "service_method": "POST",
-            "request_body": {"input": "string"},
-            "service_description": f"A service that {refined_query.lower()}",
-        }
-        self.service_manager.add_service(service_info)
+            self.service_manager.add_service(service_info)
 
         return service_info
 
-    def _generate_service(self, refined_query, port):
+    def _generate_service_info(self, refined_query, port):
+        output_parser = StructuredOutputParser.from_response_schemas(
+            [
+                ResponseSchema(
+                    name="code", description="The Python code for the Flask service"
+                ),
+                ResponseSchema(
+                    name="request_body",
+                    description="A dictionary describing the expected request body",
+                ),
+                ResponseSchema(
+                    name="service_description",
+                    description="A brief description of what the service does",
+                ),
+            ]
+        )
+
+        format_instructions = output_parser.get_format_instructions()
+
         template = """
+        Your task is to create a Flask service based on the following refined query:
         {refined_query}
 
-        Create a Flask application that runs on port {port}. The application should have a single POST route at '/' that receives JSON input and returns JSON output.
-        Include all necessary imports.
-        The service should be self-contained in a single file.
-        Do not include any comments, explanations, or code block formatting in the code.
+        Create a Flask application that runs on port {port}. Follow these guidelines:
+        1. The application should have a single POST route at '/'.
+        2. All input parameters should be received as strings in the JSON payload.
+        3. Inside the route function, parse the input strings to appropriate types (int, float, etc.) as needed.
+        4. Handle potential parsing errors and return appropriate error messages.
+        5. The route should return the result as JSON.
+        6. Include all necessary imports.
+        7. The service should be self-contained in a single file.
+        8. Do not include any comments or explanations in the code.
+        9. Ensure proper error handling for invalid inputs.
+
+        In addition to the code, provide:
+        1. A description of the expected request body as a dictionary, where all values are "string".
+        2. A brief description of what the service does.
+
+        {format_instructions}
         """
 
         prompt = PromptTemplate(
-            input_variables=["refined_query", "port"], template=template
+            input_variables=["refined_query", "port"],
+            template=template,
+            partial_variables={"format_instructions": format_instructions},
         )
 
         chain = LLMChain(llm=self.llm, prompt=prompt)
-        code = chain.run(refined_query=refined_query, port=port)
+        result = chain.run(refined_query=refined_query, port=port)
 
-        return code
+        try:
+            parsed_output = output_parser.parse(result)
+            service_info = {
+                "service_endpoint": f"http://localhost:{port}/",
+                "service_method": "POST",
+                "request_body": parsed_output["request_body"],
+                "service_description": parsed_output["service_description"],
+                "code": parsed_output[
+                    "code"
+                ],  # This will be removed in the generate method
+            }
+            return service_info
+        except Exception as e:
+            print(f"Error parsing LLM output: {e}")
+            return None
 
     def _clean_generated_code(self, code):
         code = code.replace("```python", "").replace("```", "")
