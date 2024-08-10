@@ -1,12 +1,15 @@
 import os
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
-from langchain.prompts import PromptTemplate
+from langchain.prompts import (
+    ChatPromptTemplate,
+    SystemMessagePromptTemplate,
+    HumanMessagePromptTemplate,
+)
 from langchain.chains import LLMChain
 from langchain.output_parsers import StructuredOutputParser, ResponseSchema
 import json
 import subprocess
-import ast
 
 load_dotenv()
 API_KEY = os.getenv("OPEN_AI_API_KEY")
@@ -62,33 +65,40 @@ class QueryRefiner:
 
         format_instructions = output_parser.get_format_instructions()
 
-        template = """
-            Given the following user query and list of existing service descriptions,
-            determine if any existing service can fulfill the query. If a match is found, return the index of the matching service (0-based).
-            If no match is found, return -1.
+        system_template = """You are an AI assistant specializing in matching user queries to existing services.
+        Your task is to analyze the user's query and determine if any existing service can fulfill it."""
 
-            User query: {query}
+        human_template = """Given the following user query and list of existing service descriptions,
+        determine if any existing service can fulfill the query. If a match is found, return the index of the matching service (0-based).
+        If no match is found, return -1.
 
-            Existing service descriptions:
-            {services}
+        User query: {query}
 
-            {format_instructions}
-            """
+        Existing service descriptions:
+        {services}
 
-        prompt = PromptTemplate(
-            input_variables=["query", "services"],
-            template=template,
-            partial_variables={"format_instructions": format_instructions},
+        {format_instructions}
+        """
+
+        system_message_prompt = SystemMessagePromptTemplate.from_template(
+            system_template
         )
-        print(f"prompt ---> {prompt} \n\n\n\n\n")
-        chain = LLMChain(llm=self.llm, prompt=prompt)
+        human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
+
+        chat_prompt = ChatPromptTemplate.from_messages(
+            [system_message_prompt, human_message_prompt]
+        )
+
+        chain = LLMChain(llm=self.llm, prompt=chat_prompt)
         response = chain.run(
-            query=query, services=json.dumps(services_descriptions, indent=2)
+            query=query,
+            services=json.dumps(services_descriptions, indent=2),
+            format_instructions=format_instructions,
         )
 
         try:
             parsed_output = output_parser.parse(response)
-            matching_index = int(parsed_output["matching_index"])  # Convert to int
+            matching_index = int(parsed_output["matching_index"])
             print(f"parsed_output ---> {parsed_output} \n\n\n\n\n")
             if matching_index >= 0 and matching_index < len(
                 self.service_manager.services
@@ -102,29 +112,37 @@ class QueryRefiner:
         return None
 
     def _refine_query(self, query: str):
-        template = """
-            Your task is to refine the following query into a general request for writing a Python function:
+        system_template = """You are an AI assistant specializing in refining user queries into general requests for writing Python functions.
+        Your task is to analyze the user's query and formulate a clear, specific request for a Python function that addresses the general case of the query."""
 
-            Original query: {query}
+        human_template = """
+        Original query: {query}
 
-            Instructions:
-            1. Analyze the query to understand the underlying task or problem.
-            2. Formulate a clear and specific request for writing a Python function that addresses the general case of the query.
-            3. Start your refined query with "Write a Python function to" followed by a concise description of the task.
-            4. Focus on creating a reusable function that can handle various inputs, not just the specific example in the query.
-            5. If the original query is vague, make reasonable assumptions and state them.
-            6. Ensure the function is general enough to be used in various contexts, not just for the specific instance mentioned in the query.
+        Instructions:
+        1. Analyze the query to understand the underlying task or problem.
+        2. Formulate a clear and specific request for writing a Python function that addresses the general case of the query.
+        3. Start your refined query with "Write a Python function to" followed by a concise description of the task.
+        4. Focus on creating a reusable function that can handle various inputs, not just the specific example in the query.
+        5. If the original query is vague, make reasonable assumptions and state them.
+        6. Ensure the function is general enough to be used in various contexts, not just for the specific instance mentioned in the query.
 
-            Examples:
-            - If the query is "What is the square root of 49?", the refined query should be "Write a Python function to calculate the square root of any given number"
-            - If the query is "Find the 5th Fibonacci number", the refined query should be "Write a Python function to calculate the nth Fibonacci number"
+        Examples:
+        - If the query is "What is the square root of 49?", the refined query should be "Write a Python function to calculate the square root of any given number"
+        - If the query is "Find the 5th Fibonacci number", the refined query should be "Write a Python function to calculate the nth Fibonacci number"
 
-            Refined query: "Write a Python function to
-            """
+        Refined query: "Write a Python function to
+        """
 
-        prompt = PromptTemplate(input_variables=["query"], template=template)
+        system_message_prompt = SystemMessagePromptTemplate.from_template(
+            system_template
+        )
+        human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
 
-        chain = LLMChain(llm=self.llm, prompt=prompt)
+        chat_prompt = ChatPromptTemplate.from_messages(
+            [system_message_prompt, human_message_prompt]
+        )
+
+        chain = LLMChain(llm=self.llm, prompt=chat_prompt)
         refined_query = chain.run(query=query)
 
         return refined_query.strip()
@@ -139,7 +157,7 @@ class ServiceGenerator:
         service_info = self._generate_service_info(refined_query, port)
 
         if service_info:
-            code = service_info.pop("code", None)  # Remove code from service_info
+            code = service_info.pop("code", None)
             if code:
                 clean_code = self._clean_generated_code(code)
                 filename = f"service_{port}.py"
@@ -170,11 +188,14 @@ class ServiceGenerator:
 
         format_instructions = output_parser.get_format_instructions()
 
-        template = """
-        Your task is to create a Flask service based on the following refined query:
+        system_template = """You are an AI assistant specializing in creating Flask services based on refined queries.
+        Your task is to generate a complete Flask application that fulfills the requirements of the given query."""
+
+        human_template = """
+        Create a Flask application based on the following refined query:
         {refined_query}
 
-        Create a Flask application that runs on port {port}. Follow these guidelines:
+        The application should run on port {port}. Follow these guidelines:
         1. The application should have a single POST route at '/'.
         2. All input parameters should be received as strings in the JSON payload.
         3. Inside the route function, parse the input strings to appropriate types (int, float, etc.) as needed.
@@ -192,14 +213,21 @@ class ServiceGenerator:
         {format_instructions}
         """
 
-        prompt = PromptTemplate(
-            input_variables=["refined_query", "port"],
-            template=template,
-            partial_variables={"format_instructions": format_instructions},
+        system_message_prompt = SystemMessagePromptTemplate.from_template(
+            system_template
+        )
+        human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
+
+        chat_prompt = ChatPromptTemplate.from_messages(
+            [system_message_prompt, human_message_prompt]
         )
 
-        chain = LLMChain(llm=self.llm, prompt=prompt)
-        result = chain.run(refined_query=refined_query, port=port)
+        chain = LLMChain(llm=self.llm, prompt=chat_prompt)
+        result = chain.run(
+            refined_query=refined_query,
+            port=port,
+            format_instructions=format_instructions,
+        )
 
         try:
             parsed_output = output_parser.parse(result)
@@ -208,9 +236,7 @@ class ServiceGenerator:
                 "service_method": "POST",
                 "request_body": parsed_output["request_body"],
                 "service_description": parsed_output["service_description"],
-                "code": parsed_output[
-                    "code"
-                ],  # This will be removed in the generate method
+                "code": parsed_output["code"],
             }
             return service_info
         except Exception as e:
@@ -219,7 +245,14 @@ class ServiceGenerator:
 
     def _clean_generated_code(self, code):
         code = code.replace("```python", "").replace("```", "")
+        # Replace escaped newlines with actual newlines
+        code = code.replace("\\n", "\n")
+
+        # Remove any leading/trailing whitespace
         code = code.strip()
+
+        # Ensure the code ends with a newline
         if not code.endswith("\n"):
             code += "\n"
+
         return code
