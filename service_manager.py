@@ -6,6 +6,7 @@ class ServiceManager:
             {
                 "name": "temperature_db",
                 "path": "temperature_data.db",
+                "description": "This database stores hourly temperature readings. Each record contains an ID, a timestamp, and a temperature value in Celsius.",
                 "schema": {
                     "temperature_readings": {
                         "columns": [
@@ -33,6 +34,8 @@ class ServiceManager:
         return self.databases
 
     def add_database(self, database_info):
+        if "description" not in database_info:
+            raise ValueError("Database info must include a description")
         self.databases.append(database_info)
 
     def get_database_by_name(self, name):
@@ -40,3 +43,10 @@ class ServiceManager:
             if db["name"] == name:
                 return db
         return None
+
+    def update_database_description(self, name, new_description):
+        db = self.get_database_by_name(name)
+        if db:
+            db["description"] = new_description
+            return True
+        return False

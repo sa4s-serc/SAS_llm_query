@@ -119,7 +119,7 @@ class QueryRefiner:
         system_template = """You are an AI assistant specializing in refining user queries into general requests for writing Python functions.
         Your task is to analyze the user's query and formulate a clear, specific request for a Python function that addresses the general case of the query.
         You have access to the following databases:
-        {database_schemas}
+        {database_info}
         Determine if the query requires database access.
         """
 
@@ -142,12 +142,20 @@ class QueryRefiner:
         """
 
         database_info = self.service_manager.get_database_info()
-        database_schemas = json.dumps(
-            {db["name"]: db["schema"] for db in database_info}, indent=2
+        database_info_str = json.dumps(
+            [
+                {
+                    "name": db["name"],
+                    "description": db["description"],
+                    "schema": db["schema"],
+                }
+                for db in database_info
+            ],
+            indent=2,
         )
         system_message_prompt = SystemMessagePromptTemplate.from_template(
             system_template
-        ).format(database_schemas=database_schemas)
+        ).format(database_info=database_info_str)
         human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
 
         chat_prompt = ChatPromptTemplate.from_messages(
@@ -242,15 +250,24 @@ class ServiceGenerator:
         """
 
         if needs_database and database_info:
-            database_schemas = json.dumps(
-                {db["name"]: db["schema"] for db in database_info}, indent=2
+            database_info_str = json.dumps(
+                [
+                    {
+                        "name": db["name"],
+                        "description": db["description"],
+                        "schema": db["schema"],
+                    }
+                    for db in database_info
+                ],
+                indent=2,
             )
             db_path = database_info[0][
                 "path"
             ]  # Assuming we're using the first database
-            db_info = f"You have access to the following databases:\n{database_schemas}\nThe database path is: {db_path}"
+            db_info = f"You have access to the following databases:\n{database_info_str}\nThe database path is: {db_path}"
             db_instructions = f"""10. Use the provided database information to connect to and query the appropriate database.
-            11. Use the following database path in your code: '{db_path}'"""
+            11. Use the following database path in your code: '{db_path}'
+            12. Consider the database description when designing your query and processing the data."""
         else:
             db_info = "This query does not require database access."
             db_instructions = ""
