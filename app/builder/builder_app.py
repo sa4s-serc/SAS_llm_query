@@ -3,7 +3,7 @@ import streamlit as st
 from app.utils.app_generator import AppGenerator
 import app.config as config
 from app.utils.logger import setup_logger
-from chatbot import take_input
+from app.utils.chatbot import take_input
 
 
 class BuilderApp:
@@ -53,10 +53,8 @@ class BuilderApp:
 
         selected_keywords = st.multiselect("Select features:", self.all_keywords)
         self.logger.info("Starting BuilderApp")
-        st.title(f"{APP_NAME} Builder")
         if "conversation" not in st.session_state:
             st.session_state.conversation = []
-        st.write("Your personalized IIIT Companion app:")
 
         user_input = st.text_input(
             "Enter a sentence describing your desired app features:"
