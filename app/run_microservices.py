@@ -4,6 +4,7 @@ import importlib
 import threading
 import time
 import psutil
+import requests
 import yaml
 
 # Get the absolute path of the current file
@@ -28,14 +29,22 @@ microservice_ports = config.microservice_ports
 
 # Now import the logger
 from app.utils.logger import setup_logger
-from app.utils.port_manager import update_port_map, PORT_MAP_FILE, clean_port_map
+from app.utils.port_manager import (
+    get_port,
+    update_port_map,
+    PORT_MAP_FILE,
+    clean_port_map,
+)
 
 logger = setup_logger("run_microservices")
 
 
 def load_dependencies():
-    with open(os.path.join(project_root, "app", "dependencies.yaml"), "r") as f:
-        return yaml.safe_load(f)["services"]
+    dependency_file = os.path.join(project_root, "app", "dependencies.yaml")
+    if os.path.exists(dependency_file):
+        with open(dependency_file, "r") as f:
+            return yaml.safe_load(f)["services"]
+    return {}
 
 
 dependencies = load_dependencies()
@@ -65,15 +74,13 @@ def run_microservice(module_name, service_name, port):
         logger.error(f"Error starting {service_name} service: {str(e)}", exc_info=True)
 
 
-def discover_and_run_services(
-    directory, module_prefix="app.microservices", path_prefix=""
-):
+def discover_services(directory, module_prefix="app.microservices", path_prefix=""):
     services = {}
     for item in os.listdir(directory):
         item_path = os.path.join(directory, item)
         if os.path.isdir(item_path):
             services.update(
-                discover_and_run_services(
+                discover_services(
                     item_path,
                     f"{module_prefix}.{item}",
                     f"{path_prefix}{item.lower()}_",
@@ -91,8 +98,39 @@ def discover_and_run_services(
     return services
 
 
+def check_dependency_health(dependency):
+    port = get_port(dependency)
+    if port is None:
+        logger.error(f"Port not found for dependency: {dependency}")
+        return False
+    try:
+        response = requests.get(f"http://localhost:{port}/data", timeout=5)
+        return response.status_code == 200
+    except requests.RequestException:
+        return False
+
+
 def run_service(service):
     module_name, service_name, port = service
+    service_key = f"{module_name.split('.')[-2].lower()}_{service_name.lower()}"
+
+    if service_key in dependencies:
+        for dependency in dependencies[service_key]["depends_on"]:
+            retry_count = 0
+            while retry_count < 3:  # Try 3 times
+                if check_dependency_health(dependency):
+                    break
+                logger.warning(
+                    f"Dependency {dependency} not healthy for {service_key}. Retrying in 5 seconds..."
+                )
+                time.sleep(5)
+                retry_count += 1
+            else:
+                logger.error(
+                    f"Failed to start {service_key} due to unhealthy dependency: {dependency}"
+                )
+                return None
+
     thread = threading.Thread(
         target=run_microservice, args=(module_name, service_name, port)
     )
@@ -105,21 +143,26 @@ def run_all_microservices():
     if os.path.exists(PORT_MAP_FILE):
         os.remove(PORT_MAP_FILE)
 
-    services = discover_and_run_services(config.MICROSERVICES_DIR)
-    started_services = set()
+    services = discover_services(config.MICROSERVICES_DIR)
     threads = []
 
+    # Start services without dependencies first
+    for service_key, service in list(services.items()):
+        if service_key not in dependencies:
+            thread = run_service(service)
+            if thread:
+                threads.append(thread)
+                del services[service_key]
+            time.sleep(0.1)
+
+    # Start services with dependencies
     while services:
         for service_key, service in list(services.items()):
-            if service_key not in dependencies or all(
-                dep in started_services
-                for dep in dependencies[service_key]["depends_on"]
-            ):
-                thread = run_service(service)
+            thread = run_service(service)
+            if thread:
                 threads.append(thread)
-                started_services.add(service_key)
                 del services[service_key]
-                time.sleep(0.1)
+            time.sleep(0.1)
 
         if services:
             time.sleep(1)  # Wait before checking again
