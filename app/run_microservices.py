@@ -4,6 +4,7 @@ import importlib
 import threading
 import time
 import psutil
+import yaml
 
 # Get the absolute path of the current file
 current_file = os.path.abspath(__file__)
@@ -30,6 +31,14 @@ from app.utils.logger import setup_logger
 from app.utils.port_manager import update_port_map, PORT_MAP_FILE, clean_port_map
 
 logger = setup_logger("run_microservices")
+
+
+def load_dependencies():
+    with open(os.path.join(project_root, "app", "dependencies.yaml"), "r") as f:
+        return yaml.safe_load(f)["services"]
+
+
+dependencies = load_dependencies()
 
 
 def run_microservice(module_name, service_name, port):
@@ -59,12 +68,11 @@ def run_microservice(module_name, service_name, port):
 def discover_and_run_services(
     directory, module_prefix="app.microservices", path_prefix=""
 ):
-    threads = []
+    services = {}
     for item in os.listdir(directory):
         item_path = os.path.join(directory, item)
         if os.path.isdir(item_path):
-            # Recursively process subdirectories
-            threads.extend(
+            services.update(
                 discover_and_run_services(
                     item_path,
                     f"{module_prefix}.{item}",
@@ -77,18 +85,19 @@ def discover_and_run_services(
             port_key = f"{path_prefix}{service_name.lower()}"
             port = config.get_port(port_key)
             if port is not None:
-                logger.info(
-                    f"Starting thread for {service_name} service on port {port}"
-                )
-                thread = threading.Thread(
-                    target=run_microservice, args=(module_name, service_name, port)
-                )
-                thread.start()
-                threads.append(thread)
-                time.sleep(0.1)  # Small delay between starting services
+                services[port_key] = (module_name, service_name, port)
             else:
                 logger.error(f"Port not found for service: {port_key}")
-    return threads
+    return services
+
+
+def run_service(service):
+    module_name, service_name, port = service
+    thread = threading.Thread(
+        target=run_microservice, args=(module_name, service_name, port)
+    )
+    thread.start()
+    return thread
 
 
 def run_all_microservices():
@@ -96,7 +105,24 @@ def run_all_microservices():
     if os.path.exists(PORT_MAP_FILE):
         os.remove(PORT_MAP_FILE)
 
-    threads = discover_and_run_services(config.MICROSERVICES_DIR)
+    services = discover_and_run_services(config.MICROSERVICES_DIR)
+    started_services = set()
+    threads = []
+
+    while services:
+        for service_key, service in list(services.items()):
+            if service_key not in dependencies or all(
+                dep in started_services
+                for dep in dependencies[service_key]["depends_on"]
+            ):
+                thread = run_service(service)
+                threads.append(thread)
+                started_services.add(service_key)
+                del services[service_key]
+                time.sleep(0.1)
+
+        if services:
+            time.sleep(1)  # Wait before checking again
 
     for thread in threads:
         thread.join()
@@ -112,7 +138,7 @@ if __name__ == "__main__":
 
     # Keep the script running and periodically log running services
     while True:
-        time.sleep(60)  # Log every 60 seconds
+        time.sleep(60)
         logger.info("Currently running microservices:")
         for process in psutil.process_iter(["pid", "name", "cmdline"]):
             if "python" in process.info[

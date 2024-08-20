@@ -1,0 +1,19 @@
+services:
+  academic_assignments:
+    depends_on: []
+  academic_grades:
+    depends_on: []
+  health_mental_health:
+    depends_on: []
+  event_clubs:
+    depends_on: []
+  resource_library:
+    depends_on: []
+  event_workshops:
+    depends_on:
+      - event_clubs
+      - resource_library
+  academic_course_registration:
+    depends_on:
+      - academic_grades
+      - resource_library
