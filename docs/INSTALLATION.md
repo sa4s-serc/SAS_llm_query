@@ -3,16 +3,19 @@
 If you are a Windows user, make sure to execute the following commands before proceeding with the installation:
 
 In Command Prompt:
+
 ```
 set PYTHONUTF8=1
 ```
 
 In PowerShell:
+
 ```
 $env:PYTHONUTF8 = "1"
 ```
 
 This will help counter any UTF-8 encoding issues. If it doesn't work, then execute this command
+
 ```
 chcp 65001
 ```
@@ -21,20 +24,38 @@ chcp 65001
 
 - Conda or Miniconda (for managing environments)
 
-## Set Up the Environment Using Conda
+## ~~Set Up the Environment Using Conda~~ (Deprecated)
 
-It's recommended to use Conda or Miniconda for managing environments. This keeps dependencies required by different projects separate.
+~~It's recommended to use Conda or Miniconda for managing environments. This keeps dependencies required by different projects separate.~~
 
-Create the environment using the provided `environment.yml` file:
+~~Create the environment using the provided `environment.yml` file:~~
 
 ```
 conda env create -f environment.yml
 ```
 
-Activate the environment:
+~~Activate the environment:~~
 
 ```
 conda activate iot
+```
+
+## Set Up the Environment Using `python venv`
+
+### For Linux
+
+```sh
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### For Windows
+
+```powershell
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
 ```
 
 ## Step 3: Configuration
