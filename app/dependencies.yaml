@@ -1,9 +1,0 @@
-services:
-  workshops:
-    depends_on:
-      - clubs
-      - library
-  course_registration:
-    depends_on:
-      - grades
-      - library

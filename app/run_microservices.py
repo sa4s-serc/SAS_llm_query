@@ -25,18 +25,13 @@ config.setup()
 
 # Now we can access the configuration variables
 MICROSERVICES_DIR = config.MICROSERVICES_DIR
-microservice_ports = config.microservice_ports
 
-# Now import the logger
+# Now import the logger and PortManager
 from app.utils.logger import setup_logger
-from app.utils.port_manager import (
-    get_port,
-    update_port_map,
-    PORT_MAP_FILE,
-    clean_port_map,
-)
+from app.utils.port_manager import PortManager
 
 logger = setup_logger("run_microservices")
+port_manager = PortManager()
 
 
 def load_dependencies():
@@ -50,7 +45,7 @@ def load_dependencies():
 dependencies = load_dependencies()
 
 
-def run_microservice(module_name, service_name, port):
+def run_microservice(module_name, service_name):
     try:
         logger.info(f"Importing module {module_name} for {service_name}")
         module = importlib.import_module(module_name)
@@ -58,8 +53,7 @@ def run_microservice(module_name, service_name, port):
         logger.info(f"Getting start function for {service_name}")
         start_function = getattr(module, f"start_{service_name.lower()}_service")
 
-        logger.info(f"Starting {service_name} service on port {port}")
-        update_port_map(service_name.lower(), port)
+        logger.info(f"Starting {service_name} service")
         start_function()
 
     except ImportError as e:
@@ -74,35 +68,24 @@ def run_microservice(module_name, service_name, port):
         logger.error(f"Error starting {service_name} service: {str(e)}", exc_info=True)
 
 
-def discover_services(directory, module_prefix="app.microservices", path_prefix=""):
+def discover_services(directory):
     services = {}
     for item in os.listdir(directory):
         item_path = os.path.join(directory, item)
-        if os.path.isdir(item_path):
-            services.update(
-                discover_services(
-                    item_path,
-                    f"{module_prefix}.{item}",
-                    f"{path_prefix}{item.lower()}_",
-                )
-            )
-        elif item.endswith(".py") and not item.startswith("__") and item != "base.py":
-            service_name = os.path.splitext(item)[0]
-            module_name = f"{module_prefix}.{service_name}"
-            port_key = f"{path_prefix}{service_name.lower()}"
-            port = config.get_port(port_key)
-            if port is not None:
-                services[port_key] = (module_name, service_name, port)
-            else:
-                logger.error(f"Port not found for service: {port_key}")
+        if os.path.isdir(item_path) and item != "__pycache__":
+            service_file = os.path.join(item_path, "service.py")
+            if os.path.exists(service_file):
+                module_name = f"app.microservices.{item}.service"
+                services[item.lower()] = module_name
     return services
 
 
 def check_dependency_health(dependency):
-    port = get_port(dependency)
-    if port is None:
-        logger.error(f"Port not found for dependency: {dependency}")
+    service_info = port_manager.get_service_info(dependency)
+    if not service_info:
+        logger.error(f"Service info not found for dependency: {dependency}")
         return False
+    port = service_info["port"]
     try:
         response = requests.get(f"http://localhost:{port}/data", timeout=5)
         return response.status_code == 200
@@ -110,58 +93,49 @@ def check_dependency_health(dependency):
         return False
 
 
-def run_service(service):
-    module_name, service_name, port = service
-    service_key = f"{module_name.split('.')[-2].lower()}_{service_name.lower()}"
-
-    if service_key in dependencies:
-        for dependency in dependencies[service_key]["depends_on"]:
+def run_service(service_name, module_name):
+    if service_name in dependencies:
+        for dependency in dependencies[service_name]["depends_on"]:
             retry_count = 0
             while retry_count < 3:  # Try 3 times
                 if check_dependency_health(dependency):
                     break
                 logger.warning(
-                    f"Dependency {dependency} not healthy for {service_key}. Retrying in 5 seconds..."
+                    f"Dependency {dependency} not healthy for {service_name}. Retrying in 5 seconds..."
                 )
                 time.sleep(5)
                 retry_count += 1
             else:
                 logger.error(
-                    f"Failed to start {service_key} due to unhealthy dependency: {dependency}"
+                    f"Failed to start {service_name} due to unhealthy dependency: {dependency}"
                 )
                 return None
 
-    thread = threading.Thread(
-        target=run_microservice, args=(module_name, service_name, port)
-    )
+    thread = threading.Thread(target=run_microservice, args=(module_name, service_name))
     thread.start()
     return thread
 
 
 def run_all_microservices():
-    # Clear the existing port map
-    if os.path.exists(PORT_MAP_FILE):
-        os.remove(PORT_MAP_FILE)
-
     services = discover_services(config.MICROSERVICES_DIR)
     threads = []
 
     # Start services without dependencies first
-    for service_key, service in list(services.items()):
-        if service_key not in dependencies:
-            thread = run_service(service)
+    for service_name, module_name in list(services.items()):
+        if service_name not in dependencies:
+            thread = run_service(service_name, module_name)
             if thread:
                 threads.append(thread)
-                del services[service_key]
+                del services[service_name]
             time.sleep(0.1)
 
     # Start services with dependencies
     while services:
-        for service_key, service in list(services.items()):
-            thread = run_service(service)
+        for service_name, module_name in list(services.items()):
+            thread = run_service(service_name, module_name)
             if thread:
                 threads.append(thread)
-                del services[service_key]
+                del services[service_name]
             time.sleep(0.1)
 
         if services:
@@ -169,9 +143,6 @@ def run_all_microservices():
 
     for thread in threads:
         thread.join()
-
-    # Clean and standardize the port map after all services have started
-    clean_port_map()
 
 
 if __name__ == "__main__":
