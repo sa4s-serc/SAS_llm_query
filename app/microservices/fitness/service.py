@@ -1,26 +1,25 @@
 from app.microservices.base import MicroserviceBase
-from app.utils.port_manager import update_service_info
-import random
 from app.utils.logger import setup_logger
+import random
 
 logger = setup_logger("FitnessService")
 
 
 class FitnessService(MicroserviceBase):
-    def __init__(self, port: int):
-        service_name = "fitness"
-        super().__init__(name=service_name, port=port)
+    def __init__(self):
+        super().__init__("fitness")
 
-        # Microservice-specific initialization
-        description = "Provides fitness suggestions and tracking"
-        dependencies = []
-        update_service_info(service_name, description, dependencies)
+        self.update_service_info(
+            description="Provides fitness suggestions and tracking", dependencies=[]
+        )
 
+    def register_routes(self):
         @self.app.get("/data")
         async def get_data():
             logger.info("Received request for fitness data")
             return self._get_fitness_suggestion()
 
+    # Service-specific logic
     def _get_fitness_suggestion(self):
         suggestions = [
             "Try a 20-minute jog around campus",
@@ -35,14 +34,8 @@ class FitnessService(MicroserviceBase):
 
 
 def start_fitness_service():
-    try:
-        logger.info("Starting FitnessService")
-
-        # Use the `create` class method to initialize the service
-        service = FitnessService.create(name="fitness")
-        service.start()
-    except Exception as e:
-        logger.error(f"Error starting FitnessService: {str(e)}", exc_info=True)
+    service = FitnessService()
+    service.run()
 
 
 if __name__ == "__main__":
