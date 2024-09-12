@@ -5,7 +5,6 @@ import threading
 import time
 import psutil
 import requests
-import yaml
 
 # Get the absolute path of the current file
 current_file = os.path.abspath(__file__)
@@ -32,17 +31,6 @@ from app.utils.port_manager import PortManager
 
 logger = setup_logger("run_microservices")
 port_manager = PortManager()
-
-
-def load_dependencies():
-    dependency_file = os.path.join(project_root, "app", "dependencies.yaml")
-    if os.path.exists(dependency_file):
-        with open(dependency_file, "r") as f:
-            return yaml.safe_load(f)["services"]
-    return {}
-
-
-dependencies = load_dependencies()
 
 
 def run_microservice(module_name, service_name):
@@ -94,8 +82,9 @@ def check_dependency_health(dependency):
 
 
 def run_service(service_name, module_name):
-    if service_name in dependencies:
-        for dependency in dependencies[service_name]["depends_on"]:
+    service_info = port_manager.get_service_info(service_name)
+    if service_info and "dependencies" in service_info:
+        for dependency in service_info["dependencies"]:
             retry_count = 0
             while retry_count < 3:  # Try 3 times
                 if check_dependency_health(dependency):
@@ -122,7 +111,12 @@ def run_all_microservices():
 
     # Start services without dependencies first
     for service_name, module_name in list(services.items()):
-        if service_name not in dependencies:
+        service_info = port_manager.get_service_info(service_name)
+        if (
+            not service_info
+            or "dependencies" not in service_info
+            or not service_info["dependencies"]
+        ):
             thread = run_service(service_name, module_name)
             if thread:
                 threads.append(thread)
