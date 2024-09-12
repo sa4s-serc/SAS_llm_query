@@ -1,13 +1,16 @@
 import toml
 import os
 from typing import Dict, List, Optional
-from app.config import MIN_PORT, MAX_PORT
+
+MIN_PORT: int = 9000
+MAX_PORT: int = 9999
 
 
 class PortManager:
     def __init__(self, services_file: str = "services.toml"):
         self.services_file = os.path.join("app", services_file)
         self.services = self._load_services()
+        self.app_ports = set()
 
     def _load_services(self) -> Dict:
         if os.path.exists(self.services_file):
@@ -19,11 +22,17 @@ class PortManager:
         with open(self.services_file, "w") as f:
             toml.dump(self.services, f)
 
-    def get_available_port(self) -> int:
+    def get_available_port(self, is_service: bool = True) -> int:
         used_ports = set(service["port"] for service in self.services.values())
+        used_ports.update(self.app_ports)
+
         for port in range(MIN_PORT, MAX_PORT + 1):
             if port not in used_ports:
-                return port
+                if is_service:
+                    return port
+                else:
+                    self.app_ports.add(port)
+                    return port
         raise ValueError("No available ports")
 
     def register_service(
@@ -37,7 +46,7 @@ class PortManager:
             return self.services[name]["port"]
 
         if port is None:
-            port = self.get_available_port()
+            port = self.get_available_port(is_service=True)
 
         self.services[name] = {
             "port": port,
@@ -63,15 +72,37 @@ class PortManager:
 
         self._save_services()
 
+    def release_app_port(self, port: int):
+        if port in self.app_ports:
+            self.app_ports.remove(port)
+        else:
+            raise ValueError(f"App port {port} not found")
 
-port_manager = PortManager()
+
+# Global instance of PortManager
+_port_manager = None
+
+
+def get_port_manager():
+    global _port_manager
+    if _port_manager is None:
+        _port_manager = PortManager()
+    return _port_manager
 
 
 def get_service_port(name: str) -> int:
-    return port_manager.register_service(name)
+    return get_port_manager().register_service(name)
+
+
+def get_app_port() -> int:
+    return get_port_manager().get_available_port(is_service=False)
 
 
 def update_service_info(
     name: str, description: str = None, dependencies: List[str] = None
 ):
-    port_manager.update_service_info(name, description, dependencies)
+    get_port_manager().update_service_info(name, description, dependencies)
+
+
+def release_app_port(port: int):
+    get_port_manager().release_app_port(port)

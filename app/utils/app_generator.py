@@ -3,16 +3,16 @@ import subprocess
 import shutil
 import app.config as config
 from app.utils.logger import setup_logger
-from app.utils.port_manager import PortManager
+from app.utils.port_manager import get_port_manager, get_app_port, release_app_port
 
 
 class AppGenerator:
     def __init__(self):
         self.logger = setup_logger("AppGenerator")
-        self.port_manager = PortManager()
+        self.port_manager = get_port_manager()
 
-    def generate_app(self, selected_keywords):
-        self.logger.info(f"Generating app with keywords: {selected_keywords}")
+    def generate_app(self, selected_services):
+        self.logger.info(f"Generating app with services: {selected_services}")
 
         if config.GENERATED_APPS_DIR is None:
             self.logger.error(
@@ -22,7 +22,7 @@ class AppGenerator:
                 "GENERATED_APPS_DIR is not set. Configuration may not have been initialized properly."
             )
 
-        port = self.port_manager.get_available_port()
+        port = get_app_port()
         app_dir = os.path.join(config.GENERATED_APPS_DIR, f"app_{port}")
         os.makedirs(app_dir, exist_ok=True)
 
@@ -35,7 +35,7 @@ class AppGenerator:
         # Copy services.toml
         shutil.copy(self.port_manager.services_file, app_dir)
 
-        app_content = self._generate_app_content(selected_keywords, app_dir)
+        app_content = self._generate_app_content(selected_services, app_dir)
         app_file_path = os.path.join(app_dir, "app.py")
 
         with open(app_file_path, "w", encoding="utf-8") as f:
@@ -44,7 +44,7 @@ class AppGenerator:
         self._run_app(app_file_path, port)
         return f"http://localhost:{port}"
 
-    def _generate_app_content(self, selected_keywords, app_dir):
+    def _generate_app_content(self, selected_services, app_dir):
         content = f"""
 import os
 import sys
@@ -56,7 +56,7 @@ sys.path.insert(0, current_dir)
 import streamlit as st
 import requests
 import logging
-from utils.port_manager import PortManager
+from utils.port_manager import get_port_manager
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -69,17 +69,15 @@ st.set_page_config(page_title="My IIIT Companion", page_icon="🏫", layout="wid
 
 st.title("My IIIT Companion")
 
-port_manager = PortManager()
+port_manager = get_port_manager()
 
 """
-        for category, services in selected_keywords.items():
-            content += f"\nst.header('{category}')\n"
-            for service in services:
-                content += f"""
+        for service in selected_services:
+            content += f"""
 try:
-    service_info = port_manager.get_service_info('{service.lower()}')
+    service_info = port_manager.get_service_info('{service}')
     if not service_info:
-        raise ValueError(f"Service info not found for {service.lower()} service")
+        raise ValueError(f"Service info not found for {service} service")
     port = service_info['port']
     logger.info(f"Attempting to connect to {service.capitalize()} service on port {{port}}")
     response = requests.get(f"http://localhost:{{port}}/data", timeout=5)
