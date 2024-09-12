@@ -4,7 +4,7 @@ from datetime import datetime
 import psutil
 import atexit
 from pymongo import MongoClient
-from common import store_to_mongodb_sensor
+from .common import store_to_mongodb_sensor
 
 app = Flask(__name__)
 process = psutil.Process()
@@ -75,5 +75,5 @@ def fetch_from_mongodb(db_name, collection_name, id):
         return None
 
 
-if __name__ == "__main__":
+def start_sensor_air_service():
     app.run(host="0.0.0.0", port=8001)

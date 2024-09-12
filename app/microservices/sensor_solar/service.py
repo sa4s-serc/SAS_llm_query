@@ -167,10 +167,10 @@ def log_cpu_utilization():
             )  # Subtract the interval time used by psutil.cpu_percent
 
 
-def run():
+def start_sensor_solar_service():
     threading.Thread(target=log_cpu_utilization, daemon=True).start()
     app.run(host="0.0.0.0", port=8003)
 
 
 if __name__ == "__main__":
-    run()
+    start_sensor_solar_service()
