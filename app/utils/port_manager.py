@@ -1,61 +1,77 @@
-import json
+import toml
 import os
-import logging
-import threading
-
-PORT_MAP_FILE = "service_ports.json"
-port_map_lock = threading.Lock()
+from typing import Dict, List, Optional
+from app.config import MIN_PORT, MAX_PORT
 
 
-def update_port_map(service_name, port):
-    with port_map_lock:
-        try:
-            if os.path.exists(PORT_MAP_FILE):
-                with open(PORT_MAP_FILE, "r") as f:
-                    port_map = json.load(f)
-            else:
-                port_map = {}
+class PortManager:
+    def __init__(self, services_file: str = "services.toml"):
+        self.services_file = os.path.join("app", services_file)
+        self.services = self._load_services()
 
-            # Ensure service_name is lowercase
-            service_name = service_name.lower()
-            port_map[service_name] = port
+    def _load_services(self) -> Dict:
+        if os.path.exists(self.services_file):
+            with open(self.services_file, "r") as f:
+                return toml.load(f)
+        return {}
 
-            with open(PORT_MAP_FILE, "w") as f:
-                json.dump(port_map, f, indent=2)
+    def _save_services(self):
+        with open(self.services_file, "w") as f:
+            toml.dump(self.services, f)
 
-            logging.info(f"Updated port map: {service_name} -> {port}")
-        except Exception as e:
-            logging.error(f"Error updating port map: {e}")
+    def get_available_port(self) -> int:
+        used_ports = set(service["port"] for service in self.services.values())
+        for port in range(MIN_PORT, MAX_PORT + 1):
+            if port not in used_ports:
+                return port
+        raise ValueError("No available ports")
+
+    def register_service(
+        self,
+        name: str,
+        port: Optional[int] = None,
+        description: str = "",
+        dependencies: List[str] = [],
+    ) -> int:
+        if name in self.services:
+            return self.services[name]["port"]
+
+        if port is None:
+            port = self.get_available_port()
+
+        self.services[name] = {
+            "port": port,
+            "description": description,
+            "dependencies": dependencies,
+        }
+        self._save_services()
+        return port
+
+    def get_service_info(self, name: str) -> Dict:
+        return self.services.get(name, {})
+
+    def update_service_info(
+        self, name: str, description: str = None, dependencies: List[str] = None
+    ):
+        if name not in self.services:
+            raise ValueError(f"Service {name} not found")
+
+        if description is not None:
+            self.services[name]["description"] = description
+        if dependencies is not None:
+            self.services[name]["dependencies"] = dependencies
+
+        self._save_services()
 
 
-def get_port(service_name):
-    with port_map_lock:
-        try:
-            with open(PORT_MAP_FILE, "r") as f:
-                port_map = json.load(f)
-            # Ensure service_name is lowercase when searching
-            return port_map.get(service_name.lower())
-        except json.JSONDecodeError as e:
-            logging.error(f"Error decoding JSON in port map file: {e}")
-            return None
-        except Exception as e:
-            logging.error(f"Error reading port map: {e}")
-            return None
+port_manager = PortManager()
 
 
-def clean_port_map():
-    with port_map_lock:
-        try:
-            if os.path.exists(PORT_MAP_FILE):
-                with open(PORT_MAP_FILE, "r") as f:
-                    port_map = json.load(f)
+def get_service_port(name: str) -> int:
+    return port_manager.register_service(name)
 
-                # Convert all keys to lowercase and remove duplicates
-                cleaned_map = {k.lower(): v for k, v in port_map.items()}
 
-                with open(PORT_MAP_FILE, "w") as f:
-                    json.dump(cleaned_map, f, indent=2)
-
-                logging.info("Cleaned and standardized port map")
-        except Exception as e:
-            logging.error(f"Error cleaning port map: {e}")
+def update_service_info(
+    name: str, description: str = None, dependencies: List[str] = None
+):
+    port_manager.update_service_info(name, description, dependencies)
