@@ -1,4 +1,4 @@
-# water_sensor.py
+# weather_sensor.py
 from flask import Flask, request, jsonify
 from datetime import datetime
 import psutil
@@ -31,8 +31,8 @@ def handle_notification():
         if sensor_name and timestamp and sensor1_data and sensor2_data and sensor1_location and sensor2_location:
             # Call the store_to_mongodb_sensor function with the correct parameters
             store_to_mongodb_sensor(
-                db_name="water_sensor_db", 
-                collection_name="watersensordata",
+                db_name="weather_sensor_db", 
+                collection_name="weathersensordata",
                 sensor_name=sensor_name, 
                 timestamp=timestamp,
                 sensor1_data={
@@ -56,7 +56,7 @@ def handle_notification():
 def get_data(id):
     try:
         # Fetch data from MongoDB using the provided ID
-        data = fetch_from_mongodb("water_sensor_db", "watersensordata", id)
+        data = fetch_from_mongodb("weather_sensor_db", "weathersensordata", id)
         if data:
             return jsonify({"status": "success", "data": data}), 200
         else:
@@ -105,6 +105,6 @@ def store_to_mongodb_sensor(db_name, collection_name, sensor_name, timestamp, se
         print(f"Error storing data to MongoDB: {e}")
 
 
-def start_sensor_water_service():
-    """Start the Flask service for the water sensor microservice."""
-    app.run(host="0.0.0.0", port=8002)
+def start_sensor_weather_service():
+    """Start the Flask service for the weather sensor microservice."""
+    app.run(host="0.0.0.0", port=8004)
