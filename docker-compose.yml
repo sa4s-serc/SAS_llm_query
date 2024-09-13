@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  mongo-db:
+    image: mongo:5.0
+    container_name: mongo-db
+    volumes:
+      - mongo-log:/var/log/mongodb
+      - mongo-data:/data/db
+    # restart: always
+    ports:
+      - 27017:27017
+    networks:
+      - iot
+
+  # external-mongo-db:
+  #   image: mongo:5.0
+  #   container_name: external-mongo-db
+  #   volumes:
+  #     - external-mongo-data:/data/db
+  #     - external-mongo-log:/var/log/mongodb
+  #   ports:
+  #     - 27017:27017
+  #   # restart: always
+
+  om2m:
+    image: om2m:incse
+    container_name: om2m
+    # ulimits:
+    #   nofile:
+    #     soft: 65536
+    #     hard: 65536
+    ports:
+      - 8080:8080
+    # depends_on:
+    #   - mongo-db
+    # restart: always
+    # environment:
+    #   - MONGO_URL=mongo-db:27017
+    #   - MONGO_USER=om2m
+    #   - MONGO_PASSWORD=om2m
+    #   - ADMIN_USER=admin
+    #   - ADMIN_PASSWORD=admin
+    networks:
+      - iot
+
+networks:
+  iot:
+
+volumes:
+  mongo-data:
+  mongo-log:
+  external-mongo-data:
+  external-mongo-log:
