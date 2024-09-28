@@ -8,29 +8,34 @@ MAX_PORT: int = 9999
 
 class PortManager:
     def __init__(self, services_file: str = "services.toml"):
-        self.services_file = os.path.join("app", services_file)
+        self.services_file = os.path.join(
+            os.path.dirname(__file__), "..", "services.toml"
+        )
+        self.services = self._load_services()
+        self.app_ports = set()
 
-    def _read_services(self) -> Dict:
-        services_file = os.path.join(os.getcwd(), "services.toml")
-        if os.path.exists(services_file):
-            with open(services_file, "r") as f:
-                services = toml.load(f)
-                return services
+    def _load_services(self) -> Dict:
+        if os.path.exists(self.services_file):
+            with open(self.services_file, "r") as f:
+                return toml.load(f)
         return {}
 
-    def _write_services(self, services: Dict):
+    def _save_services(self):
         with open(self.services_file, "w") as f:
-            toml.dump(services, f)
+            toml.dump(self.services, f)
 
-    def get_available_port(self) -> int:
-        services = self._read_services()
-        if not services:
-            return MIN_PORT
-        last_port = max(service["port"] for service in services.values())
-        new_port = last_port + 1
-        if new_port > MAX_PORT:
-            raise ValueError("No available ports")
-        return new_port
+    def get_available_port(self, is_service: bool = True) -> int:
+        used_ports = set(service["port"] for service in self.services.values())
+        used_ports.update(self.app_ports)
+
+        for port in range(MIN_PORT, MAX_PORT + 1):
+            if port not in used_ports:
+                if is_service:
+                    return port
+                else:
+                    self.app_ports.add(port)
+                    return port
+        raise ValueError("No available ports")
 
     def register_service(
         self,
@@ -39,38 +44,41 @@ class PortManager:
         description: str = "",
         dependencies: List[str] = [],
     ) -> int:
-        services = self._read_services()
-        if name in services:
-            return services[name]["port"]
+        if name in self.services:
+            return self.services[name]["port"]
 
         if port is None:
-            port = self.get_available_port()
+            port = self.get_available_port(is_service=True)
 
-        services[name] = {
+        self.services[name] = {
             "port": port,
             "description": description,
             "dependencies": dependencies,
         }
-        self._write_services(services)
+        self._save_services()
         return port
 
     def get_service_info(self, name: str) -> Dict:
-        services = self._read_services()
-        return services.get(name, {})
+        return self.services.get(name, {})
 
     def update_service_info(
         self, name: str, description: str = None, dependencies: List[str] = None
     ):
-        services = self._read_services()
-        if name not in services:
+        if name not in self.services:
             raise ValueError(f"Service {name} not found")
 
         if description is not None:
-            services[name]["description"] = description
+            self.services[name]["description"] = description
         if dependencies is not None:
-            services[name]["dependencies"] = dependencies
+            self.services[name]["dependencies"] = dependencies
 
-        self._write_services(services)
+        self._save_services()
+
+    def release_app_port(self, port: int):
+        if port in self.app_ports:
+            self.app_ports.remove(port)
+        else:
+            raise ValueError(f"App port {port} not found")
 
 
 # Global instance of PortManager
