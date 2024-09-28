@@ -9,10 +9,14 @@ from .common import store_to_mongodb_sensor
 app = Flask(__name__)
 process = psutil.Process()
 
+
 # Function to print CPU usage at exit
 def print_cpu_usage():
     cpu_times = process.cpu_times()
-    print(f"Total CPU time used by the program (in seconds): User = {cpu_times.user}, System = {cpu_times.system}")
+    print(
+        f"Total CPU time used by the program (in seconds): User = {cpu_times.user}, System = {cpu_times.system}"
+    )
+
 
 atexit.register(print_cpu_usage)
 
@@ -28,23 +32,27 @@ def handle_notification():
         sensor1_location = data.get("Sensor1Location")
         sensor2_location = data.get("Sensor2Location")
 
-        if sensor_name and timestamp and sensor1_data and sensor2_data and sensor1_location and sensor2_location:
+        if (
+            sensor_name
+            and timestamp
+            and sensor1_data
+            and sensor2_data
+            and sensor1_location
+            and sensor2_location
+        ):
             # Call the store_to_mongodb_sensor function with the correct parameters
             store_to_mongodb_sensor(
-                db_name="room_sensor_db", 
+                db_name="room_sensor_db",
                 collection_name="roomsensordata",
-                sensor_name=sensor_name, 
+                sensor_name=sensor_name,
                 timestamp=timestamp,
-                sensor1_data={
-                    'data': sensor1_data,
-                    'location': sensor1_location
-                },
-                sensor2_data={
-                    'data': sensor2_data,
-                    'location': sensor2_location
-                }
+                sensor1_data={"data": sensor1_data, "location": sensor1_location},
+                sensor2_data={"data": sensor2_data, "location": sensor2_location},
             )
-            return jsonify({"status": "success", "message": "Data stored successfully"}), 200
+            return (
+                jsonify({"status": "success", "message": "Data stored successfully"}),
+                200,
+            )
         else:
             return jsonify({"status": "error", "message": "Invalid sensor data"}), 400
     except Exception as e:
@@ -73,38 +81,41 @@ def fetch_from_mongodb(db_name, collection_name, id):
         db = client[db_name]
         collection = db[collection_name]
         # Fetch the document where '_id' matches the provided ID
-        data = collection.find_one({"_id": id}, {"_id": 0})  # Exclude '_id' from the result
+        data = collection.find_one(
+            {"_id": id}, {"_id": 0}
+        )  # Exclude '_id' from the result
         return data
     except Exception as e:
         print(f"Error fetching data from MongoDB: {e}")
         return None
 
 
-def store_to_mongodb_sensor(db_name, collection_name, sensor_name, timestamp, sensor1_data, sensor2_data):
+def store_to_mongodb_sensor(
+    db_name, collection_name, sensor_name, timestamp, sensor1_data, sensor2_data
+):
     """This function stores the given data into the specified MongoDB collection."""
     try:
-        client = MongoClient('mongodb://localhost:27017/')
+        client = MongoClient("mongodb://localhost:27017/")
         db = client[db_name]
         collection = db[collection_name]
         # Structure sensor data
-        sensor_data = {
-            'sensor1': sensor1_data,
-            'sensor2': sensor2_data
-        }
-        
+        sensor_data = {"sensor1": sensor1_data, "sensor2": sensor2_data}
+
         update_data = {sensor_name: sensor_data}
-        collection.update_one(
-            {'_id': timestamp},
-            {'$set': update_data},
-            upsert=True
-        )
-        
+        collection.update_one({"_id": timestamp}, {"$set": update_data}, upsert=True)
+
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f"Data stored successfully for {sensor_name} at {timestamp}. Current time: {current_time}")
+        print(
+            f"Data stored successfully for {sensor_name} at {timestamp}. Current time: {current_time}"
+        )
     except Exception as e:
         print(f"Error storing data to MongoDB: {e}")
 
 
-def start_sensor_room_service():
+def start_sensor_air_service():
     """Start the Flask service for the room sensor microservice."""
     app.run(host="0.0.0.0", port=8004)
+
+
+if __name__ == "__main__":
+    start_sensor_air_service()
