@@ -24,14 +24,20 @@ def setup_configuration():
     logger.info(f"GENERATED_APPS_DIR: {config.GENERATED_APPS_DIR}")
 
 
+# streamlit is creating a new instance of builder app every time, to prevent that, we need to store the instance in session state
+def get_builder_app():
+    if "builder_app" not in st.session_state:
+        setup_configuration()
+        st.session_state.builder_app = BuilderApp()
+    return st.session_state.builder_app
+
+
 def run_builder_app():
     try:
-        setup_configuration()
-
         st.set_page_config(
             page_title="IIIT Companion Builder", page_icon="🏗️", layout="wide"
         )
-        builder_app = BuilderApp()
+        builder_app = get_builder_app()
         builder_app.run()
     except Exception as e:
         logger.error(f"Error setting up the application: {str(e)}", exc_info=True)

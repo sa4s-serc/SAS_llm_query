@@ -3,13 +3,14 @@ import subprocess
 import shutil
 import app.config as config
 from app.utils.logger import setup_logger
-from app.utils.port_manager import get_port_manager, get_app_port, release_app_port
+from app.utils.port_manager import get_port_manager
 
 
 class AppGenerator:
     def __init__(self):
         self.logger = setup_logger("AppGenerator")
         self.port_manager = get_port_manager()
+        self.used_ports = [10000]
 
     def generate_app(self, selected_services):
         self.logger.info(f"Generating app with services: {selected_services}")
@@ -22,7 +23,8 @@ class AppGenerator:
                 "GENERATED_APPS_DIR is not set. Configuration may not have been initialized properly."
             )
 
-        port = get_app_port()
+        port = self.used_ports[-1] - 1
+        self.used_ports.append(port)
         app_dir = os.path.join(config.GENERATED_APPS_DIR, f"app_{port}")
         os.makedirs(app_dir, exist_ok=True)
 
@@ -75,7 +77,7 @@ port_manager = get_port_manager()
         for service in selected_services:
             content += f"""
 try:
-    service_info = port_manager.get_service_info('{service}')
+    service_info = port_manager.get_service_info('{service}_service')
     if not service_info:
         raise ValueError(f"Service info not found for {service} service")
     port = service_info['port']

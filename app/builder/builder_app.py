@@ -18,6 +18,7 @@ class BuilderApp:
             )
         self.all_services = self._discover_services(config.MICROSERVICES_DIR)
         self.app_generator = AppGenerator()
+        # print("builder instance created")
 
     def _discover_services(self, directory):
         services = []

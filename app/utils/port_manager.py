@@ -9,31 +9,28 @@ MAX_PORT: int = 9999
 class PortManager:
     def __init__(self, services_file: str = "services.toml"):
         self.services_file = os.path.join("app", services_file)
-        self.services = self._load_services()
-        self.app_ports = set()
 
-    def _load_services(self) -> Dict:
-        if os.path.exists(self.services_file):
-            with open(self.services_file, "r") as f:
-                return toml.load(f)
+    def _read_services(self) -> Dict:
+        services_file = os.path.join(os.getcwd(), "services.toml")
+        if os.path.exists(services_file):
+            with open(services_file, "r") as f:
+                services = toml.load(f)
+                return services
         return {}
 
-    def _save_services(self):
+    def _write_services(self, services: Dict):
         with open(self.services_file, "w") as f:
-            toml.dump(self.services, f)
+            toml.dump(services, f)
 
-    def get_available_port(self, is_service: bool = True) -> int:
-        used_ports = set(service["port"] for service in self.services.values())
-        used_ports.update(self.app_ports)
-
-        for port in range(MIN_PORT, MAX_PORT + 1):
-            if port not in used_ports:
-                if is_service:
-                    return port
-                else:
-                    self.app_ports.add(port)
-                    return port
-        raise ValueError("No available ports")
+    def get_available_port(self) -> int:
+        services = self._read_services()
+        if not services:
+            return MIN_PORT
+        last_port = max(service["port"] for service in services.values())
+        new_port = last_port + 1
+        if new_port > MAX_PORT:
+            raise ValueError("No available ports")
+        return new_port
 
     def register_service(
         self,
@@ -42,41 +39,38 @@ class PortManager:
         description: str = "",
         dependencies: List[str] = [],
     ) -> int:
-        if name in self.services:
-            return self.services[name]["port"]
+        services = self._read_services()
+        if name in services:
+            return services[name]["port"]
 
         if port is None:
-            port = self.get_available_port(is_service=True)
+            port = self.get_available_port()
 
-        self.services[name] = {
+        services[name] = {
             "port": port,
             "description": description,
             "dependencies": dependencies,
         }
-        self._save_services()
+        self._write_services(services)
         return port
 
     def get_service_info(self, name: str) -> Dict:
-        return self.services.get(name, {})
+        services = self._read_services()
+        return services.get(name, {})
 
     def update_service_info(
         self, name: str, description: str = None, dependencies: List[str] = None
     ):
-        if name not in self.services:
+        services = self._read_services()
+        if name not in services:
             raise ValueError(f"Service {name} not found")
 
         if description is not None:
-            self.services[name]["description"] = description
+            services[name]["description"] = description
         if dependencies is not None:
-            self.services[name]["dependencies"] = dependencies
+            services[name]["dependencies"] = dependencies
 
-        self._save_services()
-
-    def release_app_port(self, port: int):
-        if port in self.app_ports:
-            self.app_ports.remove(port)
-        else:
-            raise ValueError(f"App port {port} not found")
+        self._write_services(services)
 
 
 # Global instance of PortManager
@@ -94,15 +88,7 @@ def get_service_port(name: str) -> int:
     return get_port_manager().register_service(name)
 
 
-def get_app_port() -> int:
-    return get_port_manager().get_available_port(is_service=False)
-
-
 def update_service_info(
     name: str, description: str = None, dependencies: List[str] = None
 ):
     get_port_manager().update_service_info(name, description, dependencies)
-
-
-def release_app_port(port: int):
-    get_port_manager().release_app_port(port)
