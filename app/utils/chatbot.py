@@ -8,44 +8,35 @@ from langchain.memory import ConversationBufferMemory
 from langchain_core.prompts.prompt import PromptTemplate
 from dotenv import load_dotenv
 import os
+import toml
 
 load_dotenv()
 
-# List of available keywords
+services_file = os.path.join(os.path.dirname(__file__), "..", "services.toml")
+services_config = toml.load(services_file)
+
 available_keywords = [
-    "environmental",
-    "resource",
-    "academic",
-    "event",
-    "health",
-    "temperature",
-    "humidity",
-    "air quality",
-    "library",
+    service_name.replace("_service", "")
+    for service_name in services_config.keys()
+    if not service_name.startswith("sensor_")
 ]
+
+print(available_keywords)
 
 
 # Function to refine user query and get keywords
 def chatbot(query):
-    template = """You are a query refiner for the IIIT Companion app. You need to refine the user query to make it more specific and actionable.
+    template = f"""You are a query refiner for the IIIT Companion app. You need to refine the user query to make it more specific and actionable.
     You need to understand the context of the query and provide key words that can help the app to generate the app according to user query.
     Now, analyze the sentence and provided keywords and give the list of appropriate keywords from the given list of keywords as output.
-    List of keywords are environmental, resource, academic, event, health, temperature, humidity, air quality, library.
+    List of keywords are {', '.join(available_keywords)}.
     If user's query is not clear, even after analyzing the context, you should ask for more information by asking "sorry, I didn't get that. Can you please provide more information?"
-    for the following user question: {input}
+    for the following user question: {{input}}
     Current conversation:
-    {history}
+    {{history}}
     If the user's input is unclear refer to conversation history and ask again for more clarity.
     These are the keywords which you can output according to user's query:
-    Environmental: when user asks about air quality, temperature, humidity.When user asks about weather, pollution, climate.
-    Resource: when user asks about library, cafeteria, study rooms.When user asks where he can study peacefully, where he can find books.
-    Academic: when user asks about assignments, classes, grades.When user asks about courses, exams, syllabus, marks.
-    Event: when user asks about campus events, clubs, workshops.When user says he is bored, he wants to join a club, he wants to attend a workshop. When user says he wants to have fun.
-    Health: when user asks about wellness tips, fitness, mental health.When user says he is feeling low, he wants to be fit, he wants to be healthy.
-    temperature: when user asks about temperature.
-    humidity: when user asks about humidity.
-    air quality: when user asks about air quality.
-    library: when user asks about library."""
+    {' '.join([f"{keyword.capitalize()}: when user asks about {keyword}." for keyword in available_keywords])}"""
 
     # Replace with your actual OpenAI API key
     open_api_key = os.getenv("OPENAI_API_KEY")
@@ -62,7 +53,6 @@ def chatbot(query):
 
     try:
         output = conversation.predict(input=query)
-        # st.write(f"AI Assistant: {output}")
         if output is None:
             raise ValueError("Output from chain.invoke is None")
 
