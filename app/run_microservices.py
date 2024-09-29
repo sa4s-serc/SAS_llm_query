@@ -121,7 +121,7 @@ def run_all_microservices():
             if thread:
                 threads.append(thread)
                 del services[service_name]
-            time.sleep(0.1)
+            time.sleep(1)
 
     # Start services with dependencies
     while services:

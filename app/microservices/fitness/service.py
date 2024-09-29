@@ -7,7 +7,7 @@ logger = setup_logger("FitnessService")
 
 class FitnessService(MicroserviceBase):
     def __init__(self):
-        super().__init__("fitness")
+        super().__init__("fitness_service")
 
         self.update_service_info(
             description="Provides fitness suggestions and tracking", dependencies=[]

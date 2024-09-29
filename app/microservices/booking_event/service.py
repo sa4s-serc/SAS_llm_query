@@ -1,207 +1,175 @@
-import sqlite3
-from flask import Flask, request, jsonify
+from app.microservices.base import MicroserviceBase
 from app.utils.logger import setup_logger
+from fastapi import HTTPException
+from pydantic import BaseModel
+from typing import List, Optional
+from datetime import datetime
+import sqlite3
 from pymongo import MongoClient
 
 logger = setup_logger("BookingService")
 
-mongo_client = MongoClient("mongodb://localhost:27017/")
-# Define sensor mapping globally
-sensor_mapping = {
-    "air": "Airsensordata",
-    "water": "Watersensordata",
-    "solar": "Solarsensordata",
-    "room": "RoomMonitoringsensordata",
-    "crowd": "CrowdMonitoringsensordata",
-}
+
+class BookingRequest(BaseModel):
+    location: str
+    start_time: str
+    end_time: str
 
 
-# Initialize SQLite database
-def init_db():
-    conn = sqlite3.connect("booking_data.db")
-    cursor = conn.cursor()
-    cursor.execute(
-        """CREATE TABLE IF NOT EXISTS Bookings (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        location TEXT,
-                        start_time TEXT,
-                        end_time TEXT
-                      )"""
-    )
-    conn.commit()
-    conn.close()
+class QualityCheckRequest(BaseModel):
+    location: str
+    timestamp: str
+    sensors: List[str]
 
 
-init_db()
-
-
-class BookingService:
+class BookingService(MicroserviceBase):
     def __init__(self):
-        self.app = Flask(__name__)
-
-        @self.app.route("/book_location", methods=["POST"])
-        def book_location():
-            return self._book_location()
-
-        @self.app.route("/check_availability", methods=["POST"])
-        def check_availability():
-            return self._check_availability()
-
-        @self.app.route("/check_quality", methods=["POST"])
-        def check_quality():
-            return self._check_quality()
-
-    def _book_location(self):
-        data = request.json
-        location = data.get("location")
-        start_time = data.get("start_time")
-        end_time = data.get("end_time")
-
-        if not location or not start_time or not end_time:
-            return (
-                jsonify({"status": "error", "message": "Missing required fields"}),
-                400,
-            )
-
-        # Step 1: Check availability
-        availability_response = self._check_availability_internal(data)
-        if availability_response["status"] != "success":
-            return jsonify(availability_response), 409
-
-        # Step 2: Check air quality and room monitoring data
-        quality_check_data = {
-            "location": location,
-            "timestamp": start_time,
-            "sensors": ["air", "room", "water", "crowd"],
+        super().__init__("booking_event_service")
+        self.update_service_info(
+            description="Handles booking events and quality checks",
+            dependencies=["mongodb", "sqlite"],
+        )
+        self.mongo_client = MongoClient("mongodb://localhost:27017/")
+        self.sensor_mapping = {
+            "air": "Airsensordata",
+            "water": "Watersensordata",
+            "solar": "Solarsensordata",
+            "room": "RoomMonitoringsensordata",
+            "crowd": "CrowdMonitoringsensordata",
         }
-        quality_response = self._check_quality_internal(quality_check_data)
-        quality_results = quality_response.get("data", {})
+        self._init_db()
 
-        if (
-            quality_results.get("air") != f"Quality is good at {location}"
-            or quality_results.get("room") != f"Quality is good at {location}"
-        ):
-            return (
-                jsonify(
-                    {
-                        "status": "error",
-                        "message": "Air quality or room conditions are not suitable",
-                    }
-                ),
-                409,
+    def _init_db(self):
+        conn = sqlite3.connect("booking_data.db")
+        cursor = conn.cursor()
+        cursor.execute(
+            """CREATE TABLE IF NOT EXISTS Bookings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                location TEXT,
+                start_time TEXT,
+                end_time TEXT
+            )"""
+        )
+        conn.commit()
+        conn.close()
+
+    def register_routes(self):
+        @self.app.post("/book_location")
+        async def book_location(request: BookingRequest):
+            return await self._book_location(request)
+
+        @self.app.post("/check_availability")
+        async def check_availability(request: BookingRequest):
+            return await self._check_availability(request)
+
+        @self.app.post("/check_quality")
+        async def check_quality(request: QualityCheckRequest):
+            return await self._check_quality(request)
+
+        @self.app.get("/data")
+        async def get_data():
+            return {"display": "none"}
+
+    async def _book_location(self, request: BookingRequest):
+        if not self._is_available(request):
+            raise HTTPException(
+                status_code=409,
+                detail="Location is already booked for the requested time",
             )
 
-        # Step 3: Book the location
+        quality_check = await self._check_quality(
+            QualityCheckRequest(
+                location=request.location,
+                timestamp=request.start_time,
+                sensors=["air", "room", "water", "crowd"],
+            )
+        )
+
+        if not all(
+            result == f"Quality is good at {request.location}"
+            for result in quality_check["data"].values()
+        ):
+            raise HTTPException(
+                status_code=409,
+                detail="Air quality or room conditions are not suitable",
+            )
+
         try:
             conn = sqlite3.connect("booking_data.db")
             cursor = conn.cursor()
             cursor.execute(
-                """INSERT INTO Bookings (location, start_time, end_time) VALUES (?, ?, ?)""",
-                (location, start_time, end_time),
+                "INSERT INTO Bookings (location, start_time, end_time) VALUES (?, ?, ?)",
+                (request.location, request.start_time, request.end_time),
             )
             conn.commit()
             conn.close()
-            return (
-                jsonify(
-                    {"status": "success", "message": "Location booked successfully"}
-                ),
-                200,
-            )
+            return {"status": "success", "message": "Location booked successfully"}
         except Exception as e:
-            print(f"An error occurred: {e}")
-            return jsonify({"status": "error", "message": str(e)}), 500
+            logger.error(f"An error occurred while booking: {e}")
+            raise HTTPException(status_code=500, detail="Internal server error")
 
-    def _check_availability(self):
-        data = request.json
-        return self._check_availability_internal(data)
+    async def _check_availability(self, request: BookingRequest):
+        return {"status": "success", "available": self._is_available(request)}
 
-    def _check_availability_internal(self, data):
-        location = data.get("location")
-        start_time = data.get("start_time")
-        end_time = data.get("end_time")
-
-        if not location or not start_time or not end_time:
-            return {"status": "error", "message": "Missing required fields"}
-
+    def _is_available(self, request: BookingRequest) -> bool:
         try:
             conn = sqlite3.connect("booking_data.db")
             cursor = conn.cursor()
             cursor.execute(
                 """SELECT COUNT(*) FROM Bookings
-                              WHERE location = ? AND
-                                    (start_time BETWEEN ? AND ? OR end_time BETWEEN ? AND ? OR
-                                     ? BETWEEN start_time AND end_time OR ? BETWEEN start_time AND end_time)""",
+                WHERE location = ? AND
+                    (start_time BETWEEN ? AND ? OR end_time BETWEEN ? AND ? OR
+                     ? BETWEEN start_time AND end_time OR ? BETWEEN start_time AND end_time)""",
                 (
-                    location,
-                    start_time,
-                    end_time,
-                    start_time,
-                    end_time,
-                    start_time,
-                    end_time,
+                    request.location,
+                    request.start_time,
+                    request.end_time,
+                    request.start_time,
+                    request.end_time,
+                    request.start_time,
+                    request.end_time,
                 ),
             )
             count = cursor.fetchone()[0]
             conn.close()
-            if count > 0:
-                return {
-                    "status": "error",
-                    "message": "Location is already booked for the requested time",
-                }
-            else:
-                return {"status": "success", "message": "Location is available"}
+            return count == 0
         except Exception as e:
-            print(f"An error occurred: {e}")
-            return {"status": "error", "message": str(e)}
+            logger.error(f"An error occurred while checking availability: {e}")
+            raise HTTPException(status_code=500, detail="Internal server error")
 
-    def _check_quality(self):
-        data = request.json
-        return self._check_quality_internal(data)
-
-    def _check_quality_internal(self, data):
-        sensors = data.get("sensors")
-        timestamp = data.get("timestamp")
-        location = data.get("location")
-
-        if not sensors or not timestamp or not location:
-            return {"status": "error", "message": "Missing required fields"}
-
+    async def _check_quality(self, request: QualityCheckRequest):
         results = {}
         try:
-            for sensor in sensors:
-                sensor_name = sensor_mapping.get(sensor)
+            for sensor in request.sensors:
+                sensor_name = self.sensor_mapping.get(sensor)
                 if not sensor_name:
-                    return {
-                        "status": "error",
-                        "message": f"Invalid sensor type: {sensor}",
-                    }
+                    raise HTTPException(
+                        status_code=400, detail=f"Invalid sensor type: {sensor}"
+                    )
 
-                # Assuming `mongo_client` is already connected to MongoDB
-                db = mongo_client["sensordatabaseversion2"]
+                db = self.mongo_client["sensordatabaseversion2"]
                 collection = db["sensordata"]
-                document = collection.find_one({"_id": f"{sensor_name}_{timestamp}"})
+                document = collection.find_one(
+                    {"_id": f"{sensor_name}_{request.timestamp}"}
+                )
 
                 if document and sensor_name in document:
                     sensor_data = document[sensor_name]
-                    value_key = f"value{location[-1]}"  # Assuming location is in format 'room1', 'room2', etc.
+                    value_key = f"value{request.location[-1]}"
                     value = sensor_data.get(value_key, float("inf"))
 
-                    if value < 100:
-                        results[sensor] = f"Quality is good at {location}"
-                    else:
-                        results[sensor] = f"Quality is bad at {location}"
+                    results[sensor] = (
+                        f"Quality is {'good' if value < 100 else 'bad'} at {request.location}"
+                    )
                 else:
                     results[sensor] = (
-                        f"No data found for the specified timestamp and location {location}"
+                        f"No data found for the specified timestamp and location {request.location}"
                     )
 
             return {"status": "success", "data": results}
         except Exception as e:
-            print(f"An error occurred: {e}")
-            return {"status": "error", "message": str(e)}
-
-    def run(self):
-        self.app.run(port=8000)
+            logger.error(f"An error occurred while checking quality: {e}")
+            raise HTTPException(status_code=500, detail="Internal server error")
 
 
 def start_booking_event_service():
@@ -210,4 +178,4 @@ def start_booking_event_service():
 
 
 if __name__ == "__main__":
-    start_booking_service()
+    start_booking_event_service()

@@ -1,110 +1,122 @@
 # room_sensor.py
-from flask import Flask, request, jsonify
+from app.microservices.base import MicroserviceBase
+from app.utils.logger import setup_logger
+from fastapi import HTTPException, Body
+from pydantic import BaseModel
 from datetime import datetime
+from pymongo import MongoClient
 import psutil
 import atexit
-from pymongo import MongoClient
-from .common import store_to_mongodb_sensor
 
-app = Flask(__name__)
-process = psutil.Process()
-
-# Function to print CPU usage at exit
-def print_cpu_usage():
-    cpu_times = process.cpu_times()
-    print(f"Total CPU time used by the program (in seconds): User = {cpu_times.user}, System = {cpu_times.system}")
-
-atexit.register(print_cpu_usage)
+logger = setup_logger("SensorRoomService")
 
 
-@app.route("/notification", methods=["POST"])
-def handle_notification():
-    try:
-        data = request.json
-        sensor_name = data.get("Name")
-        timestamp = data.get("Time")
-        sensor1_data = data.get("Sensor1")
-        sensor2_data = data.get("Sensor2")
-        sensor1_location = data.get("Sensor1Location")
-        sensor2_location = data.get("Sensor2Location")
-
-        if sensor_name and timestamp and sensor1_data and sensor2_data and sensor1_location and sensor2_location:
-            # Call the store_to_mongodb_sensor function with the correct parameters
-            store_to_mongodb_sensor(
-                db_name="room_sensor_db", 
-                collection_name="roomsensordata",
-                sensor_name=sensor_name, 
-                timestamp=timestamp,
-                sensor1_data={
-                    'data': sensor1_data,
-                    'location': sensor1_location
-                },
-                sensor2_data={
-                    'data': sensor2_data,
-                    'location': sensor2_location
-                }
-            )
-            return jsonify({"status": "success", "message": "Data stored successfully"}), 200
-        else:
-            return jsonify({"status": "error", "message": "Invalid sensor data"}), 400
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
+class SensorData(BaseModel):
+    Name: str
+    Time: str
+    Sensor1: float
+    Sensor2: float
+    Sensor1Location: str
+    Sensor2Location: str
 
 
-@app.route("/get_data/<id>", methods=["GET"])
-def get_data(id):
-    try:
-        # Fetch data from MongoDB using the provided ID
-        data = fetch_from_mongodb("room_sensor_db", "roomsensordata", id)
-        if data:
-            return jsonify({"status": "success", "data": data}), 200
-        else:
-            return jsonify({"status": "error", "message": "Data not found"}), 404
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
-
-
-def fetch_from_mongodb(db_name, collection_name, id):
-    """This function fetches the data from the specified MongoDB collection using the provided ID."""
-    try:
-        client = MongoClient("mongodb://localhost:27017/")
-        db = client[db_name]
-        collection = db[collection_name]
-        # Fetch the document where '_id' matches the provided ID
-        data = collection.find_one({"_id": id}, {"_id": 0})  # Exclude '_id' from the result
-        return data
-    except Exception as e:
-        print(f"Error fetching data from MongoDB: {e}")
-        return None
-
-
-def store_to_mongodb_sensor(db_name, collection_name, sensor_name, timestamp, sensor1_data, sensor2_data):
-    """This function stores the given data into the specified MongoDB collection."""
-    try:
-        client = MongoClient('mongodb://localhost:27017/')
-        db = client[db_name]
-        collection = db[collection_name]
-        # Structure sensor data
-        sensor_data = {
-            'sensor1': sensor1_data,
-            'sensor2': sensor2_data
-        }
-        
-        update_data = {sensor_name: sensor_data}
-        collection.update_one(
-            {'_id': timestamp},
-            {'$set': update_data},
-            upsert=True
+class SensorRoomService(MicroserviceBase):
+    def __init__(self):
+        super().__init__("sensor_room_service")
+        self.update_service_info(
+            description="Handles room sensor data and notifications",
+            dependencies=["mongodb"],
         )
-        
-        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f"Data stored successfully for {sensor_name} at {timestamp}. Current time: {current_time}")
-    except Exception as e:
-        print(f"Error storing data to MongoDB: {e}")
+        self.process = psutil.Process()
+        atexit.register(self._print_cpu_usage)
+
+    def register_routes(self):
+        @self.app.post("/notification")
+        async def handle_notification(data: SensorData):
+            return await self._handle_notification(data)
+
+        @self.app.get("/get_data/{id}")
+        async def get_data(id: str):
+            return await self._get_data(id)
+
+        @self.app.get("/data")
+        async def get_data():
+            return {"display": "none"}
+
+    async def _handle_notification(self, data: SensorData):
+        try:
+            self._store_to_mongodb_sensor(
+                db_name="room_sensor_db",
+                collection_name="roomsensordata",
+                sensor_name=data.Name,
+                timestamp=data.Time,
+                sensor1_data={"data": data.Sensor1, "location": data.Sensor1Location},
+                sensor2_data={"data": data.Sensor2, "location": data.Sensor2Location},
+            )
+            return {"status": "success", "message": "Data stored successfully"}
+        except Exception as e:
+            logger.error(f"An error occurred: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+
+    async def _get_data(self, id: str):
+        try:
+            data = self._fetch_from_mongodb("room_sensor_db", "roomsensordata", id)
+            if data:
+                return {"status": "success", "data": data}
+            else:
+                raise HTTPException(status_code=404, detail="Data not found")
+        except Exception as e:
+            logger.error(f"An error occurred: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+
+    def _fetch_from_mongodb(self, db_name, collection_name, id):
+        try:
+            client = MongoClient("mongodb://localhost:27017/")
+            db = client[db_name]
+            collection = db[collection_name]
+            data = collection.find_one({"_id": id}, {"_id": 0})
+            return data
+        except Exception as e:
+            logger.error(f"Error fetching data from MongoDB: {e}")
+            return None
+
+    def _store_to_mongodb_sensor(
+        self,
+        db_name,
+        collection_name,
+        sensor_name,
+        timestamp,
+        sensor1_data,
+        sensor2_data,
+    ):
+        try:
+            client = MongoClient("mongodb://localhost:27017/")
+            db = client[db_name]
+            collection = db[collection_name]
+            sensor_data = {"sensor1": sensor1_data, "sensor2": sensor2_data}
+            update_data = {sensor_name: sensor_data}
+            collection.update_one(
+                {"_id": timestamp}, {"$set": update_data}, upsert=True
+            )
+
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            logger.info(
+                f"Data stored successfully for {sensor_name} at {timestamp}. Current time: {current_time}"
+            )
+        except Exception as e:
+            logger.error(f"Error storing data to MongoDB: {e}")
+
+    def _print_cpu_usage(self):
+        cpu_times = self.process.cpu_times()
+        logger.info(
+            f"Total CPU time used by the program (in seconds): User = {cpu_times.user}, System = {cpu_times.system}"
+        )
 
 
 def start_sensor_room_service():
-    """Start the Flask service for the room sensor microservice."""
-    app.run(host="0.0.0.0", port=8004)
+    service = SensorRoomService()
+    service.run()
+
+
+if __name__ == "__main__":
+    start_sensor_room_service()

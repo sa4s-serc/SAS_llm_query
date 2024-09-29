@@ -85,9 +85,12 @@ try:
     response = requests.get(f"http://localhost:{{port}}/data", timeout=5)
     response.raise_for_status()
     data = response.json()
-    st.subheader('{service.capitalize()}')
-    st.write(data)
-    logger.info(f"Successfully connected to {service.capitalize()} service")
+    if data.get("display") != "none":
+        st.subheader('{service.capitalize()}')
+        st.write(data)
+        logger.info(f"Successfully connected to {service.capitalize()} service and displayed data")
+    else:
+        logger.info(f"{service.capitalize()} service returned 'display: none', skipping display")
 except ValueError as e:
     logger.error(str(e))
     st.error(str(e))
