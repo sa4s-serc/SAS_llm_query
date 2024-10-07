@@ -1,0 +1,23 @@
+air_quality, Provides air quality information
+assignments, Provides assignment information
+booking_event, Handles booking events and quality checks
+cafeteria, Provides cafeteria menu options
+campus_events, Provides information on upcoming campus events
+campus_info, Provides combined campus information including events and cafeteria menu
+classes, Provides information on class schedules
+clubs, Provides information on club activities
+events, Provides information on upcoming campus events
+fitness, Provides fitness suggestions and tracking
+grades, Provides student grades for various subjects
+humidity, Provides current humidity levels
+library, Provides information on library availability
+mental_health, Provides mental health resources and support
+sensor_air, Handles air sensor data and notifications
+sensor_crowd, Handles crowd sensor data and notifications
+sensor_room, Handles room sensor data and notifications
+sensor_solar, Handles solar sensor data and notifications
+sensor_water, Handles water sensor data and notifications
+sensor_weather, Handles weather sensor data and notifications
+study_rooms, Provides information on available study rooms
+temperature, Provides current temperature readings
+workshops, Provides information on upcoming workshops
