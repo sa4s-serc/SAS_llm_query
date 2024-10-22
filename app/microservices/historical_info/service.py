@@ -28,7 +28,8 @@ class HistoricalInfoService(MicroserviceBase):
     async def process_request(self, params):
         site_name = params["site_name"]
         if site_name in self.historical_data:
-            return {"site": site_name, "info": self.historical_data[site_name]}
+            site_info = self.historical_data[site_name]
+            return {"name": site_info["name"], "body": site_info["body"]}
         else:
             raise HTTPException(status_code=404, detail="Site not found")
 

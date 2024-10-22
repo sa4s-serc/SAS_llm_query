@@ -5,15 +5,15 @@ import threading
 import time
 import psutil
 import requests
-from app.microservices.travel_options.service import start_travel_options_service
-from app.microservices.crowd_monitor.service import start_crowd_monitor_service
-from app.microservices.event_notifier.service import start_event_notifier_service
-from app.microservices.historical_info.service import start_historical_info_service
-from app.microservices.air_quality.service import start_air_quality_service
-from app.microservices.water_quality.service import start_water_quality_service
-from app.microservices.restaurant_finder.service import start_restaurant_finder_service
-from app.microservices.ticket_purchase.service import start_ticket_purchase_service
-from app.microservices.exhibition_tracker.service import start_exhibition_tracker_service
+# from app.microservices.travel_options.service import start_travel_options_service
+# from app.microservices.crowd_monitor.service import start_crowd_monitor_service
+# from app.microservices.event_notifier.service import start_event_notifier_service
+# from app.microservices.historical_info.service import start_historical_info_service
+# from app.microservices.air_quality.service import start_air_quality_service
+# from app.microservices.water_quality.service import start_water_quality_service
+# from app.microservices.restaurant_finder.service import start_restaurant_finder_service
+# from app.microservices.ticket_purchase.service import start_ticket_purchase_service
+# from app.microservices.exhibition_tracker.service import start_exhibition_tracker_service
 import multiprocessing
 
 # Get the absolute path of the current file
@@ -149,33 +149,33 @@ def run_all_microservices():
         thread.join()
 
 
-def run_all_services():
-    services = [
-        start_travel_options_service,
-        start_crowd_monitor_service,
-        start_event_notifier_service,
-        start_historical_info_service,
-        start_air_quality_service,
-        start_water_quality_service,
-        start_restaurant_finder_service,
-        start_ticket_purchase_service,
-        start_exhibition_tracker_service
-    ]
+# def run_all_services():
+#     services = [
+#         start_travel_options_service,
+#         start_crowd_monitor_service,
+#         start_event_notifier_service,
+#         start_historical_info_service,
+#         start_air_quality_service,
+#         start_water_quality_service,
+#         start_restaurant_finder_service,
+#         start_ticket_purchase_service,
+#         start_exhibition_tracker_service
+#     ]
 
-    processes = []
-    for service in services:
-        p = multiprocessing.Process(target=service)
-        p.start()
-        processes.append(p)
+#     processes = []
+#     for service in services:
+#         p = multiprocessing.Process(target=service)
+#         p.start()
+#         processes.append(p)
 
-    for p in processes:
-        p.join()
+#     for p in processes:
+#         p.join()
 
 
 if __name__ == "__main__":
     logger.info("Starting all microservices...")
-    # run_all_microservices()
-    run_all_services()
+    run_all_microservices()
+    # run_all_services()
 
     logger.info("All microservices started")
 

@@ -1,0 +1,122 @@
+[
+    {
+        "interested_audience": "Tech Buffs",
+        "location": "Hyderabad International Convention Centre",
+        "date_range": "2024-11-09 - 2024-12-04",
+        "exhibition_type": "Home Decor Exhibition"
+    },
+    {
+        "interested_audience": "Foodies",
+        "location": "HITEC City",
+        "date_range": "2024-11-02 - 2024-11-26",
+        "exhibition_type": "Fashion Show"
+    },
+    {
+        "interested_audience": "Foodies",
+        "location": "Salar Jung Museum",
+        "date_range": "2024-11-12 - 2024-11-24",
+        "exhibition_type": "Cosmetics Expo"
+    },
+    {
+        "interested_audience": "Collectors",
+        "location": "Salar Jung Museum",
+        "date_range": "2024-11-07 - 2024-12-21",
+        "exhibition_type": "Home Decor Exhibition"
+    },
+    {
+        "interested_audience": "Tech Buffs",
+        "location": "Golconda Fort",
+        "date_range": "2024-10-29 - 2024-12-12",
+        "exhibition_type": "Music Festival"
+    },
+    {
+        "interested_audience": "Tech Buffs",
+        "location": "Hyderabad International Convention Centre",
+        "date_range": "2024-10-31 - 2024-11-22",
+        "exhibition_type": "Home Decor Exhibition"
+    },
+    {
+        "interested_audience": "Tech Buffs",
+        "location": "KBR National Park",
+        "date_range": "2024-10-24 - 2024-11-23",
+        "exhibition_type": "Textile Fair"
+    },
+    {
+        "interested_audience": "Tech Buffs",
+        "location": "Salar Jung Museum",
+        "date_range": "2024-11-12 - 2024-11-27",
+        "exhibition_type": "Music Festival"
+    },
+    {
+        "interested_audience": "Collectors",
+        "location": "GVK One Mall",
+        "date_range": "2024-11-02 - 2024-12-18",
+        "exhibition_type": "Craft Beer Festival"
+    },
+    {
+        "interested_audience": "Foodies",
+        "location": "Botanical Gardens",
+        "date_range": "2024-10-30 - 2024-12-12",
+        "exhibition_type": "Wellness Expo"
+    },
+    {
+        "interested_audience": "Tech Buffs",
+        "location": "HITEC City",
+        "date_range": "2024-11-15 - 2024-12-01",
+        "exhibition_type": "Vintage Collectibles Show"
+    },
+    {
+        "interested_audience": "Art Lovers",
+        "location": "Chowmahalla Palace",
+        "date_range": "2024-10-28 - 2024-12-20",
+        "exhibition_type": "Gardening Show"
+    },
+    {
+        "interested_audience": "Collectors",
+        "location": "Laad Bazaar",
+        "date_range": "2024-11-13 - 2024-12-01",
+        "exhibition_type": "Textile Fair"
+    },
+    {
+        "interested_audience": "Art Lovers",
+        "location": "Golconda Fort",
+        "date_range": "2024-11-08 - 2024-12-05",
+        "exhibition_type": "Cosmetics Expo"
+    },
+    {
+        "interested_audience": "Collectors",
+        "location": "Charminar",
+        "date_range": "2024-11-05 - 2024-11-22",
+        "exhibition_type": "Craft Beer Festival"
+    },
+    {
+        "interested_audience": "Foodies",
+        "location": "Charminar",
+        "date_range": "2024-10-22 - 2024-12-03",
+        "exhibition_type": "Wellness Expo"
+    },
+    {
+        "interested_audience": "Foodies",
+        "location": "HITEC City",
+        "date_range": "2024-11-11 - 2024-11-25",
+        "exhibition_type": "Home Decor Exhibition"
+    },
+    {
+        "interested_audience": "Art Lovers",
+        "location": "Laad Bazaar",
+        "date_range": "2024-11-14 - 2024-12-20",
+        "exhibition_type": "Shoe Exhibition"
+    },
+    {
+        "interested_audience": "Foodies",
+        "location": "Botanical Gardens",
+        "date_range": "2024-11-18 - 2024-12-20",
+        "exhibition_type": "Handicrafts Fair"
+    },
+    {
+        "interested_audience": "Fashion Enthusiasts",
+        "location": "Durgam Cheruvu Lake",
+        "date_range": "2024-11-15 - 2024-12-13",
+        "exhibition_type": "Antique Fair"
+    }
+]

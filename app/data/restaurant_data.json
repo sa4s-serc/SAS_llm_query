@@ -1,0 +1,602 @@
+[
+    {
+        "location": "Lumbini Park",
+        "restaurant_name": "Mexican Place 49",
+        "cuisine_type": "Thai",
+        "price_range(per person)": 500,
+        "dietary_restrictions": "None",
+        "group_size": 10
+    },
+    {
+        "location": "Lumbini Park",
+        "restaurant_name": "Chinese Place 32",
+        "cuisine_type": "Thai",
+        "price_range(per person)": 1000,
+        "dietary_restrictions": "None",
+        "group_size": 6
+    },
+    {
+        "location": "Lumbini Park",
+        "restaurant_name": "Mexican Place 99",
+        "cuisine_type": "Continental",
+        "price_range(per person)": 1000,
+        "dietary_restrictions": "None",
+        "group_size": 8
+    },
+    {
+        "location": "Lumbini Park",
+        "restaurant_name": "Continental Place 76",
+        "cuisine_type": "Thai",
+        "price_range(per person)": 1000,
+        "dietary_restrictions": "Nut-Free",
+        "group_size": 1
+    },
+    {
+        "location": "Lumbini Park",
+        "restaurant_name": "Mexican Place 15",
+        "cuisine_type": "Mexican",
+        "price_range(per person)": 2500,
+        "dietary_restrictions": "Vegan",
+        "group_size": 6
+    },
+    {
+        "location": "Hussain Sagar Lake",
+        "restaurant_name": "Continental Place 89",
+        "cuisine_type": "Vegetarian",
+        "price_range(per person)": 2500,
+        "dietary_restrictions": "Vegetarian",
+        "group_size": 8
+    },
+    {
+        "location": "Hussain Sagar Lake",
+        "restaurant_name": "Italian Place 75",
+        "cuisine_type": "Vegetarian",
+        "price_range(per person)": 1300,
+        "dietary_restrictions": "Nut-Free",
+        "group_size": 10
+    },
+    {
+        "location": "Hussain Sagar Lake",
+        "restaurant_name": "Mexican Place 66",
+        "cuisine_type": "Fast Food",
+        "price_range(per person)": 2500,
+        "dietary_restrictions": "Nut-Free",
+        "group_size": 6
+    },
+    {
+        "location": "Hussain Sagar Lake",
+        "restaurant_name": "Vegan Place 85",
+        "cuisine_type": "Thai",
+        "price_range(per person)": 750,
+        "dietary_restrictions": "Vegetarian",
+        "group_size": 6
+    },
+    {
+        "location": "Hussain Sagar Lake",
+        "restaurant_name": "Mexican Place 91",
+        "cuisine_type": "Mexican",
+        "price_range(per person)": 1000,
+        "dietary_restrictions": "Gluten-Free",
+        "group_size": 8
+    },
+    {
+        "location": "KBR National Park",
+        "restaurant_name": "Chinese Place 35",
+        "cuisine_type": "Continental",
+        "price_range(per person)": 2500,
+        "dietary_restrictions": "Nut-Free",
+        "group_size": 6
+    },
+    {
+        "location": "KBR National Park",
+        "restaurant_name": "Vegetarian Place 71",
+        "cuisine_type": "Chinese",
+        "price_range(per person)": 750,
+        "dietary_restrictions": "Gluten-Free",
+        "group_size": 1
+    },
+    {
+        "location": "KBR National Park",
+        "restaurant_name": "Fast Food Place 20",
+        "cuisine_type": "Indian",
+        "price_range(per person)": 500,
+        "dietary_restrictions": "Vegetarian",
+        "group_size": 4
+    },
+    {
+        "location": "KBR National Park",
+        "restaurant_name": "Vegan Place 13",
+        "cuisine_type": "Fast Food",
+        "price_range(per person)": 1000,
+        "dietary_restrictions": "Nut-Free",
+        "group_size": 4
+    },
+    {
+        "location": "KBR National Park",
+        "restaurant_name": "Chinese Place 7",
+        "cuisine_type": "Mexican",
+        "price_range(per person)": 500,
+        "dietary_restrictions": "Gluten-Free",
+        "group_size": 8
+    },
+    {
+        "location": "Durgam Cheruvu Lake",
+        "restaurant_name": "Italian Place 33",
+        "cuisine_type": "Vegetarian",
+        "price_range(per person)": 500,
+        "dietary_restrictions": "None",
+        "group_size": 1
+    },
+    {
+        "location": "Durgam Cheruvu Lake",
+        "restaurant_name": "Thai Place 43",
+        "cuisine_type": "Indian",
+        "price_range(per person)": 1000,
+        "dietary_restrictions": "Nut-Free",
+        "group_size": 6
+    },
+    {
+        "location": "Durgam Cheruvu Lake",
+        "restaurant_name": "Continental Place 74",
+        "cuisine_type": "Vegan",
+        "price_range(per person)": 1300,
+        "dietary_restrictions": "None",
+        "group_size": 6
+    },
+    {
+        "location": "Durgam Cheruvu Lake",
+        "restaurant_name": "Mexican Place 94",
+        "cuisine_type": "Italian",
+        "price_range(per person)": 1300,
+        "dietary_restrictions": "Gluten-Free",
+        "group_size": 8
+    },
+    {
+        "location": "Durgam Cheruvu Lake",
+        "restaurant_name": "Fast Food Place 63",
+        "cuisine_type": "Vegan",
+        "price_range(per person)": 1000,
+        "dietary_restrictions": "Vegan",
+        "group_size": 1
+    },
+    {
+        "location": "Ananthagiri Hills",
+        "restaurant_name": "Mexican Place 80",
+        "cuisine_type": "Mexican",
+        "price_range(per person)": 1000,
+        "dietary_restrictions": "None",
+        "group_size": 2
+    },
+    {
+        "location": "Ananthagiri Hills",
+        "restaurant_name": "Indian Place 55",
+        "cuisine_type": "Continental",
+        "price_range(per person)": 750,
+        "dietary_restrictions": "Vegan",
+        "group_size": 8
+    },
+    {
+        "location": "Ananthagiri Hills",
+        "restaurant_name": "Italian Place 68",
+        "cuisine_type": "Continental",
+        "price_range(per person)": 1300,
+        "dietary_restrictions": "Nut-Free",
+        "group_size": 4
+    },
+    {
+        "location": "Ananthagiri Hills",
+        "restaurant_name": "Chinese Place 41",
+        "cuisine_type": "Vegan",
+        "price_range(per person)": 750,
+        "dietary_restrictions": "Vegan",
+        "group_size": 6
+    },
+    {
+        "location": "Ananthagiri Hills",
+        "restaurant_name": "Vegetarian Place 46",
+        "cuisine_type": "Italian",
+        "price_range(per person)": 1300,
+        "dietary_restrictions": "Vegetarian",
+        "group_size": 4
+    },
+    {
+        "location": "Botanical Gardens",
+        "restaurant_name": "Fast Food Place 17",
+        "cuisine_type": "Indian",
+        "price_range(per person)": 750,
+        "dietary_restrictions": "Vegan",
+        "group_size": 10
+    },
+    {
+        "location": "Botanical Gardens",
+        "restaurant_name": "Thai Place 15",
+        "cuisine_type": "Continental",
+        "price_range(per person)": 1300,
+        "dietary_restrictions": "Nut-Free",
+        "group_size": 8
+    },
+    {
+        "location": "Botanical Gardens",
+        "restaurant_name": "Indian Place 78",
+        "cuisine_type": "Chinese",
+        "price_range(per person)": 1300,
+        "dietary_restrictions": "Nut-Free",
+        "group_size": 4
+    },
+    {
+        "location": "Botanical Gardens",
+        "restaurant_name": "Fast Food Place 17",
+        "cuisine_type": "Italian",
+        "price_range(per person)": 500,
+        "dietary_restrictions": "Vegetarian",
+        "group_size": 2
+    },
+    {
+        "location": "Botanical Gardens",
+        "restaurant_name": "Vegan Place 94",
+        "cuisine_type": "Vegetarian",
+        "price_range(per person)": 1300,
+        "dietary_restrictions": "Vegetarian",
+        "group_size": 4
+    },
+    {
+        "location": "Charminar",
+        "restaurant_name": "Continental Place 43",
+        "cuisine_type": "Thai",
+        "price_range(per person)": 500,
+        "dietary_restrictions": "Vegan",
+        "group_size": 1
+    },
+    {
+        "location": "Charminar",
+        "restaurant_name": "Chinese Place 75",
+        "cuisine_type": "Indian",
+        "price_range(per person)": 1300,
+        "dietary_restrictions": "Vegan",
+        "group_size": 6
+    },
+    {
+        "location": "Charminar",
+        "restaurant_name": "Thai Place 10",
+        "cuisine_type": "Continental",
+        "price_range(per person)": 1300,
+        "dietary_restrictions": "Gluten-Free",
+        "group_size": 6
+    },
+    {
+        "location": "Charminar",
+        "restaurant_name": "Vegan Place 53",
+        "cuisine_type": "Italian",
+        "price_range(per person)": 750,
+        "dietary_restrictions": "Gluten-Free",
+        "group_size": 4
+    },
+    {
+        "location": "Charminar",
+        "restaurant_name": "Fast Food Place 44",
+        "cuisine_type": "Indian",
+        "price_range(per person)": 2500,
+        "dietary_restrictions": "Vegetarian",
+        "group_size": 2
+    },
+    {
+        "location": "Golconda Fort",
+        "restaurant_name": "Italian Place 16",
+        "cuisine_type": "Fast Food",
+        "price_range(per person)": 1300,
+        "dietary_restrictions": "Nut-Free",
+        "group_size": 6
+    },
+    {
+        "location": "Golconda Fort",
+        "restaurant_name": "Continental Place 28",
+        "cuisine_type": "Chinese",
+        "price_range(per person)": 1300,
+        "dietary_restrictions": "Vegan",
+        "group_size": 4
+    },
+    {
+        "location": "Golconda Fort",
+        "restaurant_name": "Indian Place 97",
+        "cuisine_type": "Chinese",
+        "price_range(per person)": 500,
+        "dietary_restrictions": "Vegetarian",
+        "group_size": 1
+    },
+    {
+        "location": "Golconda Fort",
+        "restaurant_name": "Vegetarian Place 57",
+        "cuisine_type": "Thai",
+        "price_range(per person)": 750,
+        "dietary_restrictions": "Gluten-Free",
+        "group_size": 6
+    },
+    {
+        "location": "Golconda Fort",
+        "restaurant_name": "Vegan Place 64",
+        "cuisine_type": "Mexican",
+        "price_range(per person)": 750,
+        "dietary_restrictions": "Nut-Free",
+        "group_size": 8
+    },
+    {
+        "location": "Mecca Masjid",
+        "restaurant_name": "Chinese Place 93",
+        "cuisine_type": "Vegetarian",
+        "price_range(per person)": 1000,
+        "dietary_restrictions": "Vegan",
+        "group_size": 10
+    },
+    {
+        "location": "Mecca Masjid",
+        "restaurant_name": "Italian Place 95",
+        "cuisine_type": "Continental",
+        "price_range(per person)": 2500,
+        "dietary_restrictions": "Gluten-Free",
+        "group_size": 8
+    },
+    {
+        "location": "Mecca Masjid",
+        "restaurant_name": "Indian Place 28",
+        "cuisine_type": "Mexican",
+        "price_range(per person)": 750,
+        "dietary_restrictions": "Gluten-Free",
+        "group_size": 8
+    },
+    {
+        "location": "Mecca Masjid",
+        "restaurant_name": "Indian Place 72",
+        "cuisine_type": "Vegan",
+        "price_range(per person)": 1300,
+        "dietary_restrictions": "Gluten-Free",
+        "group_size": 10
+    },
+    {
+        "location": "Mecca Masjid",
+        "restaurant_name": "Thai Place 44",
+        "cuisine_type": "Vegetarian",
+        "price_range(per person)": 750,
+        "dietary_restrictions": "Nut-Free",
+        "group_size": 8
+    },
+    {
+        "location": "Chowmahalla Palace",
+        "restaurant_name": "Fast Food Place 49",
+        "cuisine_type": "Italian",
+        "price_range(per person)": 2500,
+        "dietary_restrictions": "Gluten-Free",
+        "group_size": 10
+    },
+    {
+        "location": "Chowmahalla Palace",
+        "restaurant_name": "Continental Place 43",
+        "cuisine_type": "Vegetarian",
+        "price_range(per person)": 500,
+        "dietary_restrictions": "Vegetarian",
+        "group_size": 1
+    },
+    {
+        "location": "Chowmahalla Palace",
+        "restaurant_name": "Continental Place 43",
+        "cuisine_type": "Vegetarian",
+        "price_range(per person)": 1000,
+        "dietary_restrictions": "None",
+        "group_size": 2
+    },
+    {
+        "location": "Chowmahalla Palace",
+        "restaurant_name": "Fast Food Place 22",
+        "cuisine_type": "Fast Food",
+        "price_range(per person)": 1300,
+        "dietary_restrictions": "Gluten-Free",
+        "group_size": 6
+    },
+    {
+        "location": "Chowmahalla Palace",
+        "restaurant_name": "Vegan Place 17",
+        "cuisine_type": "Chinese",
+        "price_range(per person)": 2500,
+        "dietary_restrictions": "Nut-Free",
+        "group_size": 8
+    },
+    {
+        "location": "Qutb Shahi Tombs",
+        "restaurant_name": "Vegetarian Place 31",
+        "cuisine_type": "Fast Food",
+        "price_range(per person)": 1300,
+        "dietary_restrictions": "Nut-Free",
+        "group_size": 2
+    },
+    {
+        "location": "Qutb Shahi Tombs",
+        "restaurant_name": "Thai Place 26",
+        "cuisine_type": "Chinese",
+        "price_range(per person)": 1000,
+        "dietary_restrictions": "None",
+        "group_size": 6
+    },
+    {
+        "location": "Qutb Shahi Tombs",
+        "restaurant_name": "Mexican Place 53",
+        "cuisine_type": "Thai",
+        "price_range(per person)": 500,
+        "dietary_restrictions": "Vegetarian",
+        "group_size": 10
+    },
+    {
+        "location": "Qutb Shahi Tombs",
+        "restaurant_name": "Vegan Place 53",
+        "cuisine_type": "Mexican",
+        "price_range(per person)": 1300,
+        "dietary_restrictions": "Gluten-Free",
+        "group_size": 6
+    },
+    {
+        "location": "Qutb Shahi Tombs",
+        "restaurant_name": "Fast Food Place 64",
+        "cuisine_type": "Fast Food",
+        "price_range(per person)": 750,
+        "dietary_restrictions": "None",
+        "group_size": 2
+    },
+    {
+        "location": "Salar Jung Museum",
+        "restaurant_name": "Chinese Place 90",
+        "cuisine_type": "Thai",
+        "price_range(per person)": 1000,
+        "dietary_restrictions": "Vegan",
+        "group_size": 10
+    },
+    {
+        "location": "Salar Jung Museum",
+        "restaurant_name": "Vegetarian Place 26",
+        "cuisine_type": "Continental",
+        "price_range(per person)": 750,
+        "dietary_restrictions": "Vegetarian",
+        "group_size": 8
+    },
+    {
+        "location": "Salar Jung Museum",
+        "restaurant_name": "Indian Place 59",
+        "cuisine_type": "Vegetarian",
+        "price_range(per person)": 1000,
+        "dietary_restrictions": "Nut-Free",
+        "group_size": 4
+    },
+    {
+        "location": "Salar Jung Museum",
+        "restaurant_name": "Chinese Place 76",
+        "cuisine_type": "Indian",
+        "price_range(per person)": 2500,
+        "dietary_restrictions": "Vegetarian",
+        "group_size": 1
+    },
+    {
+        "location": "Salar Jung Museum",
+        "restaurant_name": "Mexican Place 81",
+        "cuisine_type": "Thai",
+        "price_range(per person)": 500,
+        "dietary_restrictions": "Vegan",
+        "group_size": 1
+    },
+    {
+        "location": "Laad Bazaar",
+        "restaurant_name": "Vegan Place 67",
+        "cuisine_type": "Indian",
+        "price_range(per person)": 1300,
+        "dietary_restrictions": "Vegetarian",
+        "group_size": 2
+    },
+    {
+        "location": "Laad Bazaar",
+        "restaurant_name": "Chinese Place 9",
+        "cuisine_type": "Indian",
+        "price_range(per person)": 1000,
+        "dietary_restrictions": "Vegetarian",
+        "group_size": 10
+    },
+    {
+        "location": "Laad Bazaar",
+        "restaurant_name": "Mexican Place 1",
+        "cuisine_type": "Mexican",
+        "price_range(per person)": 750,
+        "dietary_restrictions": "Gluten-Free",
+        "group_size": 8
+    },
+    {
+        "location": "Laad Bazaar",
+        "restaurant_name": "Chinese Place 66",
+        "cuisine_type": "Vegetarian",
+        "price_range(per person)": 1000,
+        "dietary_restrictions": "Gluten-Free",
+        "group_size": 1
+    },
+    {
+        "location": "Laad Bazaar",
+        "restaurant_name": "Thai Place 18",
+        "cuisine_type": "Vegetarian",
+        "price_range(per person)": 500,
+        "dietary_restrictions": "Nut-Free",
+        "group_size": 8
+    },
+    {
+        "location": "HITEC City",
+        "restaurant_name": "Thai Place 80",
+        "cuisine_type": "Chinese",
+        "price_range(per person)": 1000,
+        "dietary_restrictions": "None",
+        "group_size": 1
+    },
+    {
+        "location": "HITEC City",
+        "restaurant_name": "Fast Food Place 1",
+        "cuisine_type": "Fast Food",
+        "price_range(per person)": 1000,
+        "dietary_restrictions": "Nut-Free",
+        "group_size": 8
+    },
+    {
+        "location": "HITEC City",
+        "restaurant_name": "Fast Food Place 79",
+        "cuisine_type": "Vegetarian",
+        "price_range(per person)": 500,
+        "dietary_restrictions": "Vegan",
+        "group_size": 6
+    },
+    {
+        "location": "HITEC City",
+        "restaurant_name": "Vegetarian Place 3",
+        "cuisine_type": "Italian",
+        "price_range(per person)": 1300,
+        "dietary_restrictions": "Nut-Free",
+        "group_size": 1
+    },
+    {
+        "location": "HITEC City",
+        "restaurant_name": "Thai Place 34",
+        "cuisine_type": "Italian",
+        "price_range(per person)": 500,
+        "dietary_restrictions": "Gluten-Free",
+        "group_size": 4
+    },
+    {
+        "location": "GVK One Mall",
+        "restaurant_name": "Fast Food Place 71",
+        "cuisine_type": "Vegetarian",
+        "price_range(per person)": 750,
+        "dietary_restrictions": "Nut-Free",
+        "group_size": 4
+    },
+    {
+        "location": "GVK One Mall",
+        "restaurant_name": "Vegetarian Place 67",
+        "cuisine_type": "Vegetarian",
+        "price_range(per person)": 500,
+        "dietary_restrictions": "Nut-Free",
+        "group_size": 4
+    },
+    {
+        "location": "GVK One Mall",
+        "restaurant_name": "Chinese Place 67",
+        "cuisine_type": "Vegan",
+        "price_range(per person)": 750,
+        "dietary_restrictions": "Nut-Free",
+        "group_size": 6
+    },
+    {
+        "location": "GVK One Mall",
+        "restaurant_name": "Thai Place 41",
+        "cuisine_type": "Fast Food",
+        "price_range(per person)": 750,
+        "dietary_restrictions": "None",
+        "group_size": 8
+    },
+    {
+        "location": "GVK One Mall",
+        "restaurant_name": "Chinese Place 43",
+        "cuisine_type": "Thai",
+        "price_range(per person)": 1000,
+        "dietary_restrictions": "Gluten-Free",
+        "group_size": 1
+    }
+]

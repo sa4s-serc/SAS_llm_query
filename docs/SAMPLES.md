@@ -127,42 +127,54 @@ Crowd count is generated using a Poisson distribution with an average (lambda) o
 ```
 
 # Event Notifier Data Format
-## File: `event_notifier`
+
+## File: `event_notifier.json`
 
 ## Structure
-List of strings, each representing an event.
+JSON array of objects, each representing an event.
+
+## Object Properties
+- `event`: String
+- `time_required`: String
+- `details`: String
 
 ## Sample Data
-```
-1. Hyderabad Cultural Dance Festival
-Time Required: 2 hours
-Details: A showcase of classical and folk dances from across India, featuring Kuchipudi, Bharatanatyam, and Kathak performances. The festival celebrates the rich cultural diversity of Hyderabad, bringing together renowned dancers and artists from across the country.
-2. Lumbini Park Laser Light Show
-Time Required: 45 minutes
-Details: A spectacular laser light and fountain show at Lumbini Park, set against the backdrop of Hussain Sagar Lake. The show narrates the history of Hyderabad using vibrant lights, water jets, and music, creating a mesmerizing experience for visitors.
-3. Golconda Fort Sound and Light Show
-Time Required: 1 hour 30 minutes
-Details: A dramatic sound and light show at the historic Golconda Fort that recounts the rise and fall of the Qutb Shahi dynasty. With the majestic fort as the backdrop, the show immerses audiences in the history of the Deccan region.
+```json
+[
+    {
+        "event": "Hyderabad Cultural Dance Festival",
+        "time_required": "2 hours",
+        "details": "A showcase of classical and folk dances from across India, featuring Kuchipudi, Bharatanatyam, and Kathak performances. The festival celebrates the rich cultural diversity of Hyderabad, bringing together renowned dancers and artists from across the country."
+    },
+    {
+        "event": "Lumbini Park Laser Light Show",
+        "time_required": "45 minutes",
+        "details": "A spectacular laser light and fountain show at Lumbini Park, set against the backdrop of Hussain Sagar Lake. The show narrates the history of Hyderabad using vibrant lights, water jets, and music, creating a mesmerizing experience for visitors."
+    },
 ...
+]
 ```
 
 # Historic Data
 
-## File: `historic_data`
+## File: `historic_data.json`
 
 ## Structure
-List of strings, each representing a historic site.
+JSON object with keys as historic site names and values as objects with 'name' and 'body' keys.
 
 ## Sample Data
-```
-Charminar:
-The Charminar, located in the heart of Hyderabad, is one of India’s most iconic landmarks. Built in 1591 by Sultan Muhammad Quli Qutb Shah, the Charminar is a grand testament to the architectural brilliance of the Qutb Shahi dynasty. The monument was constructed to commemorate the founding of Hyderabad and to mark the end of a deadly plague that had ravaged the region.....
-
-Golconda Fort:
-Golconda Fort, a majestic fortress located on the outskirts of Hyderabad, is a monumental reminder of the grandeur of the Qutb Shahi dynasty. Originally a mud fort constructed by the Kakatiya dynasty in the 12th century, Golconda was later fortified by the Qutb Shahi rulers in the 16th century into the massive citadel that stands today....
-
-...
-
+```json
+{
+    "Charminar": {
+        "name": "Charminar",
+        "body": "The Charminar, located in the heart of Hyderabad, is one of India’s most iconic landmarks. Built in 1591 by Sultan Muhammad Quli Qutb Shah, the Charminar is a grand testament to the architectural brilliance of the Qutb Shahi dynasty. The monument was constructed to commemorate the founding of Hyderabad and to mark the end of a deadly plague that had ravaged the region....."
+    },
+    "Golconda Fort": {
+        "name": "Golconda Fort",
+        "body": "Golconda Fort, a majestic fortress located on the outskirts of Hyderabad, is a monumental reminder of the grandeur of the Qutb Shahi dynasty. Originally a mud fort constructed by the Kakatiya dynasty in the 12th century, Golconda was later fortified by the Qutb Shahi rulers in the 16th century into the massive citadel that stands today....."
+    },
+    ...
+}
 ```
 
 # Restaurant Data Format
