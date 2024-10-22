@@ -4,6 +4,7 @@ import shutil
 import app.config as config
 from app.utils.logger import setup_logger
 from app.utils.port_manager import get_port_manager
+from app.templates.generated_app_template import GENERATED_APP_TEMPLATE
 
 
 class AppGenerator:
@@ -37,6 +38,14 @@ class AppGenerator:
         # Copy services.toml
         shutil.copy(self.port_manager.services_file, app_dir)
 
+        # Copy templates directory
+        templates_dir = os.path.join(app_dir, "templates")
+        os.makedirs(templates_dir, exist_ok=True)
+        shutil.copy(
+            os.path.join(config.APP_DIR, "templates", "generated_app_template.py"),
+            templates_dir,
+        )
+
         app_content = self._generate_app_content(selected_services, app_dir)
         app_file_path = os.path.join(app_dir, "app.py")
 
@@ -47,35 +56,16 @@ class AppGenerator:
         return f"http://localhost:{port}"
 
     def _generate_app_content(self, selected_services, app_dir):
-        content = f"""
-import os
-import sys
-
-# Add the current directory to the Python path
-current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, current_dir)
-
-import streamlit as st
-import requests
-import logging
-from utils.port_manager import get_port_manager
-
-# Set up logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
-
-# Set the working directory to the app directory
-os.chdir(r'{app_dir}')
-
-st.set_page_config(page_title="My IIIT Companion", page_icon="🏫", layout="wide")
-
-st.title("My IIIT Companion")
-
-port_manager = get_port_manager()
-
-"""
+        service_content = ""
         for service in selected_services:
-            content += f"""
+            service_content += self._generate_service_content(service)
+
+        return GENERATED_APP_TEMPLATE.format(services=service_content)
+
+    def _generate_service_content(self, service):
+        return f"""
+# {service.capitalize()} Service
+st.header("{service.capitalize()} Information")
 try:
     service_info = port_manager.get_service_info('{service}_service')
     if not service_info:
@@ -86,8 +76,7 @@ try:
     response.raise_for_status()
     data = response.json()
     if data.get("display") != "none":
-        st.subheader('{service.capitalize()}')
-        st.write(data)
+        render_service_data('{service}', data)
         logger.info(f"Successfully connected to {service.capitalize()} service and displayed data")
     else:
         logger.info(f"{service.capitalize()} service returned 'display: none', skipping display")
@@ -104,7 +93,6 @@ except requests.exceptions.RequestException as e:
     logger.error(f"Request error for {service.capitalize()} service: {{e}}")
     st.error(f"An error occurred while connecting to {service.capitalize()} service: {{str(e)}}")
 """
-        return content
 
     def _run_app(self, app_file_path, port):
         self.logger.info(f"Running app at {app_file_path} on port {port}")
