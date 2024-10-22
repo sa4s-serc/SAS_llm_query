@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 import uvicorn
+from pydantic import BaseModel
+from typing import Dict, Any
 from app.utils.port_manager import get_service_port, update_service_info
 from app.utils.logger import setup_logger
 
@@ -30,3 +32,7 @@ class MicroserviceBase:
     def run(self):
         self.register_routes()
         self.start()
+
+    async def process_request(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        # This method should be implemented by child classes
+        raise NotImplementedError("This method should be implemented by child classes")

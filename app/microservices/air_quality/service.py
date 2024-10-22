@@ -1,47 +1,43 @@
+import json
+from fastapi import HTTPException
+from pydantic import BaseModel
+from typing import List
 from app.microservices.base import MicroserviceBase
-from app.utils.logger import setup_logger
-import random
 
-logger = setup_logger("AirQualityService")
-
+class AirQualityParams(BaseModel):
+    locations: List[str]
 
 class AirQualityService(MicroserviceBase):
     def __init__(self):
-        super().__init__("air_quality_service")
-
+        super().__init__("air_quality")
         self.update_service_info(
-            description="Provides air quality information", dependencies=[]
+            description="Monitors and reports air quality levels in different areas",
+            dependencies=[]
         )
+        self.air_quality_data = self.load_air_quality_data()
+
+    def load_air_quality_data(self):
+        with open('data/air_quality_data.json', 'r') as f:
+            return json.load(f)
 
     def register_routes(self):
-        @self.app.get("/data")
-        async def get_data():
-            logger.info("Received request for air quality data")
-            return self._get_air_quality()
+        @self.app.post("/air_quality")
+        async def get_air_quality(params: AirQualityParams):
+            return await self.process_request(params.dict())
 
-    # Service-specific logic
-    def _get_air_quality(self):
-        aqi = random.randint(0, 500)
-        if aqi <= 50:
-            status = "Good"
-        elif aqi <= 100:
-            status = "Moderate"
-        elif aqi <= 150:
-            status = "Unhealthy for Sensitive Groups"
-        elif aqi <= 200:
-            status = "Unhealthy"
-        elif aqi <= 300:
-            status = "Very Unhealthy"
-        else:
-            status = "Hazardous"
-        logger.info(f"Generated air quality data: AQI {aqi}, Status {status}")
-        return {"aqi": aqi, "status": status}
-
+    async def process_request(self, params):
+        locations = params["locations"]
+        result = {}
+        for location in locations:
+            if location in self.air_quality_data:
+                result[location] = self.air_quality_data[location][-1]  # Get the most recent data
+            else:
+                result[location] = None
+        return result
 
 def start_air_quality_service():
     service = AirQualityService()
     service.run()
-
 
 if __name__ == "__main__":
     start_air_quality_service()
