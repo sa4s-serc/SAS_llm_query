@@ -1,14 +1,15 @@
 import json
 from fastapi import HTTPException
 from pydantic import BaseModel
-from typing import List
+from typing import Optional, List
 from app.microservices.base import MicroserviceBase
+from datetime import datetime
 
 class ExhibitionTrackerParams(BaseModel):
-    user_interests: List[str]
-    user_location: str
-    date_range: str
-    exhibition_type: str
+    interested_audience: Optional[str] = None
+    location: Optional[str] = None
+    date_range: Optional[str] = None
+    exhibition_type: Optional[str] = None
 
 class ExhibitionTrackerService(MicroserviceBase):
     def __init__(self):
@@ -29,20 +30,23 @@ class ExhibitionTrackerService(MicroserviceBase):
             return await self.process_request(params.dict())
 
     async def process_request(self, params):
-        # Simple filtering based on parameters
-        filtered_exhibitions = [
-            exhibition for exhibition in self.exhibition_data
-            if (exhibition['exhibition_type'] == params['exhibition_type'] and
-                exhibition['interested_audience'] in params['user_interests'] and
-                self.is_in_date_range(exhibition['date_range'], params['date_range']))
-        ]
+        filtered_exhibitions = self.exhibition_data
+
+        if params.get('interested_audience'):
+            filtered_exhibitions = [e for e in filtered_exhibitions if e['interested_audience'] == params['interested_audience']]
+        if params.get('location'):
+            filtered_exhibitions = [e for e in filtered_exhibitions if e['location'] == params['location']]
+        if params.get('date_range'):
+            start, end = params['date_range'].split(',')
+            filtered_exhibitions = [e for e in filtered_exhibitions if self.is_date_in_range(e['date_range'], start, end)]
+        if params.get('exhibition_type'):
+            filtered_exhibitions = [e for e in filtered_exhibitions if e['exhibition_type'] == params['exhibition_type']]
+
         return {"exhibitions": filtered_exhibitions}
 
-    def is_in_date_range(self, exhibition_range, user_range):
-        # Simple date range check (assuming format "YYYY-MM-DD - YYYY-MM-DD")
+    def is_date_in_range(self, exhibition_range, start, end):
         exhibition_start, exhibition_end = exhibition_range.split(' - ')
-        user_start, user_end = user_range.split(',')
-        return exhibition_start <= user_end and exhibition_end >= user_start
+        return exhibition_start <= end and exhibition_end >= start
 
 def start_exhibition_tracker_service():
     service = ExhibitionTrackerService()

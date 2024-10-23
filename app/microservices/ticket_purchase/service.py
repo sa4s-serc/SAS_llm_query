@@ -1,11 +1,11 @@
-import json
+import csv
 from fastapi import HTTPException
 from pydantic import BaseModel
 from typing import Optional
 from app.microservices.base import MicroserviceBase
 
 class TicketPurchaseParams(BaseModel):
-    ticket_type: str
+    event_name: str
 
 class TicketPurchaseService(MicroserviceBase):
     def __init__(self):
@@ -18,8 +18,8 @@ class TicketPurchaseService(MicroserviceBase):
 
     def load_ticket_data(self):
         with open('data/event_ticket_prices.csv', 'r') as f:
-            lines = f.readlines()[1:]  # Skip header
-            return {line.split(',')[0]: int(line.split(',')[1]) for line in lines}
+            reader = csv.DictReader(f)
+            return {row['Event Name']: int(row['Ticket Price']) for row in reader}
 
     def register_routes(self):
         @self.app.post("/ticket_purchase")
@@ -27,15 +27,15 @@ class TicketPurchaseService(MicroserviceBase):
             return await self.process_request(params.dict())
 
     async def process_request(self, params):
-        ticket_type = params["ticket_type"]
-        if ticket_type in self.ticket_data:
+        event_name = params['event_name']
+        if event_name in self.ticket_data:
             return {
-                "ticket_type": ticket_type,
-                "price": self.ticket_data[ticket_type],
+                "event_name": event_name,
+                "ticket_price": self.ticket_data[event_name],
                 "purchase_status": "success"
             }
         else:
-            raise HTTPException(status_code=404, detail="Ticket type not found")
+            raise HTTPException(status_code=404, detail="Event not found")
 
 def start_ticket_purchase_service():
     service = TicketPurchaseService()

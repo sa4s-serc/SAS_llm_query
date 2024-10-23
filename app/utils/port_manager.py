@@ -59,7 +59,10 @@ class PortManager:
         return port
 
     def get_service_info(self, name: str) -> Dict:
-        return self.services.get(name, {})
+        # Remove '_service' suffix if present
+        name = name.replace('_service', '')
+        # Try to find the service with or without '_service' suffix
+        return self.services.get(f"{name}_service", self.services.get(name, {}))
 
     def update_service_info(
         self, name: str, description: str = None, dependencies: List[str] = None
@@ -79,6 +82,9 @@ class PortManager:
             self.app_ports.remove(port)
         else:
             raise ValueError(f"App port {port} not found")
+
+    def get_all_services(self) -> Dict[str, Dict]:
+        return self.services
 
 
 # Global instance of PortManager

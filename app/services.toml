@@ -1,44 +1,44 @@
-[restaurant_finder]
-port = 9000
+[restaurant_finder_service]
+port = 9009
 description = "Recommends restaurants based on cuisine preferences and location"
 dependencies = []
 
 [water_quality]
-port = 9001
+port = 9010
 description = "Tracks water quality in lakes and other water bodies"
 dependencies = []
 
 [crowd_monitor]
-port = 9002
+port = 9011
 description = "Tracks and reports real-time crowd density at various locations"
 dependencies = []
 
 [ticket_purchase]
-port = 9003
+port = 9012
 description = "Enables online ticket purchases for attractions and events"
 dependencies = []
 
 [air_quality]
-port = 9004
+port = 9013
 description = "Monitors and reports air quality levels in different areas"
 dependencies = []
 
 [exhibition_tracker]
-port = 9005
+port = 9014
 description = "Tracks and notifies users about ongoing and upcoming exhibitions"
 dependencies = []
 
 [historical_info]
-port = 9006
+port = 9015
 description = "Provides historical and cultural information about monuments and sites"
 dependencies = []
 
 [event_notifier]
-port = 9007
+port = 9016
 description = "Sends notifications about upcoming events, shows, and festivals"
 dependencies = []
 
-[travel_options]
-port = 9008
+[travel_options_service]
+port = 9017
 description = "Provides transportation options and routes to tourist destinations"
 dependencies = []

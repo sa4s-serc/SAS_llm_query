@@ -3,7 +3,7 @@ import streamlit as st
 from app.utils.app_generator import AppGenerator
 import app.config as config
 from app.utils.logger import setup_logger
-from app.utils.chatbot import take_input
+from app.utils.chatbot import chatbot_conversation, initialize_conversation
 
 
 class BuilderApp:
@@ -18,7 +18,6 @@ class BuilderApp:
             )
         self.all_services = self._discover_services(config.MICROSERVICES_DIR)
         self.app_generator = AppGenerator()
-        # print("builder instance created")
 
     def _discover_services(self, directory):
         services = []
@@ -30,42 +29,42 @@ class BuilderApp:
                 if dir.startswith("__"):
                     continue
                 services.append(dir)
-
         return services
 
     def run(self):
         st.title(f"{config.APP_NAME} Builder")
 
-        st.write(
-            "Select the features you want in your personalized IIIT Companion app:"
-        )
+        if "conversation_state" not in st.session_state:
+            st.session_state.conversation_state = initialize_conversation()
 
-        selected_keywords = st.multiselect("Select features:", self.all_services)
-        self.logger.info("Starting BuilderApp")
-        if "conversation" not in st.session_state:
-            st.session_state.conversation = []
+        if "conversation_history" not in st.session_state:
+            st.session_state.conversation_history = []
 
-        user_input = st.text_input(
-            "Enter a sentence describing your desired app features:"
-        )
+        for message in st.session_state.conversation_history:
+            with st.chat_message(message["role"]):
+                st.write(message["content"])
+
+        user_input = st.chat_input("Type your message here...")
+
         if user_input:
-            selected_keywords = take_input(user_input)
-            while selected_keywords is None:
-                st.session_state.conversation.append(selected_keywords)
-                selected_keywords = take_input(selected_keywords)
-            self.logger.info(f"Selected Keywords: {selected_keywords}")
-            st.write(f"Selected Keywords: {selected_keywords}")
+            st.session_state.conversation_history.append({"role": "user", "content": user_input})
+            with st.chat_message("user"):
+                st.write(user_input)
 
-        if st.button("Create My IIIT Companion App"):
-            if selected_keywords:
-                app_url = self.app_generator.generate_app(selected_keywords)
-                st.success(
-                    f"Your personalized {config.APP_NAME} app has been created! Access it at: {app_url}"
+            with st.chat_message("assistant"):
+                response, st.session_state.conversation_state = chatbot_conversation(user_input, st.session_state.conversation_state)
+                st.write(response)
+            st.session_state.conversation_history.append({"role": "assistant", "content": response})
+
+        if st.session_state.conversation_state["pass"] == 4:
+            if st.button("Create My IIIT Companion App"):
+                app_url = self.app_generator.generate_app(
+                    st.session_state.conversation_state["suggested_services"],
+                    st.session_state.conversation_state["parameters"]
                 )
-            else:
-                st.error("No valid features selected. Please try again.")
-
-        return selected_keywords
+                st.success(f"Your personalized {config.APP_NAME} app has been created! Access it at: {app_url}")
+                st.session_state.conversation_state = initialize_conversation()
+                st.session_state.conversation_history = []
 
 
 if __name__ == "__main__":

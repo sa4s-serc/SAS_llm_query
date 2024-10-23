@@ -4,6 +4,7 @@ import sys
 import streamlit as st
 import requests
 import logging
+import json
 from utils.port_manager import get_port_manager
 
 # Set up logging
@@ -53,4 +54,6 @@ def render_service_data(service_name, data):
             st.write(f"**{{key}}:** {{value}}")
 
 {services}
+
+{debug_content}
 """

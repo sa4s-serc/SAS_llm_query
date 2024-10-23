@@ -1,11 +1,13 @@
 import json
 from fastapi import HTTPException
 from pydantic import BaseModel
-from typing import List
+from typing import Optional
 from app.microservices.base import MicroserviceBase
+from datetime import datetime
 
 class AirQualityParams(BaseModel):
-    locations: List[str]
+    location: str
+    timestamp: Optional[str] = None
 
 class AirQualityService(MicroserviceBase):
     def __init__(self):
@@ -26,14 +28,25 @@ class AirQualityService(MicroserviceBase):
             return await self.process_request(params.dict())
 
     async def process_request(self, params):
-        locations = params["locations"]
-        result = {}
-        for location in locations:
-            if location in self.air_quality_data:
-                result[location] = self.air_quality_data[location][-1]  # Get the most recent data
-            else:
-                result[location] = None
-        return result
+        location = params['location']
+        timestamp = params.get('timestamp', datetime.now().isoformat())
+
+        location_data = [data for data in self.air_quality_data if data['location'] == location]
+        if not location_data:
+            raise HTTPException(status_code=404, detail="Location not found")
+
+        # Find the closest timestamp
+        closest_data = min(location_data, key=lambda x: abs(datetime.fromisoformat(x['timestamp']) - datetime.fromisoformat(timestamp)))
+
+        return {
+            "location": location,
+            "timestamp": closest_data['timestamp'],
+            "AQI": closest_data['AQI'],
+            "PM2.5": closest_data['PM2.5'],
+            "PM10": closest_data['PM10'],
+            "NO2": closest_data['NO2'],
+            "O3": closest_data['O3']
+        }
 
 def start_air_quality_service():
     service = AirQualityService()
