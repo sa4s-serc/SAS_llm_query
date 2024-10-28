@@ -154,38 +154,49 @@ def chatbot_conversation(user_input: str, conversation_state: Dict) -> Tuple[str
     assistant_response = llm(assistant_messages)
     conversation_state["conversation_history"].append(assistant_response)
 
-    # After max exchanges or if enough information gathered
-    if conversation_state["exchanges"] >= conversation_state["max_exchanges"]:
-        # Identify services and parameters
+    # Check if we have enough exchanges and try to identify services
+    if conversation_state["exchanges"] >= 2:
+        # Try to identify services and parameters
         services, params = identify_services_and_params(
             [msg.content for msg in conversation_state["conversation_history"]],
             conversation_state["microservices"],
             conversation_state["params_list"],
             llm
         )
-        conversation_state["suggested_services"] = services
-        conversation_state["parameters"] = params
 
-        # Generate summary
-        summary = generate_summary(
-            [msg.content for msg in conversation_state["conversation_history"]],
-            conversation_state["available_hours"],
-            llm
-        )
-        
-        # Display identified services and parameters
-        response = f"{summary}\n\nBased on our conversation, I've identified these services and parameters:\n\n"
-        for service in services:
-            response += f"📍 {service}:\n"
-            if service in params and params[service]:
-                for param, values in params[service].items():
-                    response += f"   • {param}: {', '.join(values)}\n"
+        # Only proceed if we have identified services and parameters
+        if services and any(params.values()):
+            conversation_state["suggested_services"] = services
+            conversation_state["parameters"] = params
+
+            # If we have enough exchanges or have gathered sufficient information
+            if conversation_state["exchanges"] >= conversation_state["max_exchanges"]:
+                # Generate summary
+                summary = generate_summary(
+                    [msg.content for msg in conversation_state["conversation_history"]],
+                    conversation_state["available_hours"],
+                    llm
+                )
+                
+                # Display identified services and parameters
+                response = f"{summary}\n\nBased on our conversation, I've identified these services and parameters:\n\n"
+                for service in services:
+                    response += f"📍 {service}:\n"
+                    if service in params and params[service]:
+                        for param, values in params[service].items():
+                            response += f"   • {param}: {', '.join(values)}\n"
+                    else:
+                        response += "   • No specific parameters identified\n"
+                
+                response += "\nDoes this accurately reflect what you're looking for? (Yes/No)"
+                conversation_state["awaiting_confirmation"] = True
+                return response, conversation_state
             else:
-                response += "   • No specific parameters identified\n"
-        
-        response += "\nDoes this accurately reflect what you're looking for? (Yes/No)"
-        conversation_state["awaiting_confirmation"] = True
-        return response, conversation_state
+                # Continue conversation to gather more details
+                return assistant_response.content, conversation_state
+        elif conversation_state["exchanges"] >= conversation_state["max_exchanges"]:
+            # If we've reached max exchanges but haven't identified services
+            return "I need more specific information about what you're interested in. Could you tell me more about what you'd like to do or see in Hyderabad?", conversation_state
 
     return assistant_response.content, conversation_state
 
