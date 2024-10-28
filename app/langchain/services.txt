@@ -1,0 +1,9 @@
+travel_options,Provides transportation options and routes to tourist destinations
+restaurant_finder,Recommends restaurants based on cuisine preferences and location
+crowd_monitor,Tracks and reports real-time crowd density at various locations
+air_quality,Monitors and reports air quality levels in different areas
+water_quality,Tracks water quality in lakes and other water bodies
+exhibition_tracker,Tracks and notifies users about ongoing and upcoming exhibitions
+historical_info,Provides historical and cultural information about monuments and sites
+event_notifier,Sends notifications about upcoming events shows and festivals
+ticket_purchase,Enables online ticket purchases for attractions and events

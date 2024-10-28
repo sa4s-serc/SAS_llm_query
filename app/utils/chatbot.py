@@ -8,6 +8,9 @@ from dotenv import load_dotenv
 import os
 import toml
 import json
+from typing import List, Dict, Tuple
+from langchain.schema import HumanMessage, SystemMessage
+from app.utils.llm_utils import load_microservices, load_summary, load_service_parameters
 
 load_dotenv()
 
@@ -175,3 +178,173 @@ def log_to_csv(user_query, refined_keywords):
     )
     df = pd.concat([df, new_data], ignore_index=True)
     df.to_csv(file_path, index=False)
+
+# Ensure that the OpenAI API key is set
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if not OPENAI_API_KEY:
+    raise ValueError("Please set the OPENAI_API_KEY environment variable.")
+
+# Define file paths relative to the app directory
+MICROSERVICES_FILE = os.path.join(os.path.dirname(__file__), "..", "langchain", "services.txt")
+SUMMARY_FILE = os.path.join(os.path.dirname(__file__), "..", "langchain", "summary.txt")
+PARAMS_FILE = os.path.join(os.path.dirname(__file__), "..", "langchain", "service_params.txt")
+
+llm = ChatOpenAI(api_key=OPENAI_API_KEY, temperature=0.7)
+
+def prepare_system_context(microservices: List[Dict[str, str]], system_summary: str, params_list: Dict) -> str:
+    params_context = "\n".join([
+        f"Service '{service}' options: " + 
+        ", ".join([f"{param}: {', '.join(values)}" for param, values in params.items()])
+        for service, params in params_list.items()
+    ])
+    
+    return f"""You are an intelligent Hyderabad City Guide designed to help tourists explore the city effectively.
+    {system_summary}
+    
+    Available service options:
+    {params_context}
+    
+    Share information about Hyderabad naturally, suggesting relevant options based on tourist interests.
+    Don't mention checking real-time data or making actual reservations.
+    Focus on understanding preferences and providing relevant information.
+    
+    Available services for recommendations:
+    {", ".join([ms['name'] for ms in microservices])}
+    """
+
+def identify_services_and_params(
+    conversation: List[str], 
+    microservices: List[Dict[str, str]], 
+    params_list: Dict,
+    llm: ChatOpenAI
+) -> Tuple[List[str], Dict]:
+    params_context = "\n".join([
+        f"Service '{service}' options: " + 
+        ", ".join([f"{param}: {', '.join(values)}" for param, values in params.items()])
+        for service, params in params_list.items()
+    ])
+    
+    identification_prompt = f"""Based ONLY on what has been EXPLICITLY mentioned or agreed to by the user in this conversation, identify:
+    1. The relevant services from: {', '.join([ms['name'] for ms in microservices])}
+    2. For each service, list ONLY the parameter values that were directly mentioned or confirmed by the user.
+
+    Conversation:
+    {' '.join(conversation)}
+
+    Format your response as:
+    service_name1:
+    - param1: [value1, value2, value3]
+    - param2: [value4, value5]
+
+    Guidelines:
+    - ONLY include services and parameters that the user explicitly mentioned or confirmed
+    - DO NOT include implied or suggested options that weren't confirmed
+    - DO NOT include locations or options that were only mentioned by the assistant
+    - If a service was mentioned but no specific parameters were confirmed, do not include that service
+    - Stick to the available options from this list:
+    {params_context}
+
+    Return ONLY the structured list, no explanations."""
+
+    response = llm([HumanMessage(content=identification_prompt)])
+    
+    # Process the response to extract services and parameters
+    services_and_params = {}
+    current_service = None
+    
+    for line in response.content.split('\n'):
+        line = line.strip()
+        if line and not line.startswith('-'):
+            current_service = line.replace(':', '').strip()
+            services_and_params[current_service] = {}
+        elif line.startswith('-') and current_service:
+            param, values = line[1:].split(':', 1)
+            values = [v.strip() for v in values.strip()[1:-1].split(',')]
+            services_and_params[current_service][param.strip()] = values
+
+    return list(services_and_params.keys()), services_and_params
+
+def generate_summary(conversation: List[str], available_hours: int, llm: ChatOpenAI) -> str:
+    summary_prompt = f"""Summarize the tourist's focused plan based on this conversation:
+    {' '.join(conversation)}
+    
+    Include:
+    - Main activities they're interested in
+    - Their specific preferences and requirements
+    - Time allocation within their {available_hours} hour constraint
+    
+    Start with 'It looks like you're planning to...' and keep it concise and natural.
+    Focus on details that will help identify relevant services and parameters."""
+
+    response = llm([HumanMessage(content=summary_prompt)])
+    return response.content
+
+def initialize_conversation():
+    return {
+        "conversation_history": [],
+        "microservices": load_microservices(MICROSERVICES_FILE),
+        "system_summary": load_summary(SUMMARY_FILE),
+        "params_list": load_service_parameters(PARAMS_FILE),
+        "available_hours": 4,
+        "exchanges": 0,
+        "max_exchanges": 3,
+        "suggested_services": [],
+        "parameters": {}
+    }
+
+def chatbot_conversation(user_input: str, conversation_state: Dict) -> Tuple[str, Dict]:
+    if "system_context" not in conversation_state:
+        conversation_state["system_context"] = prepare_system_context(
+            conversation_state["microservices"],
+            conversation_state["system_summary"],
+            conversation_state["params_list"]
+        )
+        conversation_state["conversation_history"].append(SystemMessage(content=conversation_state["system_context"]))
+
+    # Add user input to conversation history
+    conversation_state["conversation_history"].append(HumanMessage(content=user_input))
+    conversation_state["exchanges"] += 1
+
+    # Generate assistant response
+    if conversation_state["exchanges"] == 1:
+        assistant_messages = conversation_state["conversation_history"] + [HumanMessage(content="""
+            Start with a warm greeting and introduce yourself as a Hyderabad guide.
+            Ask the visitor about their interests and how much time they have to explore.
+            Keep it natural and friendly.
+        """)]
+    else:
+        assistant_messages = conversation_state["conversation_history"] + [HumanMessage(content=f"""
+            As a Hyderabad City Guide, respond naturally to the tourist.
+            Build on the previous conversation.
+            Ask relevant follow-up questions based on their responses.
+            Suggest activities only if enough context is available.
+            Keep the conversation natural and informative.
+        """)]
+
+    assistant_response = llm(assistant_messages)
+    conversation_state["conversation_history"].append(assistant_response)
+
+    # After max exchanges or if enough information gathered
+    if conversation_state["exchanges"] >= conversation_state["max_exchanges"]:
+        # Identify services and parameters
+        services, params = identify_services_and_params(
+            [msg.content for msg in conversation_state["conversation_history"]],
+            conversation_state["microservices"],
+            conversation_state["params_list"],
+            llm
+        )
+        conversation_state["suggested_services"] = services
+        conversation_state["parameters"] = params
+
+        # Generate summary
+        summary = generate_summary(
+            [msg.content for msg in conversation_state["conversation_history"]],
+            conversation_state["available_hours"],
+            llm
+        )
+        
+        # Move to app creation phase
+        conversation_state["ready_for_app"] = True
+        return f"{summary}\nWould you like me to create your personalized IIIT Companion app with these services and parameters?", conversation_state
+
+    return assistant_response.content, conversation_state

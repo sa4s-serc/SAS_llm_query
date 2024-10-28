@@ -56,7 +56,8 @@ class BuilderApp:
                 st.write(response)
             st.session_state.conversation_history.append({"role": "assistant", "content": response})
 
-        if st.session_state.conversation_state["pass"] == 4:
+        # Check if ready to create app
+        if st.session_state.conversation_state.get("ready_for_app", False):
             if st.button("Create My IIIT Companion App"):
                 app_url = self.app_generator.generate_app(
                     st.session_state.conversation_state["suggested_services"],

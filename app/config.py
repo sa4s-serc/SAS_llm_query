@@ -1,7 +1,7 @@
 import os
 from typing import Optional
 
-APP_NAME: str = "IIIT Companion"
+APP_NAME: str = "City Companion"
 BUILDER_PORT: int = 8501
 MIN_PORT: int = 9000
 MAX_PORT: int = 9999
