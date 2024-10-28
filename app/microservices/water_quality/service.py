@@ -1,12 +1,12 @@
 import json
 from fastapi import HTTPException
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from app.microservices.base import MicroserviceBase
 from datetime import datetime
 
 class WaterQualityParams(BaseModel):
-    location: str
+    location: Optional[List[str]] = None
     timestamp: Optional[str] = None
 
 class WaterQualityService(MicroserviceBase):
@@ -19,33 +19,69 @@ class WaterQualityService(MicroserviceBase):
         self.water_quality_data = self.load_water_quality_data()
 
     def load_water_quality_data(self):
-        with open('data/water_quality_data.json', 'r') as f:
-            return json.load(f)
+        try:
+            with open('data/water_quality_data.json', 'r') as f:
+                return json.load(f)
+        except FileNotFoundError:
+            self.logger.error("water_quality_data.json not found")
+            return []
+        except json.JSONDecodeError:
+            self.logger.error("Error decoding water_quality_data.json")
+            return []
 
     def register_routes(self):
         @self.app.post("/water_quality")
         async def get_water_quality(params: WaterQualityParams):
-            return await self.process_request(params.dict())
+            self.logger.info(f"Received parameters: {params}")
+            return await self.process_request(params.dict(exclude_unset=True))
 
     async def process_request(self, params):
-        location = params['location']
+        self.logger.info(f"Processing request with params: {params}")
+        filtered_data = self.water_quality_data
+
+        if params.get('location'):
+            locations = params['location']
+            if isinstance(locations, str):
+                locations = [locations]
+            filtered_data = [d for d in filtered_data if d['location'] in locations]
+            self.logger.info(f"After location filter: {len(filtered_data)} measurements")
+
         timestamp = params.get('timestamp', datetime.now().isoformat())
+        
+        # Group data by location
+        location_data = {}
+        for data in filtered_data:
+            loc = data['location']
+            if loc not in location_data:
+                location_data[loc] = []
+            location_data[loc].append(data)
 
-        location_data = [data for data in self.water_quality_data if data['location'] == location]
-        if not location_data:
-            raise HTTPException(status_code=404, detail="Location not found")
+        # Get latest readings for each location
+        results = []
+        for loc, measurements in location_data.items():
+            closest_data = min(measurements, 
+                             key=lambda x: abs(datetime.fromisoformat(x['timestamp']) - datetime.fromisoformat(timestamp)))
+            results.append({
+                "location": loc,
+                "timestamp": closest_data['timestamp'],
+                "pH": closest_data['pH'],
+                "Dissolved_Oxygen": closest_data['Dissolved_Oxygen'],
+                "Conductivity": closest_data['Conductivity'],
+                "Turbidity": closest_data['Turbidity'],
+                "Temperature": closest_data['Temperature']
+            })
 
-        # Find the closest timestamp
-        closest_data = min(location_data, key=lambda x: abs(datetime.fromisoformat(x['timestamp']) - datetime.fromisoformat(timestamp)))
+        if not results:
+            self.logger.warning("No water quality data found matching the criteria")
+            return {
+                "measurements": [],
+                "message": "No water quality data found for the specified locations."
+            }
 
+        self.logger.info(f"Returning water quality data for {len(results)} locations")
         return {
-            "location": location,
-            "timestamp": closest_data['timestamp'],
-            "pH": closest_data['pH'],
-            "Dissolved_Oxygen": closest_data['Dissolved_Oxygen'],
-            "Conductivity": closest_data['Conductivity'],
-            "Turbidity": closest_data['Turbidity'],
-            "Temperature": closest_data['Temperature']
+            "measurements": results,
+            "message": f"Found water quality data for {len(results)} locations."
         }
 
 def start_water_quality_service():

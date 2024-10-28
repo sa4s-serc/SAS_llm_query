@@ -1,3 +1,4 @@
+# TODO: set up app name from config
 GENERATED_APP_TEMPLATE = """
 import os
 import sys
@@ -14,9 +15,9 @@ logger = logging.getLogger(__name__)
 # Set the working directory to the app directory
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-st.set_page_config(page_title="My IIIT Companion", page_icon="🏫", layout="wide")
+st.set_page_config(page_title="My Companion", page_icon="🏫", layout="wide")
 
-st.title("My IIIT Companion")
+st.title("My Companion")
 
 port_manager = get_port_manager()
 
