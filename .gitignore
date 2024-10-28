@@ -22,3 +22,4 @@ app/cupcarbon/results/*
 !app/cupcarbon/results/.gitkeep
 app/cupcarbon/logs/*
 rough/*
+langchain/*
