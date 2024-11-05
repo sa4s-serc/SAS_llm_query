@@ -107,7 +107,14 @@ st.sidebar.write(f"Files in current directory: {{files}}")
 logger.info(f"Files in current directory: {{files}}")
 """
 
-        return GENERATED_APP_TEMPLATE.format(services=service_content, debug_content=debug_content)
+        try:
+            return GENERATED_APP_TEMPLATE.format(
+                services=service_content,
+                debug_content=debug_content
+            )
+        except KeyError as e:
+            self.logger.error(f"Template formatting error: {str(e)}")
+            raise ValueError(f"Template formatting error: {str(e)}")
 
     def _generate_service_content(self, service, params):
         param_dict = json.dumps(params)
