@@ -7,7 +7,6 @@ from langchain_core.prompts import PromptTemplate
 from dotenv import load_dotenv
 import os
 import toml
-import json
 from typing import List, Dict, Tuple
 from langchain.schema import HumanMessage, SystemMessage
 from app.utils.llm_utils import load_microservices, load_summary, load_service_parameters
