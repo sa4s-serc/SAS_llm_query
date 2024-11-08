@@ -23,8 +23,9 @@ available_keywords = [
     if not service_name.startswith("sensor_")
 ]
 
-open_api_key = os.getenv("OPENAI_API_KEY")
-llm = ChatOpenAI(openai_api_key=open_api_key)
+open_ai_key = os.getenv("OPENAI_API_KEY")
+open_ai_model = os.getenv("OPEN_AI_MODEL")
+llm = ChatOpenAI(openai_api_key=open_ai_key, temperature=0.7, model=open_ai_model)
 
 SERVICE_CONTEXT = """
 Locations: Lumbini Park, Hussain Sagar Lake, KBR National Park, Durgam Cheruvu Lake, Ananthagiri Hills, Botanical Gardens, Charminar, Golconda Fort, Mecca Masjid, Chowmahalla Palace, Qutb Shahi Tombs, Salar Jung Museum, Laad Bazaar, HITEC City, GVK One Mall
@@ -58,59 +59,6 @@ def create_conversation_chain(template):
     memory = ConversationBufferMemory(input_key="input", memory_key="history")
     return LLMChain(llm=llm, prompt=prompt, memory=memory, verbose=True)
 
-def first_pass_conversation(query, user_context):
-    template = f"""You are an AI assistant for the IIIT Companion app. Your task is to gather information about the user's context and preferences.
-    Current user context: {{user_context}}
-    Current conversation:
-    {{history}}
-    Human: {{input}}
-    AI Assistant: Based on the user's input, update the user context. If you have enough information about the user's role, interests, and preferences, respond with "MOVE_TO_SECOND_PASS". Otherwise, ask a relevant question to gather more information.
-    
-    {SERVICE_CONTEXT}
-    """
-    
-    conversation = create_conversation_chain(template)
-    response = conversation.predict(input=query, user_context=user_context)
-    return response
-
-def second_pass_conversation(query, user_context):
-    template = f"""You are an AI assistant for the IIIT Companion app. Your task is to identify which services the user might need based on their context and input, and gather more information about their preferences and needs.
-    Available services: {', '.join(available_keywords)}
-    User context: {{user_context}}
-    Current conversation:
-    {{history}}
-    Human: {{input}}
-    AI Assistant: Based on the user's context and input, suggest relevant services and identify any parameters needed. Ask abstract, high-level questions to gather more information about the user's needs and preferences, without forcing them into specific services. Try to collect information that could be relevant to multiple services.
-
-    After processing the user's input, respond with a JSON object containing:
-    1. 'services' (list of suggested services)
-    2. 'parameters' (dict of service parameters, where each service has its own dict of parameters)
-    3. 'next_question' (a high-level, abstract question to gather more information)
-
-    Only include parameters that are explicitly mentioned or can be confidently inferred from the user's input.
-    
-    {SERVICE_CONTEXT}
-    
-    Make sure to use only the parameters and values specified in the context above. If a parameter is not mentioned or cannot be inferred, do not include it.
-    """
-    
-    conversation = create_conversation_chain(template)
-    response = conversation.predict(input=query, user_context=user_context)
-    try:
-        return json.loads(response)
-    except json.JSONDecodeError:
-        return {"services": [], "parameters": {}, "next_question": "Could you tell me more about what you're looking for in your visit?"}
-
-def third_pass_conversation(suggested_services, parameters):
-    summary = f"Based on our conversation, I suggest the following services:\n"
-    for service in suggested_services:
-        summary += f"- {service}\n"
-        if service in parameters and parameters[service]:
-            summary += "  With parameters:\n"
-            for param, value in parameters[service].items():
-                summary += f"    - {param}: {value}\n"
-    summary += "\nWould you like me to create your personalized IIIT Companion app with these services and parameters?"
-    return summary
 
 def chatbot_conversation(user_input: str, conversation_state: Dict) -> Tuple[str, Dict]:
     if "system_context" not in conversation_state:
