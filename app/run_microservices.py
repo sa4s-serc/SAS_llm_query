@@ -27,6 +27,8 @@ sys.path.insert(0, project_root)
 
 # Import the config module
 import app.config as config
+from app.microservices.chatbot_llm.service import start_chatbot_llm_service
+
 
 # Set up the configuration
 config.set_paths(os.path.dirname(current_file))
@@ -149,27 +151,28 @@ def run_all_microservices():
         thread.join()
 
 
-# def run_all_services():
-#     services = [
-#         start_travel_options_service,
-#         start_crowd_monitor_service,
-#         start_event_notifier_service,
-#         start_historical_info_service,
-#         start_air_quality_service,
-#         start_water_quality_service,
-#         start_restaurant_finder_service,
-#         start_ticket_purchase_service,
-#         start_exhibition_tracker_service
-#     ]
+def run_all_services():
+    services = [
+        start_travel_options_service,
+        start_crowd_monitor_service,
+        start_event_notifier_service,
+        start_historical_info_service,
+        start_air_quality_service,
+        start_water_quality_service,
+        start_restaurant_finder_service,
+        start_ticket_purchase_service,
+        start_exhibition_tracker_service,
+        start_chatbot_llm_service,
+    ]
 
-#     processes = []
-#     for service in services:
-#         p = multiprocessing.Process(target=service)
-#         p.start()
-#         processes.append(p)
+    processes = []
+    for service in services:
+        p = multiprocessing.Process(target=service)
+        p.start()
+        processes.append(p)
 
-#     for p in processes:
-#         p.join()
+    for p in processes:
+        p.join()
 
 
 if __name__ == "__main__":
