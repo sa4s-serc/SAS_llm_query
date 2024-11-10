@@ -4,7 +4,9 @@ from typing import List, Dict, Optional, Tuple
 from app.microservices.base import MicroserviceBase
 from app.utils.llm_utils import load_microservices, load_summary, load_service_parameters
 from langchain_openai import ChatOpenAI
+from langchain_community.llms import Ollama
 from langchain.schema import HumanMessage, SystemMessage, AIMessage
+from langchain.prompts import PromptTemplate
 import os
 from dotenv import load_dotenv
 
@@ -22,19 +24,37 @@ class ChatbotLLMService(MicroserviceBase):
             dependencies=[]
         )
         
-        # Initialize OpenAI configuration
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            self.logger.error("OpenAI API key not found in environment variables")
-            raise ValueError("OpenAI API key not found")
-        
-        # Use gpt-3.5-turbo as default model
-        self.llm = ChatOpenAI(
-            api_key=api_key,
-            model_name="gpt-4o-mini",  # Explicitly set to gpt-3.5-turbo
-            temperature=0.7
-        )
-        self.logger.info("Successfully initialized ChatOpenAI with gpt-3.5-turbo model")
+        # Get LLM configuration from environment
+        self.llm_provider = os.getenv("LLM_PROVIDER", "openai").lower()
+        self.logger.info(f"Using LLM provider: {self.llm_provider}")
+
+        # Initialize LLM based on provider
+        if self.llm_provider == "openai":
+            api_key = os.getenv("OPENAI_API_KEY")
+            if not api_key:
+                self.logger.error("OpenAI API key not found in environment variables")
+                raise ValueError("OpenAI API key not found")
+            
+            self.llm = ChatOpenAI(
+                api_key=api_key,
+                model_name="gpt-4o-mini",
+                temperature=0.7
+            )
+            self.is_chat_model = True
+            self.logger.info("Successfully initialized OpenAI ChatGPT")
+        else:
+            # Initialize Ollama
+            try:
+                self.llm = Ollama(
+                    model="llama3.2",
+                    base_url="http://localhost:11434",
+                    temperature=0.7
+                )
+                self.is_chat_model = False
+                self.logger.info("Successfully initialized Ollama LLM")
+            except Exception as e:
+                self.logger.error(f"Error initializing Ollama: {str(e)}")
+                raise
 
         # Load service data
         try:
@@ -44,6 +64,35 @@ class ChatbotLLMService(MicroserviceBase):
             self.logger.info("Successfully loaded service data")
         except Exception as e:
             self.logger.error(f"Error loading service data: {str(e)}")
+            raise
+
+    def get_llm_response(self, messages):
+        """Helper method to handle different LLM types"""
+        try:
+            if self.is_chat_model:
+                # For ChatOpenAI
+                response = self.llm.invoke(messages)
+                return response.content if hasattr(response, 'content') else str(response)
+            else:
+                # For Ollama
+                # Convert messages to a single prompt string
+                conversation = []
+                for msg in messages:
+                    if hasattr(msg, 'type'):
+                        if msg.type == 'system':
+                            conversation.append(f"System: {msg.content}")
+                        elif msg.type == 'human':
+                            conversation.append(f"Human: {msg.content}")
+                        elif msg.type == 'ai':
+                            conversation.append(f"Assistant: {msg.content}")
+                    else:
+                        conversation.append(str(msg))
+                
+                prompt = "\n".join(conversation)
+                return self.llm.invoke(prompt)
+
+        except Exception as e:
+            self.logger.error(f"Error getting LLM response: {str(e)}")
             raise
 
     def register_routes(self):
@@ -125,22 +174,30 @@ class ChatbotLLMService(MicroserviceBase):
 
         Return ONLY the structured list, no explanations."""
 
-        response = llm([HumanMessage(content=identification_prompt)])
-        
-        services_and_params = {}
-        current_service = None
-        
-        for line in response.content.split('\n'):
-            line = line.strip()
-            if line and not line.startswith('-'):
-                current_service = line.replace(':', '').strip()
-                services_and_params[current_service] = {}
-            elif line.startswith('-') and current_service:
-                param, values = line[1:].split(':', 1)
-                values = [v.strip() for v in values.strip()[1:-1].split(',')]
-                services_and_params[current_service][param.strip()] = values
+        try:
+            if self.is_chat_model:
+                response = self.llm.invoke([HumanMessage(content=identification_prompt)])
+                response_text = response.content
+            else:
+                response_text = self.llm.invoke(identification_prompt)
+            
+            services_and_params = {}
+            current_service = None
+            
+            for line in response_text.split('\n'):
+                line = line.strip()
+                if line and not line.startswith('-'):
+                    current_service = line.replace(':', '').strip()
+                    services_and_params[current_service] = {}
+                elif line.startswith('-') and current_service:
+                    param, values = line[1:].split(':', 1)
+                    values = [v.strip() for v in values.strip()[1:-1].split(',')]
+                    services_and_params[current_service][param.strip()] = values
 
-        return list(services_and_params.keys()), services_and_params
+            return list(services_and_params.keys()), services_and_params
+        except Exception as e:
+            self.logger.error(f"Error in identify_services_and_params: {str(e)}")
+            return [], {}
 
     def generate_summary(self, conversation: List[str], available_hours: int, llm: ChatOpenAI) -> str:
         summary_prompt = f"""Summarize the tourist's focused plan based on this conversation:
@@ -154,8 +211,15 @@ class ChatbotLLMService(MicroserviceBase):
         Start with 'It looks like you're planning to...' and keep it concise and natural.
         Focus on details that will help identify relevant services and parameters."""
 
-        response = llm([HumanMessage(content=summary_prompt)])
-        return response.content
+        try:
+            if self.is_chat_model:
+                response = self.llm.invoke([HumanMessage(content=summary_prompt)])
+                return response.content
+            else:
+                return self.llm.invoke(summary_prompt)
+        except Exception as e:
+            self.logger.error(f"Error generating summary: {str(e)}")
+            return "Unable to generate summary at this time."
 
     def chatbot_conversation(self, user_input: str, conversation_state: Dict) -> Tuple[str, Dict]:
         try:
@@ -186,12 +250,9 @@ class ChatbotLLMService(MicroserviceBase):
                             "parameters": conversation_state["parameters"]
                         })
                     
-                    # Reset exchanges but keep conversation history
                     conversation_state["exchanges"] = 0
                     conversation_state["awaiting_confirmation"] = False
                     conversation_state["attempt_count"] += 1
-                    
-                    # Clear current suggestions but keep history
                     conversation_state["suggested_services"] = []
                     conversation_state["parameters"] = {}
                     
@@ -213,21 +274,8 @@ class ChatbotLLMService(MicroserviceBase):
                     Keep the conversation natural and informative.
                 """
 
-            # Use invoke instead of direct call and handle the response properly
             messages = conversation_state["conversation_history"] + [HumanMessage(content=prompt)]
-            response = self.llm.invoke(messages)
-            
-            # Handle the response based on its type
-            if hasattr(response, 'content'):
-                assistant_response = response.content
-            elif isinstance(response, dict) and 'content' in response:
-                assistant_response = response['content']
-            elif isinstance(response, str):
-                assistant_response = response
-            else:
-                self.logger.warning(f"Unexpected response type: {type(response)}")
-                assistant_response = str(response)
-
+            assistant_response = self.get_llm_response(messages)
             conversation_state["conversation_history"].append(AIMessage(content=assistant_response))
 
             # Check if we have enough exchanges and try to identify services
