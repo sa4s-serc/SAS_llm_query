@@ -38,8 +38,18 @@ port = 9007
 description = "Sends notifications about upcoming events, shows, and festivals"
 dependencies = []
 
+[travel_options_service]
+port = 9017
+description = "Provides transportation options and routes to tourist destinations"
+dependencies = []
+
+[restaurant_finder]
+port = 9000
+description = "Recommends restaurants based on cuisine preferences and location"
+dependencies = []
+
 [travel_options]
-port = 9008
+port = 9001
 description = "Provides transportation options and routes to tourist destinations"
 dependencies = []
 
