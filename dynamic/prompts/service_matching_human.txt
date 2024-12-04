@@ -1,0 +1,10 @@
+Given the following user query and list of existing service descriptions,
+determine if any existing service can fulfill the query. If a match is found, return the index of the matching service (0-based).
+If no match is found, return -1.
+
+User query: {query}
+
+Existing service descriptions:
+{services}
+
+{format_instructions}
