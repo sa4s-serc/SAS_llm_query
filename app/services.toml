@@ -42,3 +42,13 @@ dependencies = []
 port = 9017
 description = "Provides transportation options and routes to tourist destinations"
 dependencies = []
+
+[air_quality_service]
+port = 9000
+description = "Provides real-time and historical air quality measurements."
+dependencies = []
+
+[restaurant_recommender]
+port = 9001
+description = "A service to recommend restaurants based on user preferences."
+dependencies = []

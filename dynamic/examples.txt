@@ -1,0 +1,62 @@
+Air quality
+
+curl -X POST http://localhost:5000/query \
+     -H "Content-Type: application/json" \
+     -d '{"query": "Create a service that provides real-time and historical air quality measurements including AQI, PM2.5, PM10, NO2, and O3 levels for different locations. It should accept location names and an optional timestamp to get the closest readings for those locations"}'
+
+==================================================================================================================================================================================================================================================================================================
+
+Restaurant Finder
+
+curl -X POST http://localhost:5000/query \
+     -H "Content-Type: application/json" \
+     -d '{"query": "Create a service that recommends restaurants based on user preferences including location, cuisine type, price range, dietary restrictions, and group size. The service should filter restaurants according to all these criteria and return matching options"}'
+
+==================================================================================================================================================================================================================================================================================================
+Historical info
+
+curl -X POST http://localhost:5000/query \
+     -H "Content-Type: application/json" \
+     -d '{"query": "Create a service that provides historical and cultural information about monuments and sites. The service should accept one or more site names and return comprehensive historical details including significance, year built, and cultural importance for each requested site"}'
+
+==================================================================================================================================================================================================================================================================================================
+Exhibition Tracker
+
+curl -X POST http://localhost:5000/query \
+     -H "Content-Type: application/json" \
+     -d '{"query": "Create a service that tracks and filters exhibitions based on interested audience, location, date range, and exhibition type. The service should handle multiple values for each filter criteria and return matching exhibitions with appropriate details"}'
+
+==================================================================================================================================================================================================================================================================================================
+Crowd Monitor
+
+curl -X POST http://localhost:5000/query \
+     -H "Content-Type: application/json" \
+     -d '{"query": "Create a service that monitors crowd density at different locations. It should accept a location and optional timestamp parameter, returning the crowd count for the closest matching timestamp"}'
+
+==================================================================================================================================================================================================================================================================================================
+Event Notifier
+
+curl -X POST http://localhost:5000/query \
+     -H "Content-Type: application/json" \
+     -d '{"query": "Create a service that provides information about events based on event type and duration filters. It should handle multiple event types and durations, providing matching events with their details"}'
+
+==================================================================================================================================================================================================================================================================================================
+Ticket Purchase
+
+curl -X POST http://localhost:5000/query \
+     -H "Content-Type: application/json" \
+     -d '{"query": "Create a service that helps users find available tickets based on event names and price ranges. It should handle multiple events and price ranges, returning ticket availability and pricing information"}'
+==================================================================================================================================================================================================================================================================================================
+
+Travel Options
+
+curl -X POST http://localhost:5000/query \
+     -H "Content-Type: application/json" \
+     -d '{"query": "Create a service that provides travel options based on destination, available time, and preferred mode of transport. It should filter options based on these criteria and return matching travel possibilities"}'
+
+==================================================================================================================================================================================================================================================================================================
+Water Quality
+
+curl -X POST http://localhost:5000/query \
+     -H "Content-Type: application/json" \
+     -d '{"query": "Create a service that monitors water quality metrics in different locations. It should accept location names and an optional timestamp, returning pH, Dissolved Oxygen, Conductivity, Turbidity, and Temperature measurements for the closest matching timestamp"}'
