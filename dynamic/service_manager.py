@@ -4,6 +4,45 @@ class ServiceManager:
         self.next_port = 5001
         self.json_data_sources = [
             {
+                "name": "historic_data",
+                "path": "data/historic_data.json",
+                "description": "Contains historical and cultural information about monuments and historical sites including significance, year built, and cultural importance.",
+                "schema": {
+                    "type": "object",
+                    "patternProperties": {
+                        ".*": {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"},
+                                "year_built": {"type": "string"},
+                                "significance": {"type": "string"},
+                                "cultural_importance": {"type": "string"},
+                                "location": {"type": "string"},
+                                "description": {"type": "string"}
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "name": "restaurant_data",
+                "path": "data/restaurant_data.json",
+                "description": "Contains restaurant information including location, cuisine type, price range, dietary restrictions, and group size capacity.",
+                "schema": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "location": {"type": "string"},
+                            "cuisine_type": {"type": "string"},
+                            "price_range": {"type": "string"},
+                            "dietary_restrictions": {"type": "array", "items": {"type": "string"}},
+                            "group_size": {"type": "integer"}
+                        }
+                    }
+                }
+            },
+            {
                 "name": "air_quality_data",
                 "path": "data/air_quality_data.json",
                 "description": "Contains air quality measurements including AQI, PM2.5, PM10, NO2, and O3 levels for different locations.",

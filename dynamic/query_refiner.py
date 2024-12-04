@@ -121,7 +121,7 @@ class QueryRefiner:
         return None
 
     def _refine_query(self, query: str):
-        system_template = system_template = """You are an AI assistant specializing in refining user queries into general requests for writing Python FastAPI services.
+        system_template = """You are an AI assistant specializing in refining user queries into general requests for writing Python FastAPI services.
         Your task is to analyze the user's query and formulate a clear, specific request for a FastAPI service that addresses the general case of the query.
 
         IMPORTANT: Carefully examine if the query needs specific data types from the available JSON data sources. For example:
@@ -138,21 +138,19 @@ class QueryRefiner:
 
         Determine if the query requires access to any JSON data sources. If it does, specify the exact data source name(s) needed from the list provided.
         Also, determine whether the query is more suitable for a GET or POST HTTP method.
+
+        The goal is to create a service that matches the requirements and uses the correct data source(s).
         """
 
         human_template = """
         Original query: {query}
 
         Instructions:
-        1. Analyze the query to understand the underlying task or problem.
-        2. Formulate a clear and specific request for writing a FastAPI service that addresses the general case of the query.
-        3. Start your refined query with "Create a FastAPI service to" followed by a concise description of the task.
-        4. If the query involves data from any of the available JSON data sources, make sure to mention the use of the appropriate source(s) by their exact names.
-        5. Focus on creating a reusable service that can handle various inputs, not just the specific example in the query.
-        6. If the original query is vague, make reasonable assumptions and state them.
-        7. Ensure the service is general enough to be used in various contexts.
-        8. Determine if the query requires JSON data source access and state it explicitly.
-        9. Decide whether the query is more suitable for a GET or POST HTTP method and state your choice.
+        1. Analyze the query to understand what data source(s) it needs
+        2. Formulate a clear and specific request for writing a FastAPI service
+        3. Start your refined query with "Create a FastAPI service to" 
+        4. Explicitly identify all required data sources from the provided list
+        5. Determine the appropriate HTTP method (GET/POST)
 
         Output your response in the following format:
         Refined query: "Create a FastAPI service to..."

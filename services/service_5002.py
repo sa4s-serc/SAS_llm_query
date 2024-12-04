@@ -1,61 +1,61 @@
 import json
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import List, Optional
-import logging
+from typing import Optional, List
+from app.microservices.base import MicroserviceBase
 
-# Base service class, assume MicroserviceBase is defined elsewhere
-class MicroserviceBase:
-    def __init__(self, service_name: str):
-        self.app = FastAPI()
-        self.logger = logging.getLogger(service_name)
+class HistoricSite(BaseModel):
+    name: Optional[str]
+    year_built: Optional[str]
+    significance: Optional[str]
+    cultural_importance: Optional[str]
+    location: Optional[str]
+    description: Optional[str]
 
-class MonumentInfoService(MicroserviceBase):
+class HistoricDataService(MicroserviceBase):
     def __init__(self):
-        super().__init__("monument_info_service")
+        super().__init__("historic_data_service")
         self.update_service_info(
-            description="Service to provide historical and cultural information about monuments and sites.",
+            description="Service to provide historical details of monuments and historical sites",
             dependencies=[]
         )
         self.data = self.load_data()
-        self.register_routes()
-
-    def update_service_info(self, description: str, dependencies: List[str]):
-        self.description = description
-        self.dependencies = dependencies
 
     def load_data(self):
         try:
-            with open('data/specific_data.json', 'r') as f:
+            with open('data/historic_data.json', 'r') as f:
                 return json.load(f)
         except FileNotFoundError:
-            self.logger.error("specific_data.json not found")
-            return []
+            self.logger.error("data/historic_data.json not found")
+            return {}
         except json.JSONDecodeError:
-            self.logger.error("Error decoding specific_data.json")
-            return []
+            self.logger.error("Error decoding data/historic_data.json")
+            return {}
 
-    def register_routes(self):
-        @self.app.get("/monuments")
-        async def get_monuments(site_names: Optional[List[str]] = None):
-            self.logger.info(f"Received parameters: {site_names}")
-            return await self.process_request(site_names)
+    def get_historic_sites(self, site_names: Optional[List[str]]):
+        if not site_names:
+            raise HTTPException(status_code=400, detail="No site names provided")
+        results = []
+        for name in site_names:
+            site_info = self.data.get(name)
+            if site_info:
+                results.append(HistoricSite(**site_info))
+            else:
+                raise HTTPException(status_code=404, detail=f"Site '{name}' not found")
+        return results
 
-    async def process_request(self, site_names):
-        self.logger.info(f"Processing request with params: {site_names}")
-        filtered_data = self.data
+app = FastAPI()
 
-        if site_names:
-            if isinstance(site_names, str):
-                site_names = [site_names]
-            filtered_data = [d for d in filtered_data if d['name'] in site_names]
-            self.logger.info(f"After filter: {len(filtered_data)} items")
+service = HistoricDataService()
 
-        if not filtered_data:
-            return {"items": [], "message": "No items found matching criteria"}
+@app.get("/historic_sites", response_model=List[HistoricSite])
+async def read_historic_sites(site_names: Optional[List[str]] = None):
+    return service.get_historic_sites(site_names)
 
-        return {"items": filtered_data, "message": f"Found {len(filtered_data)} matching items"}
 
-if __name__ == '__main__':
-    import uvicorn
-    uvicorn.run(MonumentInfoService().app, host='0.0.0.0', port=5002)
+def start_service_name():
+    service = HistoricDataService()
+    service.run()
+
+if __name__ == "__main__":
+    start_service_name()

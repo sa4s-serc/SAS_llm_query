@@ -73,43 +73,24 @@ class ServiceGenerator:
         format_instructions = output_parser.get_format_instructions()
 
         system_template = """You are an AI assistant specializing in creating FastAPI microservices following a specific pattern.
-        Your task is to generate a complete FastAPI service that follows these exact structural requirements:
+        Your task is to generate a complete FastAPI service that follows these exact requirements:
 
-        1. Class Structure:
-           - Main service class must inherit from MicroserviceBase
-           - Use descriptive service name in super().__init__("service_name")
-           - Must include update_service_info with clear description and empty dependencies list
-           - Must have proper data loading method with error handling
-           - Must follow the register_routes and process_request pattern
+        1. Must include these exact imports:
+        import json
+        from fastapi import HTTPException
+        from pydantic import BaseModel
+        from typing import Optional, List
+        from app.microservices.base import MicroserviceBase
 
-        2. Pydantic Models:
-           - Create Params model for request parameters (e.g., ExhibitionTrackerParams)
-           - Always use Optional[List[str]] for string parameters that can be multiple
-           - Always use Optional[str] for timestamp parameters
-           - Use Optional[List[int]] for numeric list parameters
-           - Include proper field descriptions and validations
+        2. Must use these exact patterns:
+        - Main service class inherits from MicroserviceBase
+        - Pydantic models use Optional[List[str]] for string lists
+        - Pydantic models use Optional[str] for single strings
+        - Pydantic models use Optional[List[int]] for integer lists
+        - Use exact data paths from json_data_info
+        - Must end with start_service function and main block
 
-        3. Data Processing:
-           - Convert single string inputs to lists when needed
-           - Include proper timestamp handling where required
-           - Group data by relevant fields when needed
-           - Apply filters in a consistent order
-           - Log the count of items after each filter
-
-        4. Response Format:
-           - For list responses: {{"items": [...], "message": "Found X items matching criteria"}}
-           - For single item responses: Return the item with relevant fields
-           - Empty results: {{"items": [], "message": "No items found matching criteria"}}
-           - Always include proper error messages
-
-        5. Error Handling and Logging:
-           - Log at start of request processing
-           - Log after each filter operation
-           - Log final result count
-           - Include try-except in data loading
-           - Handle all parameter type conversions safely
-
-        You must use the provided JSON data source information:
+        The data source information provided must be used exactly as specified:
         {json_data_info}
         """
 
@@ -119,87 +100,69 @@ class ServiceGenerator:
 
         The service should run on port {port} and use the {http_method} method.
 
-        Follow these exact implementation patterns:
+        Use this EXACT data path: {data_path}
+        
+        Follow this EXACT schema for the Pydantic model:
+        {schema}
+
+        Follow these exact patterns:
 
         1. Service Class Structure:
         ```python
-        class ServiceNameService(MicroserviceBase):
-            def __init__(self):
-                super().__init__("service_name")
-                self.update_service_info(
-                    description="Service specific description",
-                    dependencies=[]
-                )
-                self.data = self.load_data()
+        def __init__(self):
+            super().__init__("service_name")
+            self.update_service_info(
+                description="Service specific description",
+                dependencies=[]
+            )
+            self.data = self.load_data()
 
-            def load_data(self):
-                try:
-                    with open('{data_path}', 'r') as f:
-                        return json.load(f)
-                except FileNotFoundError:
-                    self.logger.error("{data_path} not found")
-                    return []
-                except json.JSONDecodeError:
-                    self.logger.error("Error decoding {data_path}")
-                    return []
+        def load_data(self):
+            try:
+                with open('{data_path}', 'r') as f:
+                    return json.load(f)
+            except FileNotFoundError:
+                self.logger.error("{data_path} not found")
+                return []
+            except json.JSONDecodeError:
+                self.logger.error("Error decoding {data_path}")
+                return []
         ```
 
-        2. Route Registration:
+        2. Must end with this exact pattern:
         ```python
-        def register_routes(self):
-            @self.app.post("/endpoint")
-            async def endpoint(params: ParamsModel):
-                self.logger.info("Processing request with params: " + str(params))
-                return await self.process_request(params.dict(exclude_unset=True))
-        ```
+        def start_service_name():
+            service = ServiceName()
+            service.run()
 
-        3. Request Processing:
-        ```python
-        async def process_request(self, params):
-            self.logger.info("Processing request with params: " + str(params))
-            filtered_data = self.data
-
-            # Handle list parameters
-            if params.get('list_param'):
-                values = params['list_param']
-                if isinstance(values, str):
-                    values = [values]
-                filtered_data = [d for d in filtered_data if d['field'] in values]
-                self.logger.info("After filter: " + str(len(filtered_data)) + " items")
-
-            if not filtered_data:
-                return {{"items": [], "message": "No items found matching criteria"}}
-            
-            return {{"items": filtered_data, "message": "Found " + str(len(filtered_data)) + " matching items"}}
+        if __name__ == "__main__":
+            start_service_name()
         ```
 
         {json_instructions}
 
         {format_instructions}
-        Make sure to include correct imports, proper data path usage, and the service running code.
         """
 
         if needs_json_data and json_data_info:
-            json_data_info_str = json.dumps(json_data_info, indent=2)
-            json_info = (
-                f"You have access to the following JSON data sources:\n{json_data_info_str}"
-            )
-            data_path = json_data_info[0]["path"] if json_data_info else "data/specific_data.json"
+            data_source = json_data_info[0]  # Use first data source
+            data_path = data_source["path"]
+            schema = json.dumps(data_source["schema"], indent=2)
             json_instructions = """The service must:
-            1. Use the exact JSON file path from the data source info
-            2. Follow the JSON schema for data processing
+            1. Use the exact JSON file path provided
+            2. Follow the JSON schema exactly
             3. Handle all fields defined in the schema
-            4. Include proper validation for all data fields
-            5. Handle data loading errors gracefully"""
+            4. Include proper validation
+            5. Handle data loading errors"""
         else:
-            print("Does not require json access ")
-            json_info = "This query does not require JSON data access."
-            json_instructions = ""
             data_path = "data/specific_data.json"
+            schema = "{}"
+            json_instructions = ""
 
         system_message_prompt = SystemMessagePromptTemplate.from_template(
             system_template
-        ).format(json_data_info=json_info)
+        ).format(json_data_info=json.dumps(json_data_info, indent=2) if json_data_info else "None")
+        
         human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
 
         chat_prompt = ChatPromptTemplate.from_messages(
@@ -213,7 +176,8 @@ class ServiceGenerator:
             http_method=http_method,
             json_instructions=json_instructions,
             format_instructions=format_instructions,
-            data_path=data_path
+            data_path=data_path,
+            schema=schema
         )
 
         try:
