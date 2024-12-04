@@ -10,7 +10,8 @@ from langchain.prompts import PromptTemplate
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+# Load environment variables from .env file
+load_dotenv(override=True)
 
 class ChatInput(BaseModel):
     user_input: str
@@ -26,7 +27,12 @@ class ChatbotLLMService(MicroserviceBase):
         
         # Get LLM configuration from environment
         self.llm_provider = os.getenv("LLM_PROVIDER", "openai").lower()
-        self.logger.info(f"Using LLM provider: {self.llm_provider}")
+        
+        # Debug logging for environment variables
+        self.logger.info(f"Environment Variables:")
+        self.logger.info(f"LLM_PROVIDER: {self.llm_provider}")
+        self.logger.info(f"OPENAI_API_KEY: {'Set' if os.getenv('OPENAI_API_KEY') else 'Not Set'}")
+        self.logger.info(f"OPENAI_MODEL: {os.getenv('OPENAI_MODEL')}")
 
         # Initialize LLM based on provider
         if self.llm_provider == "openai":
@@ -35,23 +41,29 @@ class ChatbotLLMService(MicroserviceBase):
                 self.logger.error("OpenAI API key not found in environment variables")
                 raise ValueError("OpenAI API key not found")
             
+            model_name = os.getenv("OPENAI_MODEL", "gpt-4")
+            temperature = float(os.getenv("OPENAI_TEMPERATURE", "0.7"))
+            
+            self.logger.info(f"Initializing OpenAI with model: {model_name}")
             self.llm = ChatOpenAI(
                 api_key=api_key,
-                model_name="gpt-4o-mini",
-                temperature=0.7
+                model_name=model_name,
+                temperature=temperature
             )
             self.is_chat_model = True
-            self.logger.info("Successfully initialized OpenAI ChatGPT")
+            self.logger.info(f"Successfully initialized OpenAI ChatGPT with model: {model_name}")
         else:
             # Initialize Ollama
             try:
+                base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+                model = os.getenv("OLLAMA_MODEL", "llama3.2")
                 self.llm = Ollama(
-                    model="llama3.2",
-                    base_url="http://localhost:11434",
+                    model=model,
+                    base_url=base_url,
                     temperature=0.7
                 )
                 self.is_chat_model = False
-                self.logger.info("Successfully initialized Ollama LLM")
+                self.logger.info(f"Successfully initialized Ollama LLM with model: {model}")
             except Exception as e:
                 self.logger.error(f"Error initializing Ollama: {str(e)}")
                 raise
