@@ -23,20 +23,20 @@ class ServiceGenerator:
     def generate(
         self,
         refined_query,
-        port,
         needs_json_data,
         json_data_info=None,
         http_method="POST",
     ):
         service_info = self._generate_service_info(
-            refined_query, port, needs_json_data, json_data_info, http_method
+            refined_query, needs_json_data, json_data_info, http_method
         )
 
         if service_info:
             code = service_info.pop("code", None)
             if code:
                 clean_code = self._clean_generated_code(code)
-                filename = f"services/service_{port}.py"
+                service_name = service_info["service_name"]
+                filename = f"services/{service_name}_service.py"
                 with open(filename, "w") as f:
                     f.write(clean_code)
                 subprocess.Popen(["python", filename])
@@ -48,7 +48,6 @@ class ServiceGenerator:
     def _generate_service_info(
         self,
         refined_query,
-        port,
         needs_json_data,
         json_data_info=None,
         http_method="POST",
@@ -67,6 +66,10 @@ class ServiceGenerator:
                     name="service_description",
                     description="A brief description of what the service does",
                 ),
+                ResponseSchema(
+                    name="service_name",
+                    description="The name of the service in snake_case format",
+                ),
             ]
         )
 
@@ -75,20 +78,27 @@ class ServiceGenerator:
         system_template = """You are an AI assistant specializing in creating FastAPI microservices following a specific pattern.
         Your task is to generate a complete FastAPI service that follows these exact requirements:
 
-        1. Must include these exact imports:
+        1. Must include these exact imports at the top:
         import json
         from fastapi import HTTPException
         from pydantic import BaseModel
         from typing import Optional, List
         from app.microservices.base import MicroserviceBase
 
-        2. Must use these exact patterns:
+        2. Must follow this exact class pattern:
         - Main service class inherits from MicroserviceBase
+        - Has __init__ that calls super().__init__("service_name") and updates service info
+        - Has load_data method that handles JSON loading with try/except
+        - Has register_routes method with POST endpoint
+        - Has process_request method for business logic
+        - Must end with start_service function and main block
+
+        3. Must use these exact patterns:
         - Pydantic models use Optional[List[str]] for string lists
         - Pydantic models use Optional[str] for single strings
-        - Pydantic models use Optional[List[int]] for integer lists
+        - Load data in __init__ and store as instance variable
+        - Include proper error handling and logging
         - Use exact data paths from json_data_info
-        - Must end with start_service function and main block
 
         The data source information provided must be used exactly as specified:
         {json_data_info}
@@ -97,8 +107,6 @@ class ServiceGenerator:
         human_template = """
         Create a FastAPI microservice based on the following refined query:
         {refined_query}
-
-        The service should run on port {port} and use the {http_method} method.
 
         Use this EXACT data path: {data_path}
         
@@ -123,10 +131,10 @@ class ServiceGenerator:
                     return json.load(f)
             except FileNotFoundError:
                 self.logger.error("{data_path} not found")
-                return []
+                return []  # or empty dict based on data structure
             except json.JSONDecodeError:
                 self.logger.error("Error decoding {data_path}")
-                return []
+                return []  # or empty dict based on data structure
         ```
 
         2. Must end with this exact pattern:
@@ -153,7 +161,7 @@ class ServiceGenerator:
             2. Follow the JSON schema exactly
             3. Handle all fields defined in the schema
             4. Include proper validation
-            5. Handle data loading errors"""
+            5. Handle data loading errors appropriately for the data structure"""
         else:
             data_path = "data/specific_data.json"
             schema = "{}"
@@ -170,10 +178,20 @@ class ServiceGenerator:
         )
 
         chain = LLMChain(llm=self.llm, prompt=chat_prompt)
+        # Check expected keys
+        print("Expected input keys:", chat_prompt.input_variables)
+
+        # Check provided inputs
+        print("Provided inputs:", {
+            "refined_query": refined_query,
+            "json_instructions": json_instructions,
+            "format_instructions": format_instructions,
+            "data_path": data_path,
+            "schema": schema
+        })
+
         result = chain.run(
             refined_query=refined_query,
-            port=port,
-            http_method=http_method,
             json_instructions=json_instructions,
             format_instructions=format_instructions,
             data_path=data_path,
@@ -183,8 +201,7 @@ class ServiceGenerator:
         try:
             parsed_output = output_parser.parse(result)
             service_info = {
-                "service_endpoint": f"http://localhost:{port}/",
-                "service_method": http_method,
+                "service_name": parsed_output["service_name"],
                 "request_body": parsed_output["request_body"],
                 "service_description": parsed_output["service_description"],
                 "code": parsed_output["code"],

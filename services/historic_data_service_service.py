@@ -4,19 +4,21 @@ from pydantic import BaseModel
 from typing import Optional, List
 from app.microservices.base import MicroserviceBase
 
+
 class HistoricSite(BaseModel):
-    name: Optional[str]
-    year_built: Optional[str]
-    significance: Optional[str]
-    cultural_importance: Optional[str]
-    location: Optional[str]
-    description: Optional[str]
+    name: str
+    year_built: str
+    significance: str
+    cultural_importance: str
+    location: str
+    description: str
+
 
 class HistoricDataService(MicroserviceBase):
     def __init__(self):
         super().__init__("historic_data_service")
         self.update_service_info(
-            description="Service to provide historical details of monuments and historical sites",
+            description="Service providing historical and cultural information about monuments and sites",
             dependencies=[]
         )
         self.data = self.load_data()
@@ -32,30 +34,29 @@ class HistoricDataService(MicroserviceBase):
             self.logger.error("Error decoding data/historic_data.json")
             return {}
 
-    def get_historic_sites(self, site_names: Optional[List[str]]):
+    def register_routes(self):
+        @self.app.post("/historic_sites")
+        async def get_historic_sites(site_names: Optional[List[str]]):
+            return self.process_request(site_names)
+
+    def process_request(self, site_names: Optional[List[str]]):
         if not site_names:
-            raise HTTPException(status_code=400, detail="No site names provided")
-        results = []
-        for name in site_names:
-            site_info = self.data.get(name)
+            raise HTTPException(status_code=400, detail="Please provide at least one site name.")
+
+        results = {}
+        for site_name in site_names:
+            site_info = self.data.get(site_name)
             if site_info:
-                results.append(HistoricSite(**site_info))
+                results[site_name] = site_info
             else:
-                raise HTTPException(status_code=404, detail=f"Site '{name}' not found")
+                results[site_name] = "Site not found."
         return results
 
-app = FastAPI()
 
-service = HistoricDataService()
-
-@app.get("/historic_sites", response_model=List[HistoricSite])
-async def read_historic_sites(site_names: Optional[List[str]] = None):
-    return service.get_historic_sites(site_names)
-
-
-def start_service_name():
+def start_historic_data_service():
     service = HistoricDataService()
+    service.register_routes()
     service.run()
 
 if __name__ == "__main__":
-    start_service_name()
+    start_historic_data_service()
