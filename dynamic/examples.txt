@@ -24,7 +24,7 @@ Exhibition Tracker
 
 curl -X POST http://localhost:5000/query \
      -H "Content-Type: application/json" \
-     -d '{"query": "Create a service that tracks and filters exhibitions based on interested audience, location, date range, and exhibition type. The service should handle multiple values for each filter criteria and return matching exhibitions with appropriate details"}'
+     -d '{"query": "Create a service that tracks museum and art exhibitions based on audience type (general, student, specialist), venue location, exhibition dates, and category (painting, sculpture, photography, etc). The service should handle multiple filter values and return matching exhibitions with details like venue, ticket prices, and featured artists"}'
 
 ==================================================================================================================================================================================================================================================================================================
 Crowd Monitor
@@ -38,7 +38,7 @@ Event Notifier
 
 curl -X POST http://localhost:5000/query \
      -H "Content-Type: application/json" \
-     -d '{"query": "Create a service that provides information about events based on event type and duration filters. It should handle multiple event types and durations, providing matching events with their details"}'
+     -d '{"query": "Create a service that provides information about city events, festivals, and shows based on category (music, theater, sports, etc) and time commitment (1-hour, half-day, full-day, multi-day). It should handle multiple filter options and return matching events with details like timing, location, and booking information"}'
 
 ==================================================================================================================================================================================================================================================================================================
 Ticket Purchase
