@@ -1,11 +1,11 @@
-[restaurant_finder]
+[air_quality]
 port = 9000
-description = "Recommends restaurants based on cuisine preferences and location"
+description = "Monitors and reports air quality levels in different areas"
 dependencies = []
 
-[water_quality]
+[chatbot_llm]
 port = 9001
-description = "Tracks water quality in lakes and other water bodies"
+description = "LLM-based chatbot service for IIIT Companion"
 dependencies = []
 
 [crowd_monitor]
@@ -13,32 +13,37 @@ port = 9002
 description = "Tracks and reports real-time crowd density at various locations"
 dependencies = []
 
-[ticket_purchase]
+[event_notifier]
 port = 9003
-description = "Enables online ticket purchases for attractions and events"
-dependencies = []
-
-[air_quality]
-port = 9004
-description = "Monitors and reports air quality levels in different areas"
+description = "Sends notifications about upcoming events, shows, and festivals"
 dependencies = []
 
 [exhibition_tracker]
-port = 9005
+port = 9004
 description = "Tracks and notifies users about ongoing and upcoming exhibitions"
 dependencies = []
 
 [historical_info]
-port = 9006
+port = 9005
 description = "Provides historical and cultural information about monuments and sites"
 dependencies = []
 
-[event_notifier]
+[restaurant_finder]
+port = 9006
+description = "Recommends restaurants based on cuisine preferences and location"
+dependencies = []
+
+[ticket_purchase]
 port = 9007
-description = "Sends notifications about upcoming events, shows, and festivals"
+description = "Enables online ticket purchases for attractions and events"
 dependencies = []
 
 [travel_options]
 port = 9008
-description = "Provides transportation options and routes to tourist destinations"
+description = "Provides intelligent transportation options and routes to tourist destinations with context-aware recommendations"
+dependencies = []
+
+[water_quality]
+port = 9009
+description = "Tracks water quality in lakes and other water bodies"
 dependencies = []
