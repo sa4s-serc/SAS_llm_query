@@ -1,5 +1,5 @@
 [restaurant_finder]
-port = 9009
+port = 9000
 description = "Recommends restaurants based on cuisine preferences and location"
 dependencies = []
 
@@ -38,22 +38,7 @@ port = 9007
 description = "Sends notifications about upcoming events, shows, and festivals"
 dependencies = []
 
-[travel_options_service]
-port = 9017
-description = "Provides transportation options and routes to tourist destinations"
-dependencies = []
-
-[restaurant_finder]
-port = 9000
-description = "Recommends restaurants based on cuisine preferences and location"
-dependencies = []
-
 [travel_options]
-port = 9001
+port = 9008
 description = "Provides transportation options and routes to tourist destinations"
-dependencies = []
-
-[chatbot_llm]
-port = 9010
-description = "LLM-based chatbot service for IIIT Companion"
 dependencies = []
