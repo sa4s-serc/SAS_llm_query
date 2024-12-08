@@ -23,3 +23,4 @@ app/cupcarbon/results/*
 app/cupcarbon/logs/*
 rough/*
 langchain/*
+app/services.toml

@@ -33,27 +33,11 @@ class ServiceManager:
                 pid=None,
                 enabled=False
             )
-            return {
-                "status": "stopped",
-                "enabled": False
-            }
 
-        if is_running:
-            return {
-                "status": "running",
-                "pid": pid,
-                "enabled": enabled
-            }
-        elif enabled:
-            return {
-                "status": "stopped",
-                "enabled": enabled
-            }
-        else:
-            return {
-                "status": "disabled",
-                "enabled": enabled
-            }
+        return {
+            "status": "running" if is_running else "stopped",
+            "enabled": is_running
+        }
 
     def get_all_services_status(self) -> Dict[str, Dict]:
         """Get status of all services"""
@@ -91,8 +75,7 @@ class ServiceManager:
 
             return {
                 "success": True,
-                "message": f"Started service {service_name}",
-                "pid": process.pid
+                "message": f"Started service {service_name}"
             }
 
         except Exception as e:
@@ -127,18 +110,6 @@ class ServiceManager:
         except Exception as e:
             self.logger.error(f"Error stopping service {service_name}: {str(e)}")
             return {"success": False, "message": str(e)}
-
-    def restart_service(self, service_name: str) -> Dict:
-        """Restart a specific service"""
-        stop_result = self.stop_service(service_name)
-        if not stop_result["success"]:
-            return stop_result
-        
-        # Small delay to ensure clean shutdown
-        import time
-        time.sleep(1)
-        
-        return self.start_service(service_name)
 
     def _is_process_running(self, pid: Optional[int]) -> bool:
         """Check if a process is running"""
@@ -179,28 +150,6 @@ class ServiceManager:
             
         except Exception as e:
             self.logger.warning(f"Error terminating process {pid}: {str(e)}")
-
-    def enable_auto_start(self, service_name: str) -> Dict:
-        """Enable auto-start for a service"""
-        try:
-            self.port_manager.update_service_info(
-                name=service_name,
-                auto_start=True
-            )
-            return {"success": True, "message": f"Enabled auto-start for {service_name}"}
-        except Exception as e:
-            return {"success": False, "message": str(e)}
-
-    def disable_auto_start(self, service_name: str) -> Dict:
-        """Disable auto-start for a service"""
-        try:
-            self.port_manager.update_service_info(
-                name=service_name,
-                auto_start=False
-            )
-            return {"success": True, "message": f"Disabled auto-start for {service_name}"}
-        except Exception as e:
-            return {"success": False, "message": str(e)}
 
     def get_service_logs(self, service_name: str, lines: int = 100) -> List[str]:
         """Get recent logs for a service"""

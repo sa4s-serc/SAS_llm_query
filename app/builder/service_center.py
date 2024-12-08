@@ -42,7 +42,7 @@ def render_service_manager():
                 st.rerun()
 
     st.markdown("---")
-    st.markdown("### Individual Service Controls")
+    st.markdown("### Services")
     
     # Create three columns for service groups
     cols = st.columns(3)
@@ -58,11 +58,9 @@ def render_service_manager():
                 
                 with status_col:
                     if status["status"] == "running":
-                        st.markdown(f"🟢 Running (PID: {status['pid']})")
-                    elif status["status"] == "stopped":
-                        st.markdown("🟡 Stopped")
+                        st.markdown("🟢 Running")
                     else:
-                        st.markdown("🔴 Disabled")
+                        st.markdown("🔴 Stopped")
                 
                 with control_col:
                     if status["status"] == "running":
@@ -85,19 +83,6 @@ def render_service_manager():
                                     st.error(result["message"])
                                 time.sleep(1)
                                 st.rerun()
-                
-                # Auto-start toggle
-                auto_start = st.checkbox(
-                    "Auto-start",
-                    value=status.get("auto_start", False),
-                    key=f"auto_{service_name}"
-                )
-                if auto_start != status.get("auto_start", False):
-                    if auto_start:
-                        manager.enable_auto_start(service_name)
-                    else:
-                        manager.disable_auto_start(service_name)
-                    st.rerun()
 
                 # Show recent logs if expanded
                 if st.checkbox("Show Logs", key=f"logs_{service_name}"):
