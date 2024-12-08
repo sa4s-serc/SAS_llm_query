@@ -12,8 +12,8 @@ import json
 # from codeqwen import CodeQwenLLM
 
 load_dotenv()
-API_KEY = os.getenv("OPEN_AI_API_KEY")
-MODEL = os.getenv("OPEN_AI_MODEL")
+API_KEY = os.getenv("OPENAI_API_KEY")
+MODEL = os.getenv("OPENAI_MODEL")
 
 class QueryRefiner:
     def __init__(self, service_manager):
