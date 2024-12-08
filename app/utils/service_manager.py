@@ -46,8 +46,8 @@ class ServiceManager:
             services_status[service_name] = self.get_service_status(service_name)
         return services_status
 
-    def start_service(self, service_name: str) -> Dict:
-        """Start a specific service"""
+    def start_service(self, service_name: str, version: str = "original") -> Dict:
+        """Start a specific service version"""
         try:
             service_info = self.port_manager.get_service_info(service_name)
             if not service_info:
@@ -62,8 +62,13 @@ class ServiceManager:
             if old_pid:
                 self._terminate_process_group(old_pid)
 
+            # Get service path based on version
+            service_path = self._get_service_path(service_name, version)
+            if not service_path:
+                return {"success": False, "message": f"{version} version of {service_name} not found"}
+
             # Start the service using Python
-            cmd = ["python", "-m", f"app.microservices.{service_name}.service"]
+            cmd = ["python", "-m", service_path]
             process = subprocess.Popen(cmd, start_new_session=True)
             
             # Update service state with new PID
@@ -75,7 +80,7 @@ class ServiceManager:
 
             return {
                 "success": True,
-                "message": f"Started service {service_name}"
+                "message": f"Started {version} version of {service_name}"
             }
 
         except Exception as e:
@@ -150,6 +155,16 @@ class ServiceManager:
             
         except Exception as e:
             self.logger.warning(f"Error terminating process {pid}: {str(e)}")
+
+    def _get_service_path(self, service_name: str, version: str = "original") -> Optional[str]:
+        """Get the correct import path for a service version"""
+        if version == "original":
+            if os.path.exists(f"app/microservices/{service_name}/service.py"):
+                return f"app.microservices.{service_name}.service"
+        elif version == "generated":
+            if os.path.exists(f"app/generated_services/{service_name}/service.py"):
+                return f"app.generated_services.{service_name}.service"
+        return None
 
     def get_service_logs(self, service_name: str, lines: int = 100) -> List[str]:
         """Get recent logs for a service"""
