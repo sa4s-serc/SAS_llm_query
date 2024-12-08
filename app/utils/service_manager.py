@@ -359,6 +359,20 @@ except Exception as e:
             logger.error(f"Error starting all services: {str(e)}")
             return False
 
+    def stop_all_services(self):
+        """Stop all running services"""
+        try:
+            services = self.get_available_services()
+            for service_name in services:
+                if self.check_service_status(service_name):
+                    logger.info(f"Stopping service: {service_name}")
+                    self._stop_service(service_name)
+                    time.sleep(1)  # Give each service time to stop
+            return True
+        except Exception as e:
+            logger.error(f"Error stopping all services: {str(e)}")
+            return False
+
 def render_service_manager():
     """Render the service manager interface"""
     st.title("Service Command Center")
@@ -371,23 +385,33 @@ def render_service_manager():
     services = manager.get_available_services()
     states = manager.get_service_states()
 
-    # Add Start All Services button at the top
-    if st.button("🚀 Start All Services", help="Start all services in the correct order"):
-        with st.spinner("Starting all services..."):
-            if manager.start_all_services():
-                st.success("All services started!")
-            else:
-                st.error("Error starting all services")
+    # Add Start/Stop All Services buttons at the top in a row
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("🚀 Start All Services", help="Start all services in the correct order", use_container_width=True):
+            with st.spinner("Starting all services..."):
+                if manager.start_all_services():
+                    st.success("All services started!")
+                else:
+                    st.error("Error starting all services")
+    
+    with col2:
+        if st.button("🛑 Stop All Services", help="Stop all running services", use_container_width=True):
+            with st.spinner("Stopping all services..."):
+                if manager.stop_all_services():
+                    st.success("All services stopped!")
+                else:
+                    st.error("Error stopping all services")
 
     st.markdown("---")
     st.markdown("### Individual Service Controls")
     
-    # Create three columns for service groups
-    cols = st.columns(3)
-    
     # Initialize toggle states in session state if they don't exist
     if 'toggle_states' not in st.session_state:
         st.session_state.toggle_states = {}
+    
+    # Create three columns for service groups
+    cols = st.columns(3)
     
     for idx, service in enumerate(services):
         with cols[idx % 3]:
@@ -417,7 +441,7 @@ def render_service_manager():
                             manager.toggle_service(service, not is_running)
                             st.session_state.toggle_states[service] = not is_running
                             time.sleep(1)  # Give the service time to start/stop
-                            st.rerun()  # Use st.rerun() instead of experimental_rerun()
+                            st.rerun()  # Rerun only after the action is complete
 
 if __name__ == "__main__":
     render_service_manager() 

@@ -1,42 +1,42 @@
 {
     "air_quality": {
         "enabled": true,
-        "pid": 136953
+        "pid": null
     },
     "crowd_monitor": {
-        "enabled": true,
-        "pid": 136985
+        "enabled": false,
+        "pid": null
     },
     "event_notifier": {
-        "enabled": true,
-        "pid": 137022
+        "enabled": false,
+        "pid": null
     },
     "exhibition_tracker": {
-        "enabled": true,
-        "pid": 137030
+        "enabled": false,
+        "pid": null
     },
     "historical_info": {
-        "enabled": true,
-        "pid": 137061
+        "enabled": false,
+        "pid": null
     },
     "restaurant_finder": {
-        "enabled": true,
-        "pid": 137082
+        "enabled": false,
+        "pid": null
     },
     "ticket_purchase": {
-        "enabled": true,
-        "pid": 137102
+        "enabled": false,
+        "pid": null
     },
     "travel_options": {
-        "enabled": true,
-        "pid": 137142
+        "enabled": false,
+        "pid": null
     },
     "water_quality": {
-        "enabled": true,
-        "pid": 137155
+        "enabled": false,
+        "pid": null
     },
     "chatbot_llm": {
         "enabled": false,
-        "pid": 136975
+        "pid": null
     }
 }
