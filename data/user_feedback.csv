@@ -1,1 +1,2 @@
 timestamp,user_query,selected_services,accuracy_rating,relevance_rating,missing_services,unnecessary_services,additional_comments,would_use_again
+2024-12-08T18:24:28.086211,No query provided,"travel_options, restaurant_finder, air_quality, exhibition_tracker, historical_info, ticket_purchase",3,3,,,,True

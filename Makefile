@@ -19,7 +19,7 @@ clean-apps:
 # Clean services configuration
 clean-services:
 	rm -f app/services.toml
-
+	rm -f data/services_state.json
 
 # Clean all temporary files
 clean: clean-pyc clean-apps clean-services
