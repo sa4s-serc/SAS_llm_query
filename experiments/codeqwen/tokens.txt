@@ -1,0 +1,20 @@
+Input tokens: 2160, Output tokens: 90, Total: 2250
+Input tokens: 1323, Output tokens: 650, Total: 1973
+Input tokens: 2146, Output tokens: 75, Total: 2221
+Input tokens: 1248, Output tokens: 650, Total: 1898
+Input tokens: 2148, Output tokens: 50, Total: 2198
+Input tokens: 1230, Output tokens: 435, Total: 1665
+Input tokens: 2167, Output tokens: 96, Total: 2263
+Input tokens: 1324, Output tokens: 726, Total: 2050
+Input tokens: 2136, Output tokens: 65, Total: 2201
+Input tokens: 266, Output tokens: 38, Total: 304
+You seem to be using the pipelines sequentially on GPU. In order to maximize efficiency please use a dataset
+Input tokens: 1131, Output tokens: 940, Total: 2071
+Input tokens: 2173, Output tokens: 96, Total: 2269
+Input tokens: 1125, Output tokens: 601, Total: 1726
+Input tokens: 2138, Output tokens: 51, Total: 2189
+Input tokens: 1052, Output tokens: 529, Total: 1581
+Input tokens: 2139, Output tokens: 65, Total: 2204
+Input tokens: 1091, Output tokens: 649, Total: 1740
+Input tokens: 2155, Output tokens: 82, Total: 2237
+Input tokens: 1306, Output tokens: 646, Total: 1952

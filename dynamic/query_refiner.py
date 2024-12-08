@@ -9,15 +9,17 @@ from langchain.prompts import (
 from langchain.chains import LLMChain
 from langchain.output_parsers import StructuredOutputParser, ResponseSchema
 import json
+# from codeqwen import CodeQwenLLM
 
 load_dotenv()
-API_KEY = os.getenv("OPEN_AI_API_KEY")
-MODEL = os.getenv("OPEN_AI_MODEL")
+API_KEY = os.getenv("OPENAI_API_KEY")
+MODEL = os.getenv("OPENAI_MODEL")
 
 class QueryRefiner:
     def __init__(self, service_manager):
         self.service_manager = service_manager
         self.llm = ChatOpenAI(model_name=MODEL, temperature=0.7)
+        # self.llm = CodeQwenLLM()
 
     def refine(self, query: str):
         (
@@ -32,18 +34,15 @@ class QueryRefiner:
             print("matched existing service")
             return {
                 "service_exists": True,
-                "service_endpoint": existing_service["service_endpoint"],
-                "service_method": existing_service["service_method"],
+                "service_name": existing_service["service_name"],
                 "request_body": existing_service["request_body"],
                 "service_description": existing_service["service_description"],
             }
         else:
             print(f"Refined query --> {refined_query}")
-            suggested_port = self.service_manager.get_next_available_port()
             result = {
                 "service_exists": False,
                 "refined_query": refined_query,
-                "suggested_port": suggested_port,
                 "service_description": f"A service that {refined_query.lower()}",
                 "needs_json_data": needs_json_data,
                 "data_sources_needed": data_sources_needed,
@@ -121,7 +120,7 @@ class QueryRefiner:
         return None
 
     def _refine_query(self, query: str):
-        system_template = """You are an AI assistant specializing in refining user queries into general requests for writing Python FastAPI services.
+        system_template = """You are an AI assistant specializing in refining user queries into clear requests for writing Python FastAPI services.
         Your task is to analyze the user's query and formulate a clear, specific request for a FastAPI service that addresses the general case of the query.
 
         IMPORTANT: Carefully examine if the query needs specific data types from the available JSON data sources. For example:
@@ -137,7 +136,7 @@ class QueryRefiner:
         {json_data_info}
 
         Determine if the query requires access to any JSON data sources. If it does, specify the exact data source name(s) needed from the list provided.
-        Also, determine whether the query is more suitable for a GET or POST HTTP method.
+        All services should use POST as the HTTP method to match the existing pattern.
 
         The goal is to create a service that matches the requirements and uses the correct data source(s).
         """
@@ -150,13 +149,13 @@ class QueryRefiner:
         2. Formulate a clear and specific request for writing a FastAPI service
         3. Start your refined query with "Create a FastAPI service to" 
         4. Explicitly identify all required data sources from the provided list
-        5. Determine the appropriate HTTP method (GET/POST)
+        5. HTTP method should always be POST to match existing services
 
         Output your response in the following format:
         Refined query: "Create a FastAPI service to..."
         Needs JSON data: [True/False]
         Data source(s) needed: [List of exact data source names, or "None" if no source is needed]
-        HTTP Method: [GET/POST]
+        HTTP Method: POST
         """
 
         json_data_info = self.service_manager.get_json_data_sources()
@@ -209,7 +208,7 @@ class QueryRefiner:
             for source in data_sources_needed
             if source.strip("'\"").lower() != "none"
         ]
-        http_method = result.split("HTTP Method:")[1].strip().upper()
+        http_method = "POST"  # Always POST to match existing services
 
         print("data sources needed--->", data_sources_needed)
         print("HTTP Method --->", http_method, "\n\n\n\n")

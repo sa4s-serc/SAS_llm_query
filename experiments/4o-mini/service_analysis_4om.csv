@@ -1,0 +1,101 @@
+conversation_id,original_query,expected_services,matched_count,total_expected,percentage,matched_services,unmatched_services
+1,I keep seeing these gorgeous lake photos on Instagram. Would love to spend an evening there and grab dinner nearby!,"water_quality, crowd_monitor, restaurant_finder",3,3,100.00%,"water_quality, crowd_monitor, restaurant_finder",
+2,History nerd but also a foodie. Want to explore places that tell a story while munching on local specialties!,"exhibition_tracker, historical_info, restaurant_finder",2,3,66.67%,"historical_info, restaurant_finder",exhibition_tracker
+3,I want to explore Laad Bazaar for traditional bangles. What's the best way to reach there?,"travel_options, crowd_monitor",2,2,100.00%,"travel_options, crowd_monitor",
+4,I'm thinking of spending some time near Hussain Sagar Lake. How clean is the water there?,"water_quality, air_quality",1,2,50.00%,water_quality,air_quality
+5,Would love to enjoy the sunset at Tank Bund. Is it usually very crowded in the evenings?,"water_quality, crowd_monitor",1,2,50.00%,crowd_monitor,water_quality
+6,Would love to see some local handicraft exhibitions. Anything interesting coming up?,"exhibition_tracker, ticket_purchase",1,2,50.00%,exhibition_tracker,ticket_purchase
+7,Would love to visit Durgam Cheruvu for a peaceful evening. Is the area nice for walking?,"water_quality, air_quality",0,2,0.00%,,"water_quality, air_quality"
+8,Would love to enjoy the sunset at Tank Bund. Is it usually very crowded in the evenings?,"water_quality, crowd_monitor",1,2,50.00%,crowd_monitor,water_quality
+9,I want to explore Laad Bazaar for traditional bangles. What's the best way to reach there?,"travel_options, crowd_monitor",2,2,100.00%,"travel_options, crowd_monitor",
+10,I keep seeing these gorgeous lake photos on Instagram. Would love to spend an evening there and grab dinner nearby!,"water_quality, crowd_monitor, restaurant_finder",2,3,66.67%,"crowd_monitor, restaurant_finder",water_quality
+11,Love anything artsy with a story behind it. Places where I can learn about local culture while enjoying the atmosphere.,"exhibition_tracker, historical_info, restaurant_finder",3,3,100.00%,"exhibition_tracker, historical_info, restaurant_finder",
+12,My grandparents always talk about Hyderabad's old charm. Want to experience that authentic vibe and maybe try some traditional snacks.,"crowd_monitor, historical_info, restaurant_finder",3,3,100.00%,"crowd_monitor, historical_info, restaurant_finder",
+13,Would love to try some street food. Any areas famous for chaat and local snacks?,"crowd_monitor, restaurant_finder",2,2,100.00%,"crowd_monitor, restaurant_finder",
+14,Would love to see some local handicraft exhibitions. Anything interesting coming up?,"exhibition_tracker, ticket_purchase",2,2,100.00%,"exhibition_tracker, ticket_purchase",
+15,I keep seeing these gorgeous lake photos on Instagram. Would love to spend an evening there and grab dinner nearby!,"water_quality, crowd_monitor, restaurant_finder",3,3,100.00%,"water_quality, crowd_monitor, restaurant_finder",
+16,I've heard Gandipet Lake is beautiful. How's the water quality there these days?,"water_quality, air_quality",1,2,50.00%,water_quality,air_quality
+17,Planning to visit Ramoji Film City. What's the best way to plan this trip?,"travel_options, ticket_purchase",2,2,100.00%,"travel_options, ticket_purchase",
+18,Looking for a good place serving traditional Irani chai and Osmania biscuits!,restaurant_finder,1,1,100.00%,restaurant_finder,
+19,I'd love to visit Charminar and understand its history. Wonder if it gets too crowded on weekends?,"crowd_monitor, historical_info",2,2,100.00%,"crowd_monitor, historical_info",
+20,Craving some authentic Hyderabadi biryani! Any vegetarian-friendly places you'd recommend?,restaurant_finder,1,1,100.00%,restaurant_finder,
+21,I've heard Gandipet Lake is beautiful. How's the water quality there these days?,"water_quality, air_quality",1,2,50.00%,water_quality,air_quality
+22,Looking for a good place serving traditional Irani chai and Osmania biscuits!,restaurant_finder,1,1,100.00%,restaurant_finder,
+23,The Qutub Shahi Tombs look beautiful in photos. How can I plan a visit there?,"crowd_monitor, historical_info",1,2,50.00%,historical_info,crowd_monitor
+24,I've heard Gandipet Lake is beautiful. How's the water quality there these days?,"water_quality, air_quality",1,2,50.00%,water_quality,air_quality
+25,Looking for a good place serving traditional Irani chai and Osmania biscuits!,restaurant_finder,1,1,100.00%,restaurant_finder,
+26,Been reading about Hyderabad's royal history. Would love to see some of that grandeur and taste what the Nizams enjoyed!,"crowd_monitor, historical_info, restaurant_finder",3,3,100.00%,"crowd_monitor, historical_info, restaurant_finder",
+27,Would love to try some street food. Any areas famous for chaat and local snacks?,"crowd_monitor, restaurant_finder",2,2,100.00%,"crowd_monitor, restaurant_finder",
+28,Would love to try some street food. Any areas famous for chaat and local snacks?,"crowd_monitor, restaurant_finder",2,2,100.00%,"crowd_monitor, restaurant_finder",
+29,I'm thinking of spending some time near Hussain Sagar Lake. How clean is the water there?,"water_quality, air_quality",1,2,50.00%,water_quality,air_quality
+30,History nerd but also a foodie. Want to explore places that tell a story while munching on local specialties!,"exhibition_tracker, historical_info, restaurant_finder",2,3,66.67%,"historical_info, restaurant_finder",exhibition_tracker
+31,The Golconda Fort sounds fascinating! I'd like to explore it thoroughly. What's the best way to get there?,"ticket_purchase, crowd_monitor, historical_info",2,3,66.67%,"crowd_monitor, historical_info",ticket_purchase
+32,The Qutub Shahi Tombs look beautiful in photos. How can I plan a visit there?,"crowd_monitor, historical_info",1,2,50.00%,historical_info,crowd_monitor
+33,Planning to visit Ramoji Film City. What's the best way to plan this trip?,"travel_options, ticket_purchase",2,2,100.00%,"travel_options, ticket_purchase",
+34,I've heard Gandipet Lake is beautiful. How's the water quality there these days?,"water_quality, air_quality",1,2,50.00%,water_quality,air_quality
+35,Any photography exhibitions or galleries worth visiting this week?,exhibition_tracker,1,1,100.00%,exhibition_tracker,
+36,Been reading about Hyderabad's royal history. Would love to see some of that grandeur and taste what the Nizams enjoyed!,"crowd_monitor, historical_info, restaurant_finder",3,3,100.00%,"crowd_monitor, historical_info, restaurant_finder",
+37,Would love to see some local handicraft exhibitions. Anything interesting coming up?,"exhibition_tracker, ticket_purchase",2,2,100.00%,"exhibition_tracker, ticket_purchase",
+38,The Golconda Fort sounds fascinating! I'd like to explore it thoroughly. What's the best way to get there?,"ticket_purchase, crowd_monitor, historical_info",2,3,66.67%,"crowd_monitor, historical_info",ticket_purchase
+39,Planning to visit GVK One for some shopping. Is it usually very crowded on weekdays?,"travel_options, crowd_monitor",1,2,50.00%,crowd_monitor,travel_options
+40,Would love to try some street food. Any areas famous for chaat and local snacks?,"crowd_monitor, restaurant_finder",2,2,100.00%,"crowd_monitor, restaurant_finder",
+41,I've heard Gandipet Lake is beautiful. How's the water quality there these days?,"water_quality, air_quality",1,2,50.00%,water_quality,air_quality
+42,Thinking of visiting Snow World. Is it usually very crowded?,"ticket_purchase, crowd_monitor",2,2,100.00%,"ticket_purchase, crowd_monitor",
+43,Looking for a good place serving traditional Irani chai and Osmania biscuits!,restaurant_finder,1,1,100.00%,restaurant_finder,
+44,Are there any cultural exhibitions happening in the city? Particularly interested in traditional art.,"exhibition_tracker, ticket_purchase",1,2,50.00%,exhibition_tracker,ticket_purchase
+45,Any photography exhibitions or galleries worth visiting this week?,exhibition_tracker,1,1,100.00%,exhibition_tracker,
+46,Looking for a good place serving traditional Irani chai and Osmania biscuits!,restaurant_finder,1,1,100.00%,restaurant_finder,
+47,Would love to enjoy the sunset at Tank Bund. Is it usually very crowded in the evenings?,"water_quality, crowd_monitor",1,2,50.00%,crowd_monitor,water_quality
+48,Would love to enjoy the sunset at Tank Bund. Is it usually very crowded in the evenings?,"water_quality, crowd_monitor",1,2,50.00%,crowd_monitor,water_quality
+49,"Love those bustling market vibes, you know? Where locals shop and grab quick bites. That's my scene!","travel_options, crowd_monitor, restaurant_finder",2,3,66.67%,"crowd_monitor, restaurant_finder",travel_options
+50,The Golconda Fort sounds fascinating! I'd like to explore it thoroughly. What's the best way to get there?,"ticket_purchase, crowd_monitor, historical_info",2,3,66.67%,"ticket_purchase, historical_info",crowd_monitor
+51,"Love those bustling market vibes, you know? Where locals shop and grab quick bites. That's my scene!","travel_options, crowd_monitor, restaurant_finder",2,3,66.67%,"crowd_monitor, restaurant_finder",travel_options
+52,The Golconda Fort sounds fascinating! I'd like to explore it thoroughly. What's the best way to get there?,"ticket_purchase, crowd_monitor, historical_info",2,3,66.67%,"crowd_monitor, historical_info",ticket_purchase
+53,Thinking of visiting Snow World. Is it usually very crowded?,"ticket_purchase, crowd_monitor",2,2,100.00%,"ticket_purchase, crowd_monitor",
+54,I'm thinking of spending some time near Hussain Sagar Lake. How clean is the water there?,"water_quality, air_quality",1,2,50.00%,water_quality,air_quality
+55,Planning to visit GVK One for some shopping. Is it usually very crowded on weekdays?,"travel_options, crowd_monitor",1,2,50.00%,crowd_monitor,travel_options
+56,Any photography exhibitions or galleries worth visiting this week?,exhibition_tracker,1,1,100.00%,exhibition_tracker,
+57,I'd love to visit Charminar and understand its history. Wonder if it gets too crowded on weekends?,"crowd_monitor, historical_info",2,2,100.00%,"crowd_monitor, historical_info",
+58,The Qutub Shahi Tombs look beautiful in photos. How can I plan a visit there?,"crowd_monitor, historical_info",2,2,100.00%,"crowd_monitor, historical_info",
+59,History nerd but also a foodie. Want to explore places that tell a story while munching on local specialties!,"exhibition_tracker, historical_info, restaurant_finder",2,3,66.67%,"historical_info, restaurant_finder",exhibition_tracker
+60,I'm thinking of spending some time near Hussain Sagar Lake. How clean is the water there?,"water_quality, air_quality",1,2,50.00%,water_quality,air_quality
+61,Planning to visit GVK One for some shopping. Is it usually very crowded on weekdays?,"travel_options, crowd_monitor",1,2,50.00%,crowd_monitor,travel_options
+62,History nerd but also a foodie. Want to explore places that tell a story while munching on local specialties!,"exhibition_tracker, historical_info, restaurant_finder",2,3,66.67%,"historical_info, restaurant_finder",exhibition_tracker
+63,I'd love to visit Charminar and understand its history. Wonder if it gets too crowded on weekends?,"crowd_monitor, historical_info",2,2,100.00%,"crowd_monitor, historical_info",
+64,I'm really interested in visiting Salar Jung Museum. Do they have any special exhibitions going on?,"exhibition_tracker, historical_info",1,2,50.00%,exhibition_tracker,historical_info
+65,"First time in Hyderabad! Want to start with the locals' favorites, not the tourist checklist.","travel_options, crowd_monitor, restaurant_finder",2,3,66.67%,"crowd_monitor, restaurant_finder",travel_options
+66,"Love those bustling market vibes, you know? Where locals shop and grab quick bites. That's my scene!","travel_options, crowd_monitor, restaurant_finder",2,3,66.67%,"crowd_monitor, restaurant_finder",travel_options
+67,Looking for a good place serving traditional Irani chai and Osmania biscuits!,restaurant_finder,1,1,100.00%,restaurant_finder,
+68,"First time in Hyderabad! Want to start with the locals' favorites, not the tourist checklist.","travel_options, crowd_monitor, restaurant_finder",3,3,100.00%,"travel_options, crowd_monitor, restaurant_finder",
+69,History nerd but also a foodie. Want to explore places that tell a story while munching on local specialties!,"exhibition_tracker, historical_info, restaurant_finder",2,3,66.67%,"historical_info, restaurant_finder",exhibition_tracker
+70,I'm thinking of spending some time near Hussain Sagar Lake. How clean is the water there?,"water_quality, air_quality",1,2,50.00%,water_quality,air_quality
+71,Would love to visit Durgam Cheruvu for a peaceful evening. Is the area nice for walking?,"water_quality, air_quality",1,2,50.00%,water_quality,air_quality
+72,"First time in Hyderabad! Want to start with the locals' favorites, not the tourist checklist.","travel_options, crowd_monitor, restaurant_finder",2,3,66.67%,"crowd_monitor, restaurant_finder",travel_options
+73,Would love to enjoy the sunset at Tank Bund. Is it usually very crowded in the evenings?,"water_quality, crowd_monitor",1,2,50.00%,crowd_monitor,water_quality
+74,I'm really interested in visiting Salar Jung Museum. Do they have any special exhibitions going on?,"exhibition_tracker, historical_info",2,2,100.00%,"exhibition_tracker, historical_info",
+75,"First time in Hyderabad! Want to start with the locals' favorites, not the tourist checklist.","travel_options, crowd_monitor, restaurant_finder",2,3,66.67%,"crowd_monitor, restaurant_finder",travel_options
+76,I'd love to visit Charminar and understand its history. Wonder if it gets too crowded on weekends?,"crowd_monitor, historical_info",2,2,100.00%,"crowd_monitor, historical_info",
+77,The Qutub Shahi Tombs look beautiful in photos. How can I plan a visit there?,"crowd_monitor, historical_info",1,2,50.00%,historical_info,crowd_monitor
+78,Are there any cultural exhibitions happening in the city? Particularly interested in traditional art.,"exhibition_tracker, ticket_purchase",1,2,50.00%,exhibition_tracker,ticket_purchase
+79,Been reading about Hyderabad's royal history. Would love to see some of that grandeur and taste what the Nizams enjoyed!,"crowd_monitor, historical_info, restaurant_finder",3,3,100.00%,"crowd_monitor, historical_info, restaurant_finder",
+80,Thinking of visiting Snow World. Is it usually very crowded?,"ticket_purchase, crowd_monitor",2,2,100.00%,"ticket_purchase, crowd_monitor",
+81,My grandparents always talk about Hyderabad's old charm. Want to experience that authentic vibe and maybe try some traditional snacks.,"crowd_monitor, historical_info, restaurant_finder",3,3,100.00%,"crowd_monitor, historical_info, restaurant_finder",
+82,Looking for a good place serving traditional Irani chai and Osmania biscuits!,restaurant_finder,1,1,100.00%,restaurant_finder,
+83,I'm thinking of spending some time near Hussain Sagar Lake. How clean is the water there?,"water_quality, air_quality",1,2,50.00%,water_quality,air_quality
+84,"First time in Hyderabad! Want to start with the locals' favorites, not the tourist checklist.","travel_options, crowd_monitor, restaurant_finder",2,3,66.67%,"crowd_monitor, restaurant_finder",travel_options
+85,Planning to visit GVK One for some shopping. Is it usually very crowded on weekdays?,"travel_options, crowd_monitor",1,2,50.00%,crowd_monitor,travel_options
+86,The Golconda Fort sounds fascinating! I'd like to explore it thoroughly. What's the best way to get there?,"ticket_purchase, crowd_monitor, historical_info",2,3,66.67%,"crowd_monitor, historical_info",ticket_purchase
+87,Are there any cultural exhibitions happening in the city? Particularly interested in traditional art.,"exhibition_tracker, ticket_purchase",1,2,50.00%,exhibition_tracker,ticket_purchase
+88,Craving some authentic Hyderabadi biryani! Any vegetarian-friendly places you'd recommend?,restaurant_finder,1,1,100.00%,restaurant_finder,
+89,"First time in Hyderabad! Want to start with the locals' favorites, not the tourist checklist.","travel_options, crowd_monitor, restaurant_finder",3,3,100.00%,"travel_options, crowd_monitor, restaurant_finder",
+90,I keep seeing these gorgeous lake photos on Instagram. Would love to spend an evening there and grab dinner nearby!,"water_quality, crowd_monitor, restaurant_finder",2,3,66.67%,"crowd_monitor, restaurant_finder",water_quality
+91,Thinking of visiting Snow World. Is it usually very crowded?,"ticket_purchase, crowd_monitor",2,2,100.00%,"ticket_purchase, crowd_monitor",
+92,I want to explore Laad Bazaar for traditional bangles. What's the best way to reach there?,"travel_options, crowd_monitor",2,2,100.00%,"travel_options, crowd_monitor",
+93,I keep seeing these gorgeous lake photos on Instagram. Would love to spend an evening there and grab dinner nearby!,"water_quality, crowd_monitor, restaurant_finder",3,3,100.00%,"water_quality, crowd_monitor, restaurant_finder",
+94,Would love to see some local handicraft exhibitions. Anything interesting coming up?,"exhibition_tracker, ticket_purchase",1,2,50.00%,exhibition_tracker,ticket_purchase
+95,Thinking of visiting Snow World. Is it usually very crowded?,"ticket_purchase, crowd_monitor",2,2,100.00%,"ticket_purchase, crowd_monitor",
+96,Would love to try some street food. Any areas famous for chaat and local snacks?,"crowd_monitor, restaurant_finder",2,2,100.00%,"crowd_monitor, restaurant_finder",
+97,I'd love to visit Charminar and understand its history. Wonder if it gets too crowded on weekends?,"crowd_monitor, historical_info",2,2,100.00%,"crowd_monitor, historical_info",
+98,Would love to try some street food. Any areas famous for chaat and local snacks?,"crowd_monitor, restaurant_finder",2,2,100.00%,"crowd_monitor, restaurant_finder",
+99,I'm thinking of spending some time near Hussain Sagar Lake. How clean is the water there?,"water_quality, air_quality",1,2,50.00%,water_quality,air_quality
+100,I keep seeing these gorgeous lake photos on Instagram. Would love to spend an evening there and grab dinner nearby!,"water_quality, crowd_monitor, restaurant_finder",3,3,100.00%,"water_quality, crowd_monitor, restaurant_finder",
