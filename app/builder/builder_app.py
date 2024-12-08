@@ -36,16 +36,7 @@ class BuilderApp:
     def show_feedback_form(self, user_query: str, selected_services: list):
         """Display feedback form and collect user responses"""
         st.markdown("### Help Us Improve! 📝")
-        
-        # Skip feedback option
-        col1, col2 = st.columns([3, 1])
-        with col2:
-            if st.button("Skip Feedback ⏭️", help="Skip feedback form (Development Mode)"):
-                st.session_state.feedback_submitted = True
-                return True
-        
-        with col1:
-            st.write("Please provide feedback about the selected services:")
+        st.write("Please provide feedback about the selected services:")
 
         # Accuracy rating
         accuracy = st.slider(
@@ -113,12 +104,8 @@ class BuilderApp:
     def run(self):
         st.title(f"{config.APP_NAME} Builder")
 
-        # Development mode toggle in sidebar
-        with st.sidebar:
-            st.markdown("### Developer Options")
-            dev_mode = st.toggle("Development Mode", help="Enable to skip feedback collection")
-            if dev_mode:
-                st.info("Development mode enabled. Feedback collection can be skipped.")
+        # Check if we're in admin mode (controlled by environment variable)
+        dev_mode = os.getenv("ENABLE_DEBUG", "false").lower() == "true"
 
         if "conversation_state" not in st.session_state:
             st.session_state.conversation_state = initialize_conversation()

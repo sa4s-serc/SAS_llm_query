@@ -21,7 +21,7 @@ class TravelOptionsService(MicroserviceBase):
         super().__init__("travel_options")
         self.update_service_info(
             description="Provides intelligent transportation options and routes to tourist destinations with context-aware recommendations",
-            dependencies=["weather_service", "traffic_service"]
+            dependencies=[]
         )
         self.travel_options = self.load_travel_options()
         self.popular_times = self.load_popular_times()

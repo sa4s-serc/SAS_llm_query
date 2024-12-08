@@ -9,8 +9,6 @@ from langchain.prompts import (
 from langchain.chains import LLMChain
 from langchain.output_parsers import StructuredOutputParser, ResponseSchema
 import json
-import subprocess
-# from codeqwen import CodeQwenLLM
 
 load_dotenv()
 API_KEY = os.getenv("OPENAI_API_KEY")
@@ -20,7 +18,11 @@ class ServiceGenerator:
     def __init__(self, service_manager):
         self.service_manager = service_manager
         self.llm = ChatOpenAI(model_name=MODEL, temperature=0.7)
-        # self.llm = CodeQwenLLM()
+        self.output_dir = "app/generated_services"
+        
+        # Ensure output directory exists
+        if not os.path.exists(self.output_dir):
+            os.makedirs(self.output_dir)
         
     def generate(
         self,
@@ -38,10 +40,22 @@ class ServiceGenerator:
             if code:
                 clean_code = self._clean_generated_code(code)
                 service_name = service_info["service_name"]
-                filename = f"services/{service_name}_service.py"
-                with open(filename, "w") as f:
+                
+                # Create service directory if it doesn't exist
+                service_dir = os.path.join(self.output_dir, service_name)
+                if not os.path.exists(service_dir):
+                    os.makedirs(service_dir)
+                
+                # Save service file
+                service_file = os.path.join(service_dir, "service.py")
+                with open(service_file, "w") as f:
                     f.write(clean_code)
-                subprocess.Popen(["python", filename])
+                
+                # Create __init__.py
+                init_file = os.path.join(service_dir, "__init__.py")
+                if not os.path.exists(init_file):
+                    with open(init_file, "w") as f:
+                        f.write("")
 
             self.service_manager.add_service(service_info)
 
@@ -70,7 +84,7 @@ class ServiceGenerator:
                 ),
                 ResponseSchema(
                     name="service_name",
-                    description="The name of the service in snake_case format",
+                    description="The name of the service in snake_case format without _service suffix",
                 ),
             ]
         )
@@ -101,6 +115,7 @@ class ServiceGenerator:
         - Load data in __init__ and store as instance variable
         - Include proper error handling and logging
         - Use exact data paths from json_data_info
+        - Service name should be in snake_case without _service suffix
 
         The data source information provided must be used exactly as specified:
         {json_data_info}
@@ -120,7 +135,7 @@ class ServiceGenerator:
         1. Service Class Structure:
         ```python
         def __init__(self):
-            super().__init__("service_name")
+            super().__init__("service_name")  # service_name without _service suffix
             self.update_service_info(
                 description="Service specific description",
                 dependencies=[]
@@ -139,7 +154,7 @@ class ServiceGenerator:
                 return []  # or empty dict based on data structure
         ```
 
-        2. Must end with this exact pattern:
+        2. Must end with this exact pattern (note: no _service suffix in names):
         ```python
         def start_service_name():
             service = ServiceName()
@@ -202,8 +217,9 @@ class ServiceGenerator:
 
         try:
             parsed_output = output_parser.parse(result)
+            service_name = parsed_output["service_name"].replace("_service", "")  # Remove _service suffix if present
             service_info = {
-                "service_name": parsed_output["service_name"],
+                "service_name": service_name,
                 "request_body": parsed_output["request_body"],
                 "service_description": parsed_output["service_description"],
                 "code": parsed_output["code"],

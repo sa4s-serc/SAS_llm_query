@@ -68,11 +68,18 @@ class ChatbotLLMService(MicroserviceBase):
                 self.logger.error(f"Error initializing Ollama: {str(e)}")
                 raise
 
-        # Load service data
+        # Get the project root directory
+        self.project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
+        
+        # Load service data with proper paths
         try:
-            self.microservices = load_microservices("langchain/services.txt")
-            self.system_summary = load_summary("langchain/summary.txt")
-            self.params_list = load_service_parameters("langchain/service_params.txt")
+            services_path = os.path.join(self.project_root, "app", "langchain", "services.txt")
+            summary_path = os.path.join(self.project_root, "app", "langchain", "summary.txt")
+            params_path = os.path.join(self.project_root, "app", "langchain", "service_params.txt")
+            
+            self.microservices = load_microservices(services_path)
+            self.system_summary = load_summary(summary_path)
+            self.params_list = load_service_parameters(params_path)
             self.logger.info("Successfully loaded service data")
         except Exception as e:
             self.logger.error(f"Error loading service data: {str(e)}")

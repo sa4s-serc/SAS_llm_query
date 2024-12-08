@@ -15,14 +15,9 @@ clean-pyc:
 # Clean generated apps
 clean-apps:
 	rm -rf app/generated_apps/*
-
-# Clean services configuration
-clean-services:
-	rm -f app/services.toml
-
-
+	
 # Clean all temporary files
-clean: clean-pyc clean-apps clean-services
+clean: clean-pyc clean-apps
 	find . -type f -name ".DS_Store" -delete
 	find . -type f -name "*.log" -delete
 	find . -type d -name ".ipynb_checkpoints" -exec rm -rf {} + 
