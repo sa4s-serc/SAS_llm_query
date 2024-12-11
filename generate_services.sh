@@ -4,43 +4,116 @@
 make_request() {
     local query="$1"
     local description="$2"
+    local service_name="$3"
     
-    echo "Making request for: $description"
+    echo "Generating service: $service_name"
     echo "----------------------------------------"
     
     curl -X POST http://localhost:5000/query \
          -H "Content-Type: application/json" \
-         -d "{\"query\": \"$query\"}"
+         -d "{\"query\": \"$query\", \"service_name\": \"$service_name\"}"
     
-    echo -e "\n\nWaiting 20 seconds before next request...\n"
-    sleep 20
+    echo -e "\n\nWaiting 10 seconds before next request...\n"
+    sleep 10
 }
 
-# Air Quality
-make_request "Create a service that provides real-time and historical air quality measurements including AQI, PM2.5, PM10, NO2, and O3 levels for different locations. It should accept location names and an optional timestamp to get the closest readings for those locations" "Air Quality Service"
+# Air Quality Service
+make_request \
+"Create a service that provides real-time and historical air quality measurements including AQI, PM2.5, PM10, NO2, and O3 levels for different locations. The service must:
+- Use POST endpoint /air_quality
+- Accept location (List[str]) and timestamp (Optional[str]) parameters
+- Return measurements with AQI, PM2.5, PM10, NO2, O3 values
+- Load data from data/air_quality_data.json
+- Match the exact structure of the original air_quality service" \
+"Air Quality Service" \
+"air_quality"
 
-# Restaurant Finder
-make_request "Create a service that recommends restaurants based on user preferences including location, cuisine type, price range, dietary restrictions, and group size. The service should filter restaurants according to all these criteria and return matching options" "Restaurant Finder Service"
+# Restaurant Finder Service
+make_request \
+"Create a service that recommends restaurants based on user preferences. The service must:
+- Use POST endpoint /restaurant_finder
+- Accept cuisine_type (List[str]), price_range (List[int]), dietary_restrictions (List[str]), group_size (int) parameters
+- Return filtered restaurant recommendations
+- Load data from data/restaurant_data.json
+- Match the exact structure of the original restaurant_finder service" \
+"Restaurant Finder Service" \
+"restaurant_finder"
 
-# Historical Info
-make_request "Create a service that provides historical and cultural information about monuments and sites. The service should accept one or more site names and return comprehensive historical details including significance, year built, and cultural importance for each requested site" "Historical Information Service"
+# Historical Info Service
+make_request \
+"Create a service that provides historical information about monuments and sites. The service must:
+- Use POST endpoint /historical_info
+- Accept site_name (List[str]) parameter
+- Return historical details for requested sites
+- Load data from data/historic_data.json
+- Match the exact structure of the original historical_info service" \
+"Historical Information Service" \
+"historical_info"
 
-# Exhibition Tracker
-make_request "Create a service that tracks museum and art exhibitions based on audience type (general, student, specialist), venue location, exhibition dates, and category (painting, sculpture, photography, etc). The service should handle multiple filter values and return matching exhibitions with details like venue, ticket prices, and featured artists" "Exhibition Tracker Service"
+# Exhibition Tracker Service
+make_request \
+"Create a service that tracks museum and art exhibitions. The service must:
+- Use POST endpoint /exhibition_tracker
+- Accept interested_audience (List[str]), location (List[str]), date_range (str), exhibition_type (List[str]) parameters
+- Return filtered exhibition information
+- Load data from data/exhibition_data.json
+- Match the exact structure of the original exhibition_tracker service" \
+"Exhibition Tracker Service" \
+"exhibition_tracker"
 
-# Crowd Monitor
-make_request "Create a service that monitors crowd density at different locations. It should accept a location and optional timestamp parameter, returning the crowd count for the closest matching timestamp" "Crowd Monitor Service"
+# Crowd Monitor Service
+make_request \
+"Create a service that monitors crowd density at locations. The service must:
+- Use POST endpoint /crowd_monitor
+- Accept location (str) and timestamp (Optional[str]) parameters
+- Return crowd count for closest timestamp
+- Load data from data/crowd_quality_data.json
+- Match the exact structure of the original crowd_monitor service" \
+"Crowd Monitor Service" \
+"crowd_monitor"
 
-# Event Notifier
-make_request "Create a service that provides information about city events, festivals, and shows based on category (music, theater, sports, etc) and time commitment (1-hour, half-day, full-day, multi-day). It should handle multiple filter options and return matching events with details like timing, location, and booking information" "Event Notifier Service"
+# Event Notifier Service
+make_request \
+"Create a service that provides information about city events. The service must:
+- Use POST endpoint /event_notifier
+- Accept event_type (List[str]) and duration (List[str]) parameters
+- Return filtered event information
+- Load data from data/event_notifier.json
+- Match the exact structure of the original event_notifier service" \
+"Event Notifier Service" \
+"event_notifier"
 
-# Ticket Purchase
-make_request "Create a service that helps users find available tickets based on event names and price ranges. It should handle multiple events and price ranges, returning ticket availability and pricing information" "Ticket Purchase Service"
+# Ticket Purchase Service
+make_request \
+"Create a service that helps users find available tickets. The service must:
+- Use POST endpoint /ticket_purchase
+- Accept event_name (List[str]) and price_range (List[int]) parameters
+- Return ticket availability and pricing
+- Load data from data/event_ticket_prices.csv
+- Match the exact structure of the original ticket_purchase service" \
+"Ticket Purchase Service" \
+"ticket_purchase"
 
-# Travel Options
-make_request "Create a service that provides travel options based on destination, available time, and preferred mode of transport. It should filter options based on these criteria and return matching travel possibilities" "Travel Options Service"
+# Travel Options Service
+make_request \
+"Create a service that provides travel options. The service must:
+- Use POST endpoint /travel_options
+- Accept destination (List[str]), available_time (int), preferred_mode (List[str]) parameters
+- Return filtered travel options
+- Load data from data/travel.txt
+- Match the exact structure of the original travel_options service" \
+"Travel Options Service" \
+"travel_options"
 
-# Water Quality
-make_request "Create a service that monitors water quality metrics in different locations. It should accept location names and an optional timestamp, returning pH, Dissolved Oxygen, Conductivity, Turbidity, and Temperature measurements for the closest matching timestamp" "Water Quality Service"
+# Water Quality Service
+make_request \
+"Create a service that monitors water quality metrics. The service must:
+- Use POST endpoint /water_quality
+- Accept location (List[str]) and timestamp (Optional[str]) parameters
+- Return water quality measurements (pH, Dissolved_Oxygen, Conductivity, Turbidity, Temperature)
+- Load data from data/water_quality_data.json
+- Match the exact structure of the original water_quality service" \
+"Water Quality Service" \
+"water_quality"
 
-echo "All requests completed!"
+echo "All services generated!"

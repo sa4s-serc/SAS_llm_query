@@ -30,9 +30,10 @@ class ServiceGenerator:
         needs_json_data,
         json_data_info=None,
         http_method="POST",
+        service_name=None
     ):
         service_info = self._generate_service_info(
-            refined_query, needs_json_data, json_data_info, http_method
+            refined_query, needs_json_data, json_data_info, http_method, service_name
         )
 
         if service_info:
@@ -67,6 +68,7 @@ class ServiceGenerator:
         needs_json_data,
         json_data_info=None,
         http_method="POST",
+        service_name=None
     ):
         output_parser = StructuredOutputParser.from_response_schemas(
             [
@@ -95,27 +97,71 @@ class ServiceGenerator:
         Your task is to generate a complete FastAPI service that follows these exact requirements:
 
         1. Must include these exact imports at the top:
+        ```python
         import json
         from fastapi import HTTPException
         from pydantic import BaseModel
         from typing import Optional, List
         from app.microservices.base import MicroserviceBase
+        from datetime import datetime
+        ```
 
         2. Must follow this exact class pattern:
-        - Main service class inherits from MicroserviceBase
-        - Has __init__ that calls super().__init__("service_name") and updates service info
-        - Has load_data method that handles JSON loading with try/except
-        - Has register_routes method with POST endpoint
-        - Has process_request method for business logic
-        - Must end with start_service function and main block
+        ```python
+        class ServiceNameParams(BaseModel):
+            # Parameters with exact types
+            param1: Optional[List[str]] = None
+            param2: Optional[str] = None
 
-        3. Must use these exact patterns:
-        - Pydantic models use Optional[List[str]] for string lists
-        - Pydantic models use Optional[str] for single strings
-        - Load data in __init__ and store as instance variable
-        - Include proper error handling and logging
-        - Use exact data paths from json_data_info
-        - Service name should be in snake_case without _service suffix
+        class ServiceNameService(MicroserviceBase):
+            def __init__(self):
+                super().__init__("service_name")
+                self.update_service_info(
+                    description="Service description",
+                    dependencies=[]
+                )
+                self.data = self.load_data()
+
+            def load_data(self):
+                try:
+                    with open('data/file.json', 'r') as f:
+                        return json.load(f)
+                except FileNotFoundError:
+                    self.logger.error("file.json not found")
+                    return []
+                except json.JSONDecodeError:
+                    self.logger.error("Error decoding file.json")
+                    return []
+
+            def register_routes(self):
+                @self.app.post("/endpoint")
+                async def endpoint_handler(params: ServiceNameParams):
+                    self.logger.info(f"Received parameters: {{params}}")
+                    return await self.process_request(params.dict(exclude_unset=True))
+
+            async def process_request(self, params):
+                self.logger.info(f"Processing request with params: {{params}}")
+                # Process logic here
+                return {{"results": [], "message": "Message"}}
+
+        def start_service_name():
+            service = ServiceNameService()
+            service.run()
+
+        if __name__ == "__main__":
+            start_service_name()
+        ```
+
+        3. Must follow these exact patterns:
+        - Use Optional[List[str]] for string list parameters
+        - Use Optional[str] for single string parameters
+        - Use Optional[int] for integer parameters
+        - Always use self.logger for logging
+        - Always return dict with results and message
+        - Always handle type conversions in process_request
+        - Always use params.dict(exclude_unset=True) in route handler
+        - Never pass app to run() method
+        - Always use async/await for route handlers and process_request
 
         The data source information provided must be used exactly as specified:
         {json_data_info}
@@ -130,39 +176,16 @@ class ServiceGenerator:
         Follow this EXACT schema for the Pydantic model:
         {schema}
 
-        Follow these exact patterns:
-
-        1. Service Class Structure:
-        ```python
-        def __init__(self):
-            super().__init__("service_name")  # service_name without _service suffix
-            self.update_service_info(
-                description="Service specific description",
-                dependencies=[]
-            )
-            self.data = self.load_data()
-
-        def load_data(self):
-            try:
-                with open('{data_path}', 'r') as f:
-                    return json.load(f)
-            except FileNotFoundError:
-                self.logger.error("{data_path} not found")
-                return []  # or empty dict based on data structure
-            except json.JSONDecodeError:
-                self.logger.error("Error decoding {data_path}")
-                return []  # or empty dict based on data structure
-        ```
-
-        2. Must end with this exact pattern (note: no _service suffix in names):
-        ```python
-        def start_service_name():
-            service = ServiceName()
-            service.run()
-
-        if __name__ == "__main__":
-            start_service_name()
-        ```
+        The service MUST:
+        1. Use exact service name: {service_name}
+        2. Use exact endpoint: /{service_name}
+        3. Match parameter names and types exactly
+        4. Follow error handling pattern exactly
+        5. Use proper logging with self.logger
+        6. Return results in the exact format as shown
+        7. Handle type conversions properly
+        8. Use async/await correctly
+        9. Not pass app to run() method
 
         {json_instructions}
 
@@ -184,42 +207,39 @@ class ServiceGenerator:
             schema = "{}"
             json_instructions = ""
 
-        system_message_prompt = SystemMessagePromptTemplate.from_template(
-            system_template
-        ).format(json_data_info=json.dumps(json_data_info, indent=2) if json_data_info else "None")
-        
-        human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
+        # Convert service name to class name format
+        service_class_name = "".join(word.capitalize() for word in (service_name or "").split("_")) + "Service"
 
-        chat_prompt = ChatPromptTemplate.from_messages(
-            [system_message_prompt, human_message_prompt]
-        )
+        # Format the templates with all required variables
+        system_message = SystemMessagePromptTemplate.from_template(system_template)
+        human_message = HumanMessagePromptTemplate.from_template(human_template)
 
-        chain = LLMChain(llm=self.llm, prompt=chat_prompt)
-        # Check expected keys
-        print("Expected input keys:", chat_prompt.input_variables)
+        chat_prompt = ChatPromptTemplate.from_messages([
+            system_message,
+            human_message
+        ])
 
-        # Check provided inputs
-        print("Provided inputs:", {
+        # Create a dictionary with all required template variables
+        template_vars = {
             "refined_query": refined_query,
             "json_instructions": json_instructions,
             "format_instructions": format_instructions,
             "data_path": data_path,
-            "schema": schema
-        })
+            "schema": schema,
+            "service_name": service_name or "",
+            "service_class_name": service_class_name,
+            "json_data_info": json.dumps(json_data_info, indent=2) if json_data_info else "None"
+        }
 
-        result = chain.run(
-            refined_query=refined_query,
-            json_instructions=json_instructions,
-            format_instructions=format_instructions,
-            data_path=data_path,
-            schema=schema
-        )
+        chain = LLMChain(llm=self.llm, prompt=chat_prompt)
+        result = chain.run(**template_vars)
 
         try:
             parsed_output = output_parser.parse(result)
-            service_name = parsed_output["service_name"].replace("_service", "")  # Remove _service suffix if present
+            # Use provided service name or parsed one
+            final_service_name = service_name or parsed_output["service_name"].replace("_service", "")
             service_info = {
-                "service_name": service_name,
+                "service_name": final_service_name,
                 "request_body": parsed_output["request_body"],
                 "service_description": parsed_output["service_description"],
                 "code": parsed_output["code"],
