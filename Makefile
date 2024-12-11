@@ -12,6 +12,21 @@ clean-pyc:
 	find . -type d -name ".pytest_cache" -exec rm -rf {} +
 	find . -type d -name ".mypy_cache" -exec rm -rf {} +
 
+# Start OM2M server and open webpage
+om2m:
+	@echo "Starting OM2M server..."
+	cd /home/stealthspectre/Cupcarbon/eclipse-om2m-v1-4-1/in-cse && \
+	if [ -f "plugins/org.eclipse.equinox.launcher_1.3.0.v20140415-2008.jar" ]; then \
+		./start.sh & \
+		sleep 5; \
+		@echo "Opening OM2M webpage..."; \
+		xdg-open http://localhost:8080/webpage || open http://localhost:8080/webpage || python -m webbrowser http://localhost:8080/webpage; \
+	else \
+		echo "Error: Required JAR file not found. Please check your OM2M installation."; \
+		exit 1; \
+	fi
+
+
 # Clean generated apps
 clean-apps:
 	rm -rf app/generated_apps/*
