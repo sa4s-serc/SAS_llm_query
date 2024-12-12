@@ -1,37 +1,39 @@
-import os
 import streamlit as st
-from app.utils.app_generator import AppGenerator
-import app.config as config
-from app.utils.logger import setup_logger
-from app.utils.chatbot import chatbot_conversation, initialize_conversation
-from app.utils.feedback_collector import FeedbackCollector
-
+import os
+from utils.chatbot import initialize_conversation, chatbot_conversation
+from utils.feedback_collector import FeedbackCollector
+from utils.app_generator import AppGenerator
+from utils.service_manager import ServiceManager
 
 class BuilderApp:
     def __init__(self):
-        self.logger = setup_logger("BuilderApp")
-        if config.MICROSERVICES_DIR is None:
-            self.logger.error(
-                "MICROSERVICES_DIR is None. Make sure config.set_paths() and config.setup() have been called."
-            )
-            raise ValueError(
-                "MICROSERVICES_DIR is not set. Configuration may not have been initialized properly."
-            )
-        self.all_services = self._discover_services(config.MICROSERVICES_DIR)
+        self.initialize_components()
+
+    def initialize_components(self):
         self.app_generator = AppGenerator()
         self.feedback_collector = FeedbackCollector()
+        self.service_manager = ServiceManager()
 
-    def _discover_services(self, directory):
-        services = []
-        if not os.path.exists(directory):
-            self.logger.error(f"Directory does not exist: {directory}")
-            return services
-        for root, dirs, files in os.walk(directory):
-            for dir in dirs:
-                if dir.startswith("__"):
-                    continue
-                services.append(dir)
-        return services
+    def show_welcome_message(self):
+        st.title("Welcome to City Companion Builder! 🏛️")
+        
+        st.markdown("""
+        <p style='font-size: 1.1em; line-height: 1.6; margin-bottom: 1.5rem;'>
+            Imagine you're in Hyderabad with only a few hours to explore. You need different apps—one for metro routes, 
+            another for restaurants, one for weather updates, booking tickets, and more. But what if there was one app 
+            that could understand your schedule, preferences, and needs, combining all these functionalities into a 
+            single solution?
+        </p>
+        
+        <p style='font-size: 1.1em; line-height: 1.6; margin-bottom: 1.5rem;'>
+            <strong>That's exactly what we've built for you.</strong> Try it out and see how well it works. 
+            It may not look perfect yet, but we want you to focus on how accurately it helps you complete your tasks.
+        </p>
+        
+        <p style='font-size: 1.1em; line-height: 1.6; color: #2e6c80;'>
+            After testing, please fill out the feedback form to share your experience and suggestions.
+        </p>
+        """, unsafe_allow_html=True)
 
     def show_feedback_form(self, user_query: str, selected_services: list):
         """Display feedback form and collect user responses"""
@@ -59,7 +61,7 @@ class BuilderApp:
         # Missing services
         missing = st.multiselect(
             "Were there any services you expected but weren't selected?",
-            options=self.all_services,
+            options=self.service_manager.get_available_services(),
             default=[]
         )
 
@@ -101,66 +103,81 @@ class BuilderApp:
 
         return False
 
-    def run(self):
-        st.title(f"{config.APP_NAME} Builder")
-
-        # Check if we're in admin mode (controlled by environment variable)
-        dev_mode = os.getenv("ENABLE_DEBUG", "false").lower() == "true"
-
-        if "conversation_state" not in st.session_state:
+    def initialize_session_state(self):
+        if 'conversation_state' not in st.session_state:
             st.session_state.conversation_state = initialize_conversation()
-
-        if "conversation_history" not in st.session_state:
+            st.session_state.generated_apps = []
+            st.session_state.feedback_collector = FeedbackCollector()
+            st.session_state.app_generator = AppGenerator()
+            st.session_state.service_manager = ServiceManager()
             st.session_state.conversation_history = []
-
-        if "feedback_submitted" not in st.session_state:
             st.session_state.feedback_submitted = False
 
+    def run(self):
+        # Show welcome message for first-time users
+        if 'welcomed' not in st.session_state:
+            self.show_welcome_message()
+            if st.button("Get Started", key="welcome_button"):
+                st.session_state.welcomed = True
+                st.rerun()
+            return
+
+        # Main app content
+        st.title("City Companion Builder")
+        self.initialize_session_state()
+
+        # Display conversation history
         for message in st.session_state.conversation_history:
             with st.chat_message(message["role"]):
                 st.write(message["content"])
 
-        user_input = st.chat_input("Type your message here...")
+        # Chat input
+        user_input = st.chat_input("Converse with your city companion from here!")
 
         if user_input:
+            # Add user message to history
             st.session_state.conversation_history.append({"role": "user", "content": user_input})
             with st.chat_message("user"):
                 st.write(user_input)
 
+            # Get assistant response
             with st.chat_message("assistant"):
-                response, st.session_state.conversation_state = chatbot_conversation(user_input, st.session_state.conversation_state)
+                response, st.session_state.conversation_state = chatbot_conversation(
+                    user_input, 
+                    st.session_state.conversation_state
+                )
                 st.write(response)
             st.session_state.conversation_history.append({"role": "assistant", "content": response})
 
         # Check if ready to create app
         if st.session_state.conversation_state.get("ready_for_app", False):
-            selected_services = st.session_state.conversation_state["suggested_services"]
+            selected_services = st.session_state.conversation_state.get("suggested_services", [])
             
-            # Show feedback form if not submitted and not in dev mode
-            if not st.session_state.feedback_submitted and not dev_mode:
+            # Show feedback form if not submitted
+            if not st.session_state.feedback_submitted:
                 feedback_submitted = self.show_feedback_form(
                     user_input or "No query provided",
                     selected_services
                 )
                 if feedback_submitted:
                     st.session_state.feedback_submitted = True
-            else:
-                # In dev mode, automatically mark feedback as submitted
-                st.session_state.feedback_submitted = True
 
-            # Show create app button after feedback or in dev mode
-            if st.session_state.feedback_submitted or dev_mode:
-                if st.button(f"Create {config.APP_NAME} App"):
+            # Show create app button after feedback
+            if st.session_state.feedback_submitted:
+                if st.button("Create City Companion App"):
                     app_url = self.app_generator.generate_app(
                         selected_services,
-                        st.session_state.conversation_state["parameters"]
+                        st.session_state.conversation_state.get("parameters", {})
                     )
-                    st.success(f"Your personalized {config.APP_NAME} app has been created! Access it at: {app_url}")
+                    st.success(f"Your personalized City Companion app has been created! Access it at: {app_url}")
+                    # Reset the conversation
                     st.session_state.conversation_state = initialize_conversation()
                     st.session_state.conversation_history = []
                     st.session_state.feedback_submitted = False
 
-
-if __name__ == "__main__":
+def main():
     app = BuilderApp()
     app.run()
+
+if __name__ == "__main__":
+    main()

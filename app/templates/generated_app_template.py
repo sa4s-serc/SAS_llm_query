@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 # Set the working directory to the app directory
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-st.set_page_config(page_title="My IIIT Companion", page_icon="🏫", layout="wide")
+st.set_page_config(page_title="My City Companion", page_icon="🏫", layout="wide")
 
 st.title("My IIIT Companion")
 
