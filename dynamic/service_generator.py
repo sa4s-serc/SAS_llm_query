@@ -109,9 +109,10 @@ class ServiceGenerator:
         2. Must follow this exact class pattern:
         ```python
         class ServiceNameParams(BaseModel):
-            # Parameters with exact types
-            param1: Optional[List[str]] = None
-            param2: Optional[str] = None
+            # Parameters must be Optional with proper types
+            location: Optional[List[str]] = None
+            timestamp: Optional[str] = None
+            # Add other parameters as needed
 
         class ServiceNameService(MicroserviceBase):
             def __init__(self):
@@ -141,8 +142,52 @@ class ServiceGenerator:
 
             async def process_request(self, params):
                 self.logger.info(f"Processing request with params: {{params}}")
-                # Process logic here
-                return {{"results": [], "message": "Message"}}
+                filtered_data = self.data
+
+                # Filter by location if provided
+                if params.get('location'):
+                    locations = params['location']
+                    if isinstance(locations, str):
+                        locations = [locations]
+                    filtered_data = [d for d in filtered_data if d['location'] in locations]
+                    self.logger.info(f"After location filter: {{len(filtered_data)}} items")
+
+                # Handle timestamp
+                timestamp = params.get('timestamp', datetime.now().isoformat())
+                
+                # Group data by location
+                location_data = {{}}
+                for data in filtered_data:
+                    loc = data['location']
+                    if loc not in location_data:
+                        location_data[loc] = []
+                    location_data[loc].append(data)
+
+                # Get latest readings for each location
+                results = []
+                for loc, measurements in location_data.items():
+                    closest_data = min(measurements, 
+                                   key=lambda x: abs(datetime.fromisoformat(x['timestamp']) - datetime.fromisoformat(timestamp)))
+                    results.append({{
+                        "location": loc,
+                        "timestamp": closest_data['timestamp'],
+                        # Add other fields based on data
+                        "sensor1_value": closest_data.get('sensor1_value', 0.0),
+                        "sensor2_value": closest_data.get('sensor2_value', 0.0)
+                    }})
+
+                if not results:
+                    self.logger.warning("No data found matching the criteria")
+                    return {{
+                        "measurements": [],
+                        "message": "No data found for the specified criteria."
+                    }}
+
+                self.logger.info(f"Returning data for {{len(results)}} locations")
+                return {{
+                    "measurements": results,
+                    "message": f"Found data for {{len(results)}} locations."
+                }}
 
         def start_service_name():
             service = ServiceNameService()
@@ -153,15 +198,15 @@ class ServiceGenerator:
         ```
 
         3. Must follow these exact patterns:
-        - Use Optional[List[str]] for string list parameters
-        - Use Optional[str] for single string parameters
-        - Use Optional[int] for integer parameters
+        - All parameters must be Optional with proper types
         - Always use self.logger for logging
-        - Always return dict with results and message
+        - Always return dict with measurements array and message
         - Always handle type conversions in process_request
-        - Always use params.dict(exclude_unset=True) in route handler
+        - Always use params.dict(exclude_unset=True)
         - Never pass app to run() method
         - Always use async/await for route handlers and process_request
+        - Always group data by location and find closest timestamp
+        - Always return only one measurement per location
 
         The data source information provided must be used exactly as specified:
         {json_data_info}
@@ -186,6 +231,8 @@ class ServiceGenerator:
         7. Handle type conversions properly
         8. Use async/await correctly
         9. Not pass app to run() method
+        10. Group data by location and find closest timestamp
+        11. Return only one measurement per location
 
         {json_instructions}
 

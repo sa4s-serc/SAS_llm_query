@@ -25,3 +25,5 @@ rough/*
 langchain/*
 app/services.toml
 app/generated_services/*
+temp/*
+

@@ -6,6 +6,8 @@ import signal
 from typing import Dict, Optional, List
 from app.utils.logger import setup_logger
 from app.utils.port_manager import get_port_manager
+import toml
+from datetime import datetime
 
 logger = setup_logger("ServiceManager")
 
@@ -13,6 +15,90 @@ class ServiceManager:
     def __init__(self):
         self.port_manager = get_port_manager()
         self.logger = logger
+        self.services_file = "app/services.toml"
+        self.services_config = self.load_services_config()
+
+    def load_services_config(self) -> Dict:
+        """Load services configuration from TOML file"""
+        try:
+            if os.path.exists(self.services_file):
+                with open(self.services_file, 'r') as f:
+                    return toml.load(f)
+            else:
+                self.logger.warning(f"Services file not found: {self.services_file}")
+                return {}
+        except Exception as e:
+            self.logger.error(f"Error loading services config: {str(e)}")
+            return {}
+
+    def get_available_services(self) -> List[str]:
+        """Get list of all available services"""
+        try:
+            return list(self.services_config.keys())
+        except Exception as e:
+            self.logger.error(f"Error getting available services: {str(e)}")
+            return []
+
+    def get_service_info(self, service_name: str) -> Optional[Dict]:
+        """Get information about a specific service"""
+        try:
+            return self.services_config.get(service_name)
+        except Exception as e:
+            self.logger.error(f"Error getting service info for {service_name}: {str(e)}")
+            return None
+
+    def update_service_status(self, service_name: str, enabled: bool, pid: Optional[int] = None) -> bool:
+        """Update service status in the configuration"""
+        try:
+            if service_name in self.services_config:
+                self.services_config[service_name]["enabled"] = enabled
+                if pid is not None:
+                    self.services_config[service_name]["pid"] = pid
+                self.services_config[service_name]["last_updated"] = datetime.now().isoformat()
+                self.save_services_config()
+                return True
+            return False
+        except Exception as e:
+            self.logger.error(f"Error updating service status for {service_name}: {str(e)}")
+            return False
+
+    def save_services_config(self) -> bool:
+        """Save current services configuration to TOML file"""
+        try:
+            with open(self.services_file, 'w') as f:
+                toml.dump(self.services_config, f)
+            return True
+        except Exception as e:
+            self.logger.error(f"Error saving services config: {str(e)}")
+            return False
+
+    def is_service_running(self, service_name: str) -> bool:
+        """Check if a service is currently running"""
+        try:
+            service_info = self.get_service_info(service_name)
+            if not service_info:
+                return False
+            
+            pid = service_info.get("pid")
+            if not pid:
+                return False
+
+            # Check if process is running
+            return psutil.pid_exists(pid)
+        except Exception as e:
+            self.logger.error(f"Error checking service status for {service_name}: {str(e)}")
+            return False
+
+    def get_service_description(self, service_name: str) -> str:
+        """Get the description of a service"""
+        try:
+            service_info = self.get_service_info(service_name)
+            if service_info:
+                return service_info.get("description", "No description available")
+            return "Service not found"
+        except Exception as e:
+            self.logger.error(f"Error getting service description for {service_name}: {str(e)}")
+            return "Error retrieving description"
 
     def get_service_status(self, service_name: str) -> Dict:
         """Get current status of a service"""
