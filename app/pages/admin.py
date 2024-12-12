@@ -137,31 +137,136 @@ def render_manual_app_generator():
             service_info = service_manager.get_service_info(service)
             if service_info:
                 st.markdown(f"*{service_info.get('description', 'No description available')}*")
-                # Add default parameters based on service type
+                
+                # Common locations for location-based services
+                locations = ['Lumbini Park', 'HITEC City', 'Charminar', 'Hussain Sagar', 'KBR National Park', 
+                           'Durgam Cheruvu Lake', 'Golconda Fort', 'Mecca Masjid']
+                
                 if service in ['air_quality', 'water_quality', 'crowd_monitor']:
                     parameters[service] = {
-                        'location': st.multiselect(f"Select locations for {service}:", 
-                                                 ['Lumbini Park', 'HITEC City', 'Charminar', 'Hussain Sagar'],
-                                                 key=f"{service}_loc")
+                        'location': st.multiselect(
+                            f"Select locations for {service}:", 
+                            options=locations,
+                            key=f"{service}_loc"
+                        ),
+                        'timestamp': st.text_input(
+                            "Timestamp (optional, format: YYYY-MM-DDTHH:MM:SS)", 
+                            key=f"{service}_time"
+                        )
                     }
+                
                 elif service == 'restaurant_finder':
                     parameters[service] = {
-                        'cuisine_type': st.multiselect("Select cuisine types:", 
-                                                     ['Indian', 'Chinese', 'Italian', 'Continental'],
-                                                     key=f"{service}_cuisine"),
-                        'price_range': st.slider("Price range (₹)", 0, 5000, (500, 2000), key=f"{service}_price")
+                        'cuisine_type': st.multiselect(
+                            "Select cuisine types:", 
+                            ['Indian', 'Chinese', 'Italian', 'Mexican', 'Continental', 'Thai', 'Fast Food', 'Vegetarian', 'Vegan'],
+                            key=f"{service}_cuisine"
+                        ),
+                        'price_range': st.multiselect(
+                            "Select price range (₹):",
+                            [500, 750, 1000, 1300, 2500],
+                            key=f"{service}_price"
+                        ),
+                        'dietary_restrictions': st.multiselect(
+                            "Select dietary restrictions:",
+                            ['None', 'Vegetarian', 'Vegan', 'Gluten-Free', 'Nut-Free'],
+                            key=f"{service}_diet"
+                        ),
+                        'group_size': st.number_input(
+                            "Group size:",
+                            min_value=1,
+                            max_value=20,
+                            value=2,
+                            key=f"{service}_group"
+                        )
                     }
+                
                 elif service == 'travel_options':
                     parameters[service] = {
-                        'preferred_mode': st.multiselect("Select travel modes:",
-                                                       ['walk', 'public_transport', 'private_transport'],
-                                                       key=f"{service}_mode")
+                        'destination': st.multiselect(
+                            "Select destinations:",
+                            locations,
+                            key=f"{service}_dest"
+                        ),
+                        'preferred_mode': st.multiselect(
+                            "Select preferred travel modes:",
+                            ['walk', 'public_transport', 'private_transport'],
+                            key=f"{service}_mode"
+                        ),
+                        'available_time': st.number_input(
+                            "Available time (in hours):",
+                            min_value=1,
+                            max_value=12,
+                            value=2,
+                            key=f"{service}_time"
+                        )
+                    }
+                
+                elif service == 'historical_info':
+                    parameters[service] = {
+                        'site_name': st.multiselect(
+                            "Select historical sites:",
+                            ['Charminar', 'Golconda Fort', 'Mecca Masjid', 'Chowmahalla Palace', 
+                             'Qutb Shahi Tombs', 'Salar Jung Museum'],
+                            key=f"{service}_sites"
+                        )
+                    }
+                
+                elif service == 'exhibition_tracker':
+                    parameters[service] = {
+                        'interested_audience': st.multiselect(
+                            "Select interested audience types:",
+                            ['Art Lovers', 'Fashion Enthusiasts', 'Foodies', 'Collectors', 'Tech Buffs'],
+                            key=f"{service}_audience"
+                        ),
+                        'exhibition_type': st.multiselect(
+                            "Select exhibition types:",
+                            ['Home Decor Exhibition', 'Fashion Show', 'Cosmetics Expo', 'Music Festival',
+                             'Textile Fair', 'Craft Beer Festival', 'Wellness Expo', 'Antique Fair',
+                             'Handicrafts Fair', 'Shoe Exhibition', 'Gardening Show'],
+                            key=f"{service}_type"
+                        )
+                    }
+                
+                elif service == 'event_notifier':
+                    parameters[service] = {
+                        'event_type': st.multiselect(
+                            "Select event types:",
+                            ['Cultural', 'Sports', 'Music', 'Food', 'Art', 'Technology', 'Business'],
+                            key=f"{service}_type"
+                        ),
+                        'duration': st.multiselect(
+                            "Select event durations:",
+                            ['1 Day', '2-3 Days', 'Week Long', 'Month Long'],
+                            key=f"{service}_duration"
+                        )
+                    }
+                
+                elif service == 'ticket_purchase':
+                    parameters[service] = {
+                        'event_name': st.multiselect(
+                            "Select events:",
+                            ['Cultural Festival', 'Music Concert', 'Art Exhibition', 'Food Festival',
+                             'Tech Conference', 'Sports Event', 'Theater Show'],
+                            key=f"{service}_events"
+                        ),
+                        'price_range': st.slider(
+                            "Price range (₹):",
+                            min_value=0,
+                            max_value=5000,
+                            value=(500, 2000),
+                            key=f"{service}_price"
+                        )
                     }
 
     # Generate button
     if selected_services:
         if st.button("Generate Test App"):
             try:
+                # Clean up parameters
+                for service in parameters:
+                    parameters[service] = {k: v for k, v in parameters[service].items() if v}
+                
                 # Pass empty conversation history for manual generation
                 app_url = app_generator.generate_app(
                     selected_services,
@@ -177,24 +282,79 @@ def render_feedback_analysis():
     """Render the feedback analysis section"""
     st.header("Feedback Analysis")
     
-    feedback_collector = FeedbackCollector()
+    # Initialize feedback collector with correct path
+    feedback_collector = FeedbackCollector(feedback_dir="app/data")
     stats = feedback_collector.get_feedback_stats()
     
     # Display statistics
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("Total Responses", stats.get("total_responses", 0))
     with col2:
-        st.metric("Average Accuracy", f"{stats.get('average_accuracy', 0):.2f}/5")
+        st.metric("Average App Rating", f"{stats.get('average_app_rating', 0):.2f}/5")
     with col3:
+        st.metric("Average Accuracy", f"{stats.get('average_accuracy', 0):.2f}/5")
+    with col4:
         st.metric("Would Use Again", f"{stats.get('would_use_again_percentage', 0):.1f}%")
 
-    # Display common services feedback
-    st.subheader("Most Commonly Missing Services")
-    st.write(stats.get("most_common_missing_services", []))
+    # Display raw feedback data
+    if st.checkbox("Show Raw Feedback Data"):
+        try:
+            import pandas as pd
+            df = pd.read_csv("app/data/user_feedback.csv")
+            st.dataframe(df)
+        except Exception as e:
+            st.error(f"Error reading feedback data: {str(e)}")
     
-    st.subheader("Most Commonly Unnecessary Services")
-    st.write(stats.get("most_common_unnecessary_services", []))
+    # Display common services feedback
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader("Most Commonly Missing Services")
+        missing_services = stats.get("most_common_missing_services", [])
+        if missing_services:
+            for service in missing_services:
+                st.write(f"- {service}")
+        else:
+            st.info("No data available")
+    
+    with col2:
+        st.subheader("Most Commonly Unnecessary Services")
+        unnecessary_services = stats.get("most_common_unnecessary_services", [])
+        if unnecessary_services:
+            for service in unnecessary_services:
+                st.write(f"- {service}")
+        else:
+            st.info("No data available")
+    
+    # Display feedback summary
+    st.subheader("Feedback Summary")
+    summary_cols = st.columns(2)
+    
+    with summary_cols[0]:
+        st.markdown("#### Rating Distribution")
+        try:
+            df = pd.read_csv("app/data/user_feedback.csv")
+            for rating_type in ['app_rating', 'accuracy_rating', 'relevance_rating']:
+                if rating_type in df.columns:
+                    avg_rating = df[rating_type].mean()
+                    st.write(f"{rating_type.replace('_', ' ').title()}: {avg_rating:.2f}/5")
+        except Exception as e:
+            st.error(f"Error calculating rating distribution: {str(e)}")
+    
+    with summary_cols[1]:
+        st.markdown("#### Recent Feedback")
+        try:
+            df = pd.read_csv("app/data/user_feedback.csv")
+            recent_feedback = df.sort_values('timestamp', ascending=False).head(5)
+            for _, row in recent_feedback.iterrows():
+                with st.expander(f"Feedback from {row.get('user_name', 'Anonymous')} - {row['timestamp']}"):
+                    st.write(f"Overall Experience: {row.get('overall_experience', 'N/A')}")
+                    st.write(f"App Rating: {row.get('app_rating', 'N/A')}/5")
+                    if row.get('other_suggestions'):
+                        st.write(f"Suggestions: {row['other_suggestions']}")
+        except Exception as e:
+            st.error(f"Error displaying recent feedback: {str(e)}")
 
 def render_debug_info():
     """Render debug information section"""
