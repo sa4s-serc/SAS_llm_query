@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Arrays to store metrics
+total_tokens=()
+prompt_tokens=()
+completion_tokens=()
+execution_times=()
+descriptions=()
+
 # Function to make a curl request with a given query
 make_request() {
     local query="$1"
@@ -8,11 +15,33 @@ make_request() {
     echo "Making request for: $description"
     echo "----------------------------------------"
     
-    curl -X POST http://localhost:5000/query \
-         -H "Content-Type: application/json" \
-         -d "{\"query\": \"$query\"}"
+    # Record start time
+    start_time=$(date +%s.%N)
     
-    echo -e "\n\nWaiting 20 seconds before next request...\n"
+    # Make request and store response
+    response=$(curl -s -X POST http://localhost:5000/query \
+         -H "Content-Type: application/json" \
+         -d "{\"query\": \"$query\"}")
+    
+    # Calculate execution time
+    end_time=$(date +%s.%N)
+    execution_time=$(echo "$end_time - $start_time" | bc)
+    
+    # Extract token information using jq
+    if [[ $response == *"token_usage"* ]]; then
+        total=$(echo $response | jq -r '.token_usage.total_tokens.total')
+        prompt=$(echo $response | jq -r '.token_usage.total_tokens.prompt')
+        completion=$(echo $response | jq -r '.token_usage.total_tokens.completion')
+        
+        # Store metrics
+        total_tokens+=($total)
+        prompt_tokens+=($prompt)
+        completion_tokens+=($completion)
+        execution_times+=($execution_time)
+        descriptions+=("$description")
+    fi
+    
+    echo -e "\nWaiting 20 seconds before next request...\n"
     sleep 20
 }
 
@@ -44,3 +73,24 @@ make_request "Create a service that provides travel options based on destination
 make_request "Create a service that monitors water quality metrics in different locations. It should accept location names and an optional timestamp, returning pH, Dissolved Oxygen, Conductivity, Turbidity, and Temperature measurements for the closest matching timestamp" "Water Quality Service"
 
 echo "All requests completed!"
+
+echo -e "\nResults in Python list format:"
+echo "descriptions = ["
+printf '%s\n' "${descriptions[@]}" | sed 's/^/    "/' | sed 's/$/"/' | sed '$!s/$/, /'
+echo "]"
+
+echo -e "\ntotal_tokens = ["
+printf '%s, ' "${total_tokens[@]}" | sed 's/, $//'
+echo "]"
+
+echo -e "\nprompt_tokens = ["
+printf '%s, ' "${prompt_tokens[@]}" | sed 's/, $//'
+echo "]"
+
+echo -e "\ncompletion_tokens = ["
+printf '%s, ' "${completion_tokens[@]}" | sed 's/, $//'
+echo "]"
+
+echo -e "\nexecution_times = ["
+printf '%.2f, ' "${execution_times[@]}" | sed 's/, $//'
+echo "]"

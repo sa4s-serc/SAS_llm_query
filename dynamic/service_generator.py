@@ -11,15 +11,47 @@ from langchain.output_parsers import StructuredOutputParser, ResponseSchema
 import json
 import subprocess
 # from codeqwen import CodeQwenLLM
+from langchain.callbacks.base import BaseCallbackHandler
+from langchain.schema import LLMResult
 
+class TokenUsageCallback(BaseCallbackHandler):
+    def __init__(self, token_tracker):
+        self.token_tracker = token_tracker
+
+    def on_llm_end(self, response: LLMResult, **kwargs) -> None:
+        # Extract token usage from the response
+        usage = response.llm_output.get('token_usage', {})
+        if usage:
+            self.token_tracker.total_tokens += usage.get('total_tokens', 0)
+            self.token_tracker.total_prompt_tokens += usage.get('prompt_tokens', 0)
+            self.token_tracker.total_completion_tokens += usage.get('completion_tokens', 0)
+
+class TokenTracker:
+    def __init__(self):
+        self.total_tokens = 0
+        self.total_prompt_tokens = 0
+        self.total_completion_tokens = 0
 load_dotenv()
-API_KEY = os.getenv("OPEN_AI_API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 MODEL = os.getenv("OPEN_AI_MODEL")
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
+
+
+
 
 class ServiceGenerator:
     def __init__(self, service_manager):
         self.service_manager = service_manager
-        self.llm = ChatOpenAI(model_name=MODEL, temperature=0.7)
+        # self.llm = ChatOpenAI(model_name=MODEL, temperature=0.7)
+        self.token_tracker = TokenTracker()
+        self.llm = ChatOpenAI(
+            model='deepseek-chat', 
+            openai_api_key=DEEPSEEK_API_KEY, 
+            openai_api_base='https://api.deepseek.com',
+            temperature=0.7,
+            callbacks=[TokenUsageCallback(self.token_tracker)]
+        )
+
         # self.llm = CodeQwenLLM()
         
     def generate(
