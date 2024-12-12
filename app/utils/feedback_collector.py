@@ -2,19 +2,20 @@ import pandas as pd
 import os
 from datetime import datetime
 from typing import List, Dict, Any
-from app.utils.logger import setup_logger
-
-logger = setup_logger("FeedbackCollector")
+import logging
 
 class FeedbackCollector:
-    def __init__(self):
-        self.feedback_file = "data/user_feedback.csv"
+    def __init__(self, feedback_dir="data"):
+        """Initialize feedback collector with configurable directory"""
+        self.feedback_dir = feedback_dir
+        self.feedback_file = os.path.join(feedback_dir, "user_feedback.csv")
+        self.logger = logging.getLogger("FeedbackCollector")
         self.ensure_feedback_file_exists()
 
     def ensure_feedback_file_exists(self):
         """Create feedback file with headers if it doesn't exist"""
-        if not os.path.exists("data"):
-            os.makedirs("data")
+        if not os.path.exists(self.feedback_dir):
+            os.makedirs(self.feedback_dir)
             
         if not os.path.exists(self.feedback_file):
             headers = [
@@ -33,7 +34,7 @@ class FeedbackCollector:
                 "would_use_again"
             ]
             pd.DataFrame(columns=headers).to_csv(self.feedback_file, index=False)
-            logger.info(f"Created new feedback file at {self.feedback_file}")
+            self.logger.info(f"Created new feedback file at {self.feedback_file}")
 
     def save_feedback(self, feedback_data: Dict[str, Any]):
         """Save user feedback to CSV file"""
@@ -63,10 +64,10 @@ class FeedbackCollector:
             
             # Save back to CSV
             df.to_csv(self.feedback_file, index=False)
-            logger.info("Successfully saved user feedback with conversation history")
+            self.logger.info("Successfully saved user feedback with conversation history")
             return True
         except Exception as e:
-            logger.error(f"Error saving feedback: {str(e)}")
+            self.logger.error(f"Error saving feedback: {str(e)}")
             return False
 
     def get_feedback_stats(self) -> Dict[str, Any]:
@@ -84,7 +85,7 @@ class FeedbackCollector:
             }
             return stats
         except Exception as e:
-            logger.error(f"Error calculating feedback stats: {str(e)}")
+            self.logger.error(f"Error calculating feedback stats: {str(e)}")
             return {}
 
     def _get_most_common_items(self, df: pd.DataFrame, column: str, top_n: int = 5) -> List[str]:

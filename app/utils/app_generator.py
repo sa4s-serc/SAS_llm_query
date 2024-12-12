@@ -12,9 +12,9 @@ class AppGenerator:
     def __init__(self):
         self.logger = setup_logger("AppGenerator")
         self.port_manager = get_port_manager()
-        self.used_ports = [10000]
+        self.last_used_port = 10000
 
-    def generate_app(self, selected_services, parameters):
+    def generate_app(self, selected_services, parameters, conversation_history=None):
         self.logger.info(f"Generating app with services: {selected_services}")
         self.logger.info(f"Service parameters: {parameters}")
 
@@ -26,11 +26,14 @@ class AppGenerator:
                 "GENERATED_APPS_DIR is not set. Configuration may not have been initialized properly."
             )
 
-        port = self.used_ports[-1] - 1
-        self.used_ports.append(port)
-        app_dir = os.path.join(config.GENERATED_APPS_DIR, f"app_{port}")
-        os.makedirs(app_dir, exist_ok=True)
+        # Find next available port
+        while True:
+            self.last_used_port -= 1
+            app_dir = os.path.join(config.GENERATED_APPS_DIR, f"app_{self.last_used_port}")
+            if not os.path.exists(app_dir):
+                break
 
+        os.makedirs(app_dir, exist_ok=True)
         self.logger.info(f"Created app directory: {app_dir}")
 
         # Copy utility files
@@ -38,6 +41,7 @@ class AppGenerator:
         os.makedirs(utils_dir, exist_ok=True)
         shutil.copy(os.path.join(config.APP_DIR, "utils", "port_manager.py"), utils_dir)
         shutil.copy(os.path.join(config.APP_DIR, "utils", "logger.py"), utils_dir)
+        shutil.copy(os.path.join(config.APP_DIR, "utils", "feedback_collector.py"), utils_dir)
 
         self.logger.info(f"Copied utility files to: {utils_dir}")
 
@@ -46,9 +50,14 @@ class AppGenerator:
         shutil.copy(self.port_manager.services_file, services_toml_path)
         self.logger.info(f"Copied services.toml to: {services_toml_path}")
 
-        # Log the contents of services.toml
-        with open(services_toml_path, 'r') as f:
-            self.logger.info(f"Contents of services.toml:\n{f.read()}")
+        # Save conversation history and service info
+        app_data = {
+            "conversation_history": conversation_history or [],
+            "selected_services": selected_services,
+            "parameters": parameters
+        }
+        with open(os.path.join(app_dir, "app_data.json"), "w") as f:
+            json.dump(app_data, f, indent=2)
 
         # Copy templates directory
         templates_dir = os.path.join(app_dir, "templates")
@@ -68,53 +77,21 @@ class AppGenerator:
 
         self.logger.info(f"Generated app content and wrote to: {app_file_path}")
 
-        self._run_app(app_file_path, port)
-        return f"http://localhost:{port}"
+        self._run_app(app_file_path, self.last_used_port)
+        return f"http://localhost:{self.last_used_port}"
 
     def _generate_app_content(self, selected_services, parameters, app_dir):
         service_content = ""
         for service in selected_services:
             service_content += self._generate_service_content(service, parameters.get(service, {}))
 
-        debug_content = f"""
-# Debugging information
-selected_services = {json.dumps(selected_services)}
-parameters = {json.dumps(parameters)}
-
-st.sidebar.header("Debugging Information")
-st.sidebar.write(f"Selected services: {{json.dumps(selected_services, indent=2)}}")
-st.sidebar.write(f"Parameters: {{json.dumps(parameters, indent=2)}}")
-
-# Log available services
-available_services = port_manager.get_all_services()
-st.sidebar.write(f"Available services: {{json.dumps(available_services, indent=2)}}")
-logger.info(f"Available services: {{json.dumps(available_services, indent=2)}}")
-
-# Log the contents of services.toml
-with open('services.toml', 'r') as f:
-    services_toml_content = f.read()
-    st.sidebar.text_area("services.toml content:", services_toml_content, height=300)
-    logger.info(f"services.toml content:\\n{{services_toml_content}}")
-
-# Log the current working directory
-current_dir = os.getcwd()
-st.sidebar.write(f"Current working directory: {{current_dir}}")
-logger.info(f"Current working directory: {{current_dir}}")
-
-# List files in the current directory
-files = os.listdir(current_dir)
-st.sidebar.write(f"Files in current directory: {{files}}")
-logger.info(f"Files in current directory: {{files}}")
-"""
-
-        try:
-            return GENERATED_APP_TEMPLATE.format(
-                services=service_content,
-                debug_content=debug_content
-            )
-        except KeyError as e:
-            self.logger.error(f"Template formatting error: {str(e)}")
-            raise ValueError(f"Template formatting error: {str(e)}")
+        # Create the complete app content
+        app_content = GENERATED_APP_TEMPLATE
+        
+        # Replace the services placeholder with our service content
+        app_content = app_content.replace("{services}", service_content)
+        
+        return app_content
 
     def _generate_service_content(self, service, params):
         param_dict = json.dumps(params)

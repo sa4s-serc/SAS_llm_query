@@ -162,10 +162,16 @@ def render_manual_app_generator():
     if selected_services:
         if st.button("Generate Test App"):
             try:
-                app_url = app_generator.generate_app(selected_services, parameters)
+                # Pass empty conversation history for manual generation
+                app_url = app_generator.generate_app(
+                    selected_services,
+                    parameters,
+                    conversation_history=[]
+                )
                 st.success(f"Test app generated successfully! Access it at: {app_url}")
             except Exception as e:
                 st.error(f"Error generating app: {str(e)}")
+                st.error("Check logs for more details")
 
 def render_feedback_analysis():
     """Render the feedback analysis section"""
