@@ -64,11 +64,9 @@ class WaterQualityService(MicroserviceBase):
             results.append({
                 "location": loc,
                 "timestamp": closest_data['timestamp'],
-                "pH": closest_data['pH'],
-                "Dissolved_Oxygen": closest_data['Dissolved_Oxygen'],
-                "Conductivity": closest_data['Conductivity'],
-                "Turbidity": closest_data['Turbidity'],
-                "Temperature": closest_data['Temperature']
+                "sensor1_value": closest_data.get('sensor1_value', 0.0),
+                "sensor2_value": closest_data.get('sensor2_value', 0.0),
+                "raw_values": closest_data.get('raw_values', [0.0, 0.0])
             })
 
         if not results:

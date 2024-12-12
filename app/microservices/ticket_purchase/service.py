@@ -1,4 +1,4 @@
-import csv
+import json
 from fastapi import HTTPException
 from pydantic import BaseModel
 from typing import Optional, List
@@ -19,14 +19,13 @@ class TicketPurchaseService(MicroserviceBase):
 
     def load_ticket_data(self):
         try:
-            with open('data/event_ticket_prices.csv', 'r') as f:
-                reader = csv.DictReader(f)
-                return {row['Event Name']: int(row['Ticket Price']) for row in reader}
+            with open('data/event_ticket_prices.json', 'r') as f:
+                return json.load(f)
         except FileNotFoundError:
-            self.logger.error("event_ticket_prices.csv not found")
+            self.logger.error("event_ticket_prices.json not found")
             return {}
-        except Exception as e:
-            self.logger.error(f"Error loading ticket data: {str(e)}")
+        except json.JSONDecodeError:
+            self.logger.error("Error decoding event_ticket_prices.json")
             return {}
 
     def register_routes(self):
@@ -46,12 +45,14 @@ class TicketPurchaseService(MicroserviceBase):
             
             for event in event_names:
                 if event in self.ticket_data:
-                    price = self.ticket_data[event]
+                    price = self.ticket_data[event]["price"]
                     if not params.get('price_range') or price in params['price_range']:
                         available_tickets.append({
                             "event_name": event,
                             "ticket_price": price,
-                            "purchase_status": "available"
+                            "purchase_status": "available",
+                            "venue": self.ticket_data[event].get("venue", "TBD"),
+                            "date": self.ticket_data[event].get("date", "TBD")
                         })
                         self.logger.info(f"Found tickets for event: {event}")
                 else:
@@ -62,12 +63,15 @@ class TicketPurchaseService(MicroserviceBase):
             if isinstance(price_range[0], str):
                 price_range = [int(p) for p in price_range]
             
-            for event, price in self.ticket_data.items():
+            for event, details in self.ticket_data.items():
+                price = details["price"]
                 if price in price_range:
                     available_tickets.append({
                         "event_name": event,
                         "ticket_price": price,
-                        "purchase_status": "available"
+                        "purchase_status": "available",
+                        "venue": details.get("venue", "TBD"),
+                        "date": details.get("date", "TBD")
                     })
 
         if not available_tickets:

@@ -84,9 +84,13 @@ class ExhibitionTrackerService(MicroserviceBase):
             "message": f"Found {len(filtered_exhibitions)} exhibitions matching your criteria."
         }
 
-    def is_date_in_range(self, exhibition_range, start, end):
-        exhibition_start, exhibition_end = exhibition_range.split(' - ')
-        return exhibition_start <= end and exhibition_end >= start
+    def is_date_in_range(self, exhibition_range: str, start: str, end: str) -> bool:
+        try:
+            exhibition_start, exhibition_end = exhibition_range.split(' - ')
+            return exhibition_start <= end and exhibition_end >= start
+        except Exception as e:
+            self.logger.error(f"Error checking date range: {str(e)}")
+            return False
 
 def start_exhibition_tracker_service():
     service = ExhibitionTrackerService()
