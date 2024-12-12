@@ -1,0 +1,42 @@
+# Deepseek run 1
+
+total_tokens = [
+4029, 8517, 12866, 17519, null, null, 27146, 31448, null]
+
+prompt_tokens = [
+3291, 6779, 10320, 14001, null, null, 22358, 25873, null]
+
+completion_tokens = [
+738, 1738, 2546, 3518, null, null, 4788, 5575, null]
+
+execution_times = [
+38.07, 47.25, 37.92, 45.00, 7.90, 10.31, 42.55, 40.94, 9.01]
+
+# Deepseek run 2
+
+total_tokens = [
+4032, 8543, 12894, 17513, null, 24633, null, 31595, null]
+
+prompt_tokens = [
+3291, 6779, 10320, 13987, null, 20098, null, 26097, null]
+
+completion_tokens = [
+741, 1764, 2574, 3526, null, 4535, null, 5498, null]
+
+execution_times = [
+36.99, 48.49, 39.50, 46.06, 8.33, 41.15, 9.27, 41.81, 8.37]
+
+
+# Deepseek run 3
+
+total_tokens = [
+4088, 8543, 12841, 17483, null, null, 27131, 31417, null]
+
+prompt_tokens = [
+3299, 6795, 10344, 14029, null, null, 22392, 25895, null]
+
+completion_tokens = [
+789, 1748, 2497, 3454, null, null, 4739, 5522, null]
+
+execution_times = [
+38.75, 47.01, 37.82, 45.89, 8.44, 12.46, 42.26, 38.91, 10.24]

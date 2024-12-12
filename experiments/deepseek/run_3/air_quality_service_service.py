@@ -4,9 +4,11 @@ from pydantic import BaseModel
 from typing import Optional, List
 from app.microservices.base import MicroserviceBase
 
+
 class AirQualityRequest(BaseModel):
     locations: List[str]
     timestamp: Optional[str] = None
+
 
 class AirQualityService(MicroserviceBase):
     def __init__(self):
@@ -29,25 +31,27 @@ class AirQualityService(MicroserviceBase):
             return []
 
     def register_routes(self):
-        @self.app.post("/air_quality/")
+        @self.app.post("/air_quality")
         async def get_air_quality(request: AirQualityRequest):
             return self.process_request(request)
 
     def process_request(self, request: AirQualityRequest):
         results = []
         for location in request.locations:
-            matching_data = [d for d in self.data if d['location'] == location]
+            matching_data = [item for item in self.data if item["location"] == location]
             if request.timestamp:
-                matching_data = [d for d in matching_data if d['timestamp'] == request.timestamp]
+                matching_data = [item for item in matching_data if item["timestamp"] == request.timestamp]
             if matching_data:
                 results.append(matching_data[0])
             else:
-                results.append({"location": location, "message": "No data found for this location and timestamp."})
+                results.append({"location": location, "message": "No data found for this location."})
         return results
 
-    def start_air_quality_service():
-        service = AirQualityService()
-        service.run()
 
-    if __name__ == "__main__":
-        start_air_quality_service()
+def start_air_quality_service():
+    service = AirQualityService()
+    service.run()
+
+
+if __name__ == "__main__":
+    start_air_quality_service()
