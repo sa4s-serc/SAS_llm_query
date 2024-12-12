@@ -363,9 +363,20 @@ def render_debug_info():
     if st.checkbox("Show Environment Variables"):
         st.json({k: v for k, v in os.environ.items() if not k.startswith(('_', 'PATH'))})
     
-    if st.checkbox("Show Port Mappings"):
+    if st.checkbox("Show Service Port Mappings"):
         port_manager = get_port_manager()
-        st.json(port_manager.get_all_ports())
+        services = port_manager.get_all_services()
+        
+        # Create a more readable port mapping display
+        port_mappings = {}
+        for service_name, info in services.items():
+            port_mappings[service_name] = {
+                "port": info.get("port", "N/A"),
+                "status": "Running" if info.get("enabled", False) else "Stopped",
+                "pid": info.get("pid", "N/A"),
+                "last_updated": info.get("last_updated", "Never")
+            }
+        st.json(port_mappings)
     
     if st.checkbox("Show Service Configurations"):
         service_manager = ServiceManager()

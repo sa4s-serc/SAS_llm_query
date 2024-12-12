@@ -5,7 +5,7 @@ from typing import List, Dict, Any
 import logging
 
 class FeedbackCollector:
-    def __init__(self, feedback_dir="data"):
+    def __init__(self, feedback_dir="app/data"):
         """Initialize feedback collector with configurable directory"""
         self.feedback_dir = feedback_dir
         self.feedback_file = os.path.join(feedback_dir, "user_feedback.csv")
