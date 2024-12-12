@@ -3,6 +3,10 @@ import os
 from app.builder.service_center import render_service_manager
 from app.utils.logger import setup_logger
 from app.utils.om2m_utils import OM2MManager
+from app.utils.service_manager import ServiceManager
+from app.utils.feedback_collector import FeedbackCollector
+from app.utils.app_generator import AppGenerator
+from app.utils.port_manager import get_port_manager
 
 logger = setup_logger("AdminPage")
 
@@ -107,6 +111,100 @@ def render_om2m_manager():
             else:
                 st.warning(f"No data available for {view_sensor}")
 
+def render_manual_app_generator():
+    """Render the manual app generator section"""
+    st.header("Manual App Generator")
+    
+    service_manager = ServiceManager()
+    app_generator = AppGenerator()
+    
+    # Service selection
+    st.subheader("Select Services")
+    available_services = service_manager.get_available_services()
+    selected_services = st.multiselect(
+        "Choose services to include in the app:",
+        options=available_services,
+        default=[],
+        help="Select one or more services to include in your generated app"
+    )
+
+    # Parameters configuration
+    st.subheader("Configure Parameters")
+    parameters = {}
+    if selected_services:
+        for service in selected_services:
+            st.markdown(f"**{service} Parameters**")
+            service_info = service_manager.get_service_info(service)
+            if service_info:
+                st.markdown(f"*{service_info.get('description', 'No description available')}*")
+                # Add default parameters based on service type
+                if service in ['air_quality', 'water_quality', 'crowd_monitor']:
+                    parameters[service] = {
+                        'location': st.multiselect(f"Select locations for {service}:", 
+                                                 ['Lumbini Park', 'HITEC City', 'Charminar', 'Hussain Sagar'],
+                                                 key=f"{service}_loc")
+                    }
+                elif service == 'restaurant_finder':
+                    parameters[service] = {
+                        'cuisine_type': st.multiselect("Select cuisine types:", 
+                                                     ['Indian', 'Chinese', 'Italian', 'Continental'],
+                                                     key=f"{service}_cuisine"),
+                        'price_range': st.slider("Price range (₹)", 0, 5000, (500, 2000), key=f"{service}_price")
+                    }
+                elif service == 'travel_options':
+                    parameters[service] = {
+                        'preferred_mode': st.multiselect("Select travel modes:",
+                                                       ['walk', 'public_transport', 'private_transport'],
+                                                       key=f"{service}_mode")
+                    }
+
+    # Generate button
+    if selected_services:
+        if st.button("Generate Test App"):
+            try:
+                app_url = app_generator.generate_app(selected_services, parameters)
+                st.success(f"Test app generated successfully! Access it at: {app_url}")
+            except Exception as e:
+                st.error(f"Error generating app: {str(e)}")
+
+def render_feedback_analysis():
+    """Render the feedback analysis section"""
+    st.header("Feedback Analysis")
+    
+    feedback_collector = FeedbackCollector()
+    stats = feedback_collector.get_feedback_stats()
+    
+    # Display statistics
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Total Responses", stats.get("total_responses", 0))
+    with col2:
+        st.metric("Average Accuracy", f"{stats.get('average_accuracy', 0):.2f}/5")
+    with col3:
+        st.metric("Would Use Again", f"{stats.get('would_use_again_percentage', 0):.1f}%")
+
+    # Display common services feedback
+    st.subheader("Most Commonly Missing Services")
+    st.write(stats.get("most_common_missing_services", []))
+    
+    st.subheader("Most Commonly Unnecessary Services")
+    st.write(stats.get("most_common_unnecessary_services", []))
+
+def render_debug_info():
+    """Render debug information section"""
+    st.header("Debug Information")
+    
+    if st.checkbox("Show Environment Variables"):
+        st.json({k: v for k, v in os.environ.items() if not k.startswith(('_', 'PATH'))})
+    
+    if st.checkbox("Show Port Mappings"):
+        port_manager = get_port_manager()
+        st.json(port_manager.get_all_ports())
+    
+    if st.checkbox("Show Service Configurations"):
+        service_manager = ServiceManager()
+        st.json(service_manager.services_config)
+
 def main():
     st.title("Admin Panel")
     
@@ -114,13 +212,28 @@ def main():
         return
 
     # Create tabs for different admin sections
-    tab1, tab2 = st.tabs(["Service Manager", "OM2M Manager"])
+    tabs = st.tabs([
+        "Service Manager",
+        "OM2M Manager",
+        "Manual App Generator",
+        "Feedback Analysis",
+        "Debug Info"
+    ])
     
-    with tab1:
+    with tabs[0]:
         render_service_manager()
     
-    with tab2:
+    with tabs[1]:
         render_om2m_manager()
+        
+    with tabs[2]:
+        render_manual_app_generator()
+        
+    with tabs[3]:
+        render_feedback_analysis()
+        
+    with tabs[4]:
+        render_debug_info()
 
 if __name__ == "__main__":
     main() 

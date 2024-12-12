@@ -172,7 +172,7 @@ class BuilderApp:
                 st.write(message["content"])
 
         # Chat input
-        user_input = st.chat_input("What kind of app would you like me to build for you?")
+        user_input = st.chat_input("Converse with your city companion from here!")
 
         if user_input:
             # Add user message to history
@@ -193,43 +193,27 @@ class BuilderApp:
         if st.session_state.conversation_state.get("ready_for_app", False):
             selected_services = st.session_state.conversation_state.get("suggested_services", [])
             
-            # Create two columns for app generation and feedback
-            col1, col2 = st.columns([1, 2])
-            
-            with col1:
-                st.markdown("### Create Your App")
-                st.write("Generate your personalized City Companion app with the selected services.")
-                if st.button("Create City Companion App", key="create_app"):
+            # Show feedback form if not submitted
+            if not st.session_state.feedback_submitted:
+                feedback_submitted = self.show_feedback_form(
+                    user_input or "No query provided",
+                    selected_services
+                )
+                if feedback_submitted:
+                    st.session_state.feedback_submitted = True
+
+            # Show create app button after feedback
+            if st.session_state.feedback_submitted:
+                if st.button("Create City Companion App"):
                     app_url = self.app_generator.generate_app(
                         selected_services,
                         st.session_state.conversation_state.get("parameters", {})
                     )
                     st.success(f"Your personalized City Companion app has been created! Access it at: {app_url}")
-                    
-                # Show selected services
-                st.markdown("### Selected Services")
-                for service in selected_services:
-                    st.markdown(f"- {service}")
-
-            with col2:
-                if not st.session_state.get("feedback_submitted", False):
-                    feedback_submitted = self.show_feedback_form(
-                        user_input or "No query provided",
-                        selected_services
-                    )
-                    if feedback_submitted:
-                        st.session_state.feedback_submitted = True
-                        # Reset the conversation only after feedback is submitted
-                        st.session_state.conversation_state = initialize_conversation()
-                        st.session_state.conversation_history = []
-                        st.rerun()
-                else:
-                    st.success("Thank you for your feedback! Start a new conversation to create another app.")
-                    if st.button("Start New Conversation", key="new_conversation"):
-                        st.session_state.conversation_state = initialize_conversation()
-                        st.session_state.conversation_history = []
-                        st.session_state.feedback_submitted = False
-                        st.rerun()
+                    # Reset the conversation
+                    st.session_state.conversation_state = initialize_conversation()
+                    st.session_state.conversation_history = []
+                    st.session_state.feedback_submitted = False
 
 def main():
     app = BuilderApp()
