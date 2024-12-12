@@ -17,7 +17,7 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 st.set_page_config(page_title="My City Companion", page_icon="🏫", layout="wide")
 
-st.title("My IIIT Companion")
+st.title("My City Companion")
 
 port_manager = get_port_manager()
 

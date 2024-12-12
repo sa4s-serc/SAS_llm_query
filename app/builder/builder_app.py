@@ -38,7 +38,31 @@ class BuilderApp:
     def show_feedback_form(self, user_query: str, selected_services: list):
         """Display feedback form and collect user responses"""
         st.markdown("### Help Us Improve! 📝")
-        st.write("Please provide feedback about the selected services:")
+        st.write("Please share your experience with our service:")
+
+        # User name (optional)
+        user_name = st.text_input(
+            "Your Name (Optional)",
+            help="Optional: Your name will help us better understand our users",
+            key="feedback_name"
+        )
+
+        # Query summary
+        query_summary = st.text_area(
+            "Briefly summarize about the queries you have asked",
+            help="This helps us understand how users interact with our system",
+            key="query_summary"
+        )
+
+        # Application rating
+        app_rating = st.slider(
+            "Rate the application on a scale of 1 to 5",
+            min_value=1,
+            max_value=5,
+            value=3,
+            help="1 = Poor, 5 = Excellent",
+            key="app_rating"
+        )
 
         # Accuracy rating
         accuracy = st.slider(
@@ -46,7 +70,8 @@ class BuilderApp:
             min_value=1,
             max_value=5,
             value=3,
-            help="1 = Not accurate at all, 5 = Extremely accurate"
+            help="1 = Not accurate at all, 5 = Extremely accurate",
+            key="accuracy_rating"
         )
 
         # Relevance rating
@@ -55,42 +80,57 @@ class BuilderApp:
             min_value=1,
             max_value=5,
             value=3,
-            help="1 = Not relevant at all, 5 = Extremely relevant"
+            help="1 = Not relevant at all, 5 = Extremely relevant",
+            key="relevance_rating"
         )
 
         # Missing services
         missing = st.multiselect(
             "Were there any services you expected but weren't selected?",
             options=self.service_manager.get_available_services(),
-            default=[]
+            default=[],
+            key="missing_services"
         )
 
         # Unnecessary services
         unnecessary = st.multiselect(
             "Were any of the selected services unnecessary?",
             options=selected_services,
-            default=[]
+            default=[],
+            key="unnecessary_services"
         )
 
-        # Additional comments
-        comments = st.text_area(
-            "Any additional comments or suggestions?",
-            help="Optional: Please share any other thoughts about the service selection"
+        # Overall experience
+        overall_experience = st.text_area(
+            "How is your overall experience?",
+            help="Please share your thoughts about using the application",
+            key="overall_experience"
+        )
+
+        # Other suggestions
+        other_suggestions = st.text_area(
+            "Other suggestions / feedback",
+            help="Any additional ideas or comments to help us improve",
+            key="other_suggestions"
         )
 
         # Would use again
-        would_use_again = st.checkbox("Would you use this system again?", value=True)
+        would_use_again = st.checkbox("Would you use this system again?", value=True, key="would_use_again")
 
         # Submit button
-        if st.button("Submit Feedback"):
+        if st.button("Submit Feedback", key="submit_feedback"):
             feedback_data = {
-                "user_query": user_query,
+                "user_name": user_name,
+                "conversation_history": st.session_state.conversation_history,
+                "query_summary": query_summary,
+                "app_rating": app_rating,
                 "selected_services": selected_services,
                 "accuracy_rating": accuracy,
                 "relevance_rating": relevance,
                 "missing_services": missing,
                 "unnecessary_services": unnecessary,
-                "additional_comments": comments,
+                "overall_experience": overall_experience,
+                "other_suggestions": other_suggestions,
                 "would_use_again": would_use_again
             }
 
@@ -132,7 +172,7 @@ class BuilderApp:
                 st.write(message["content"])
 
         # Chat input
-        user_input = st.chat_input("Converse with your city companion from here!")
+        user_input = st.chat_input("What kind of app would you like me to build for you?")
 
         if user_input:
             # Add user message to history
@@ -153,27 +193,43 @@ class BuilderApp:
         if st.session_state.conversation_state.get("ready_for_app", False):
             selected_services = st.session_state.conversation_state.get("suggested_services", [])
             
-            # Show feedback form if not submitted
-            if not st.session_state.feedback_submitted:
-                feedback_submitted = self.show_feedback_form(
-                    user_input or "No query provided",
-                    selected_services
-                )
-                if feedback_submitted:
-                    st.session_state.feedback_submitted = True
-
-            # Show create app button after feedback
-            if st.session_state.feedback_submitted:
-                if st.button("Create City Companion App"):
+            # Create two columns for app generation and feedback
+            col1, col2 = st.columns([1, 2])
+            
+            with col1:
+                st.markdown("### Create Your App")
+                st.write("Generate your personalized City Companion app with the selected services.")
+                if st.button("Create City Companion App", key="create_app"):
                     app_url = self.app_generator.generate_app(
                         selected_services,
                         st.session_state.conversation_state.get("parameters", {})
                     )
                     st.success(f"Your personalized City Companion app has been created! Access it at: {app_url}")
-                    # Reset the conversation
-                    st.session_state.conversation_state = initialize_conversation()
-                    st.session_state.conversation_history = []
-                    st.session_state.feedback_submitted = False
+                    
+                # Show selected services
+                st.markdown("### Selected Services")
+                for service in selected_services:
+                    st.markdown(f"- {service}")
+
+            with col2:
+                if not st.session_state.get("feedback_submitted", False):
+                    feedback_submitted = self.show_feedback_form(
+                        user_input or "No query provided",
+                        selected_services
+                    )
+                    if feedback_submitted:
+                        st.session_state.feedback_submitted = True
+                        # Reset the conversation only after feedback is submitted
+                        st.session_state.conversation_state = initialize_conversation()
+                        st.session_state.conversation_history = []
+                        st.rerun()
+                else:
+                    st.success("Thank you for your feedback! Start a new conversation to create another app.")
+                    if st.button("Start New Conversation", key="new_conversation"):
+                        st.session_state.conversation_state = initialize_conversation()
+                        st.session_state.conversation_history = []
+                        st.session_state.feedback_submitted = False
+                        st.rerun()
 
 def main():
     app = BuilderApp()

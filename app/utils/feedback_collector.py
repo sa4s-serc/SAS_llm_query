@@ -19,13 +19,17 @@ class FeedbackCollector:
         if not os.path.exists(self.feedback_file):
             headers = [
                 "timestamp",
-                "user_query",
+                "user_name",
+                "conversation_history",
+                "query_summary",
+                "app_rating",
                 "selected_services",
                 "accuracy_rating",
                 "relevance_rating",
                 "missing_services",
                 "unnecessary_services",
-                "additional_comments",
+                "overall_experience",
+                "other_suggestions",
                 "would_use_again"
             ]
             pd.DataFrame(columns=headers).to_csv(self.feedback_file, index=False)
@@ -36,10 +40,19 @@ class FeedbackCollector:
         try:
             feedback_data["timestamp"] = datetime.now().isoformat()
             
-            # Convert lists to string representation
+            # Convert lists and conversation history to string representation
             for key in ["selected_services", "missing_services", "unnecessary_services"]:
                 if key in feedback_data and isinstance(feedback_data[key], list):
-                    feedback_data[key] = ", ".join(feedback_data[key])
+                    feedback_data[key] = ", ".join(str(item) for item in feedback_data[key])
+
+            # Format conversation history
+            if "conversation_history" in feedback_data and isinstance(feedback_data["conversation_history"], list):
+                formatted_history = []
+                for msg in feedback_data["conversation_history"]:
+                    role = msg.get("role", "unknown")
+                    content = msg.get("content", "")
+                    formatted_history.append(f"{role}: {content}")
+                feedback_data["conversation_history"] = "\n".join(formatted_history)
 
             # Read existing data
             df = pd.read_csv(self.feedback_file)
@@ -50,7 +63,7 @@ class FeedbackCollector:
             
             # Save back to CSV
             df.to_csv(self.feedback_file, index=False)
-            logger.info("Successfully saved user feedback")
+            logger.info("Successfully saved user feedback with conversation history")
             return True
         except Exception as e:
             logger.error(f"Error saving feedback: {str(e)}")
@@ -62,6 +75,7 @@ class FeedbackCollector:
             df = pd.read_csv(self.feedback_file)
             stats = {
                 "total_responses": len(df),
+                "average_app_rating": df["app_rating"].mean(),
                 "average_accuracy": df["accuracy_rating"].mean(),
                 "average_relevance": df["relevance_rating"].mean(),
                 "would_use_again_percentage": (df["would_use_again"] == True).mean() * 100,
@@ -78,7 +92,7 @@ class FeedbackCollector:
         try:
             all_items = []
             for items_str in df[column].dropna():
-                all_items.extend([item.strip() for item in items_str.split(",")])
+                all_items.extend([item.strip() for item in str(items_str).split(",")])
             
             from collections import Counter
             return [item for item, _ in Counter(all_items).most_common(top_n)]
