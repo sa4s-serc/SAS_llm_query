@@ -57,20 +57,20 @@ make_request "Create a service that provides historical and cultural information
 # Exhibition Tracker
 make_request "Create a service that tracks museum and art exhibitions based on audience type (general, student, specialist), venue location, exhibition dates, and category (painting, sculpture, photography, etc). The service should handle multiple filter values and return matching exhibitions with details like venue, ticket prices, and featured artists" "Exhibition Tracker Service"
 
-# Crowd Monitor
-make_request "Create a service that monitors crowd density at different locations. It should accept a location and optional timestamp parameter, returning the crowd count for the closest matching timestamp" "Crowd Monitor Service"
+# # Crowd Monitor
+# make_request "Create a service that monitors crowd density at different locations. It should accept a location and optional timestamp parameter, returning the crowd count for the closest matching timestamp" "Crowd Monitor Service"
 
-# Event Notifier
-make_request "Create a service that provides information about city events, festivals, and shows based on category (music, theater, sports, etc) and time commitment (1-hour, half-day, full-day, multi-day). It should handle multiple filter options and return matching events with details like timing, location, and booking information" "Event Notifier Service"
+# # Event Notifier
+# make_request "Create a service that provides information about city events, festivals, and shows based on category (music, theater, sports, etc) and time commitment (1-hour, half-day, full-day, multi-day). It should handle multiple filter options and return matching events with details like timing, location, and booking information" "Event Notifier Service"
 
-# Ticket Purchase
-make_request "Create a service that helps users find available tickets based on event names and price ranges. It should handle multiple events and price ranges, returning ticket availability and pricing information" "Ticket Purchase Service"
+# # Ticket Purchase
+# make_request "Create a service that helps users find available tickets based on event names and price ranges. It should handle multiple events and price ranges, returning ticket availability and pricing information" "Ticket Purchase Service"
 
-# Travel Options
-make_request "Create a service that provides travel options based on destination, available time, and preferred mode of transport. It should filter options based on these criteria and return matching travel possibilities" "Travel Options Service"
+# # Travel Options
+# make_request "Create a service that provides travel options based on destination, available time, and preferred mode of transport. It should filter options based on these criteria and return matching travel possibilities" "Travel Options Service"
 
-# Water Quality
-make_request "Create a service that monitors water quality metrics in different locations. It should accept location names and an optional timestamp, returning pH, Dissolved Oxygen, Conductivity, Turbidity, and Temperature measurements for the closest matching timestamp" "Water Quality Service"
+# # Water Quality
+# make_request "Create a service that monitors water quality metrics in different locations. It should accept location names and an optional timestamp, returning pH, Dissolved Oxygen, Conductivity, Turbidity, and Temperature measurements for the closest matching timestamp" "Water Quality Service"
 
 echo "All requests completed!"
 

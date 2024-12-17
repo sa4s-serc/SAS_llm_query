@@ -42,15 +42,15 @@ DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 class ServiceGenerator:
     def __init__(self, service_manager):
         self.service_manager = service_manager
-        # self.llm = ChatOpenAI(model_name=MODEL, temperature=0.7)
         self.token_tracker = TokenTracker()
-        self.llm = ChatOpenAI(
-            model='deepseek-chat', 
-            openai_api_key=DEEPSEEK_API_KEY, 
-            openai_api_base='https://api.deepseek.com',
-            temperature=0.7,
-            callbacks=[TokenUsageCallback(self.token_tracker)]
-        )
+        self.llm = ChatOpenAI(model_name=MODEL, temperature=0.7, callbacks=[TokenUsageCallback(self.token_tracker)])
+        # self.llm = ChatOpenAI(
+        #     model='deepseek-chat', 
+        #     openai_api_key=DEEPSEEK_API_KEY, 
+        #     openai_api_base='https://api.deepseek.com',
+        #     temperature=0.7,
+        #     callbacks=[TokenUsageCallback(self.token_tracker)]
+        # )
 
         # self.llm = CodeQwenLLM()
         
