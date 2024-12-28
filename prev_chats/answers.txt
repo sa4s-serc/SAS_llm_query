@@ -1,0 +1,54 @@
+- *Answer:* Noise is extremely important as I need a quiet environment to focus. Air quality matters slightly, but temperature is not a concern. Yes, please consider noise levels when suggesting spaces.
+- *Answer:* Yes, I’d like to be in the quietest available area, as I have urgent tasks to complete.
+- *Answer:* I prefer a familiar area where I’ve worked before—no time to explore today.
+- *Answer:* Yes, I’ve used the quiet pods near the corner, and I’d like to book a similar space today.
+- *Answer:* Yes, I need a workspace with a large monitor for reviewing documents.
+- *Answer:* Yes, I need an available space immediately.
+- *Answer:* Noise isn’t a big deal today, and air quality is not a concern. I’d like a space that’s comfortable temperature-wise, though.
+- *Answer:* No, I don’t mind if the space is busy. I’m here to explore and maybe meet others.
+- *Answer:* I’m open to exploring new places today.
+- *Answer:* No, I haven’t been here before, so I’d like to see something new.
+- *Answer:* I’m not looking for anything specific—just exploring.
+- *Answer:* I’m open to busy or quiet areas, no preference.
+- *Answer:* Air quality is important as I like fresh, well-ventilated spaces. Noise is a secondary concern, but not a deal-breaker.
+- *Answer:* Yes, I’d prefer a quieter area with fewer distractions, as I need to focus on my work.
+- *Answer:* I don’t have any preferred areas yet, but I’d like to try something new.
+- *Answer:* I haven’t used any spaces yet, but I’d prefer something with comfortable seating.
+- *Answer:* Yes, I need a workspace with access to strong Wi-Fi and charging stations.
+- *Answer:* Yes, please show me available spaces with good Wi-Fi and charging stations.
+- *Answer:* Noise doesn’t matter too much, but I’d like a comfortable temperature as I’ll be with a team for a few hours.
+- *Answer:* Yes, I’d prefer a space that’s not too busy but allows for a little interaction.
+- *Answer:* I’m open to discovering new areas that are good for team collaboration.
+- *Answer:* Yes, I’ve used the group collaboration spaces before, and I’d like a similar space today.
+- *Answer:* Yes, I need access to a collaborative space with large displays for team presentations.
+- *Answer:* Yes, I’d prefer a space that’s available for the entire team right now.
+- *Answer:* Noise is fine, I don’t mind a lively environment. Temperature isn’t a big deal either, but air quality should be decent since I’ll be spending a lot of time indoors.
+- *Answer:* Yes, I’d prefer busy areas where I can interact with people.
+- *Answer:* I’m open to discovering new places where people usually hang out.
+- *Answer:* Yes, I’ve used the open lounge areas before, and I’d like something similar today.
+- *Answer:* No, I’m just here to network and meet people, so no special requirements today.
+- *Answer:* No, I’d prefer to be in busier spaces.
+- *Answer:* Air quality and temperature are very important to me. I’d like a space that’s well-ventilated and comfortable in terms of temperature. Noise is less of a concern.
+- *Answer:* Yes, please show me less crowded areas where the air quality is better.
+- *Answer:* I’m open to discovering new places, especially those with good ventilation or outdoor access.
+- *Answer:* I haven’t used any spaces yet, but I’d like somewhere close to greenery or natural light.
+- *Answer:* I don’t need tech tools, but I’d like access to a space with good airflow.
+- *Answer:* Yes, I’d prefer less crowded spaces with good ventilation.
+- *Answer:* Air quality and temperature aren’t a priority, but noise should be minimal since I’ll be testing some tech tools.
+- *Answer:* Yes, I’d like a quieter space to focus on testing out the tech tools.
+- *Answer:* I’m open to new places, as long as they are tech-friendly with plenty of outlets and good Wi-Fi.
+- *Answer:* Yes, I used a tech-enabled workspace last time, and I’d like something with a similar setup today.
+- *Answer:* Yes, I need a space with access to an interactive display and fast Wi-Fi.
+- *Answer:* Yes, show me the tech-enabled spaces that are available right now.
+- *Answer:* I need a comfortable temperature and natural light to feel inspired. Noise isn’t a big issue, as I like a bit of background buzz when I’m working.
+- *Answer:* Yes, I’d like to be in a space with a bit of activity but not too crowded.
+- *Answer:* I’m open to discovering creative spaces, preferably with natural light or interesting design features.
+- *Answer:* No, I haven’t used any spaces yet, but I’d like to try something creative and open.
+- *Answer:* No, I don’t need any tech today—just a creative space with good natural lighting.
+- *Answer:* Yes, I’d prefer something moderately busy but still available now.
+- *Answer:* Temperature and air quality are key, as I need a comfortable environment for an event I’m planning. Noise is less important, as the event itself will create some noise.
+- *Answer:* Yes, please show me areas that can accommodate larger groups and aren’t too crowded beforehand.
+- *Answer:* I’m open to discovering new places that can accommodate a larger group.
+- *Answer:* Yes, I’ve used the auditorium before, but I’d like to explore more flexible options this time.
+- *Answer:* Yes, I need access to tech-enabled features like displays and microphones for my event.
+- *Answer:* Yes, I need a space that’s available now and suitable for an event.

@@ -1,0 +1,16 @@
+travel_options.preferred_mode=walk,public_transport,private_transport,auto_rickshaw,metro,cab
+
+crowd_monitor.location_name=charminar,hussain sagar,golconda fort,tank bund,birla mandir,laad bazaar,inorbit mall,gvk one
+
+historical_info.site_name=charminar,golconda fort,qutub shahi tombs,salar jung museum,mecca masjid,purani haveli,taramati baradari
+
+air_quality.locations=hyderabad,secunderabad,cyberabad,hitec city,gachibowli,banjara hills,jubilee hills
+
+water_quality.water_body_name=hussain sagar,osman sagar,himayat sagar,durgam cheruvu,mir alam tank,gandipet lake
+
+restaurant_finder.cuisine_type=hyderabadi,south indian,north indian,chinese,continental,mughlai,street food,irani,bengali,gujarati
+restaurant_finder.dietary_restrictions=vegetarian,vegan,non_veg,jain
+
+ticket_purchase.ticket_type=movie,concert,monument,museum,theme_park,water_park,ramoji film city,snow world
+
+exhibition_tracker.exhibition_type=art,historical,scientific,cultural,interactive,photography,handicrafts,traditional

@@ -1,5 +1,0 @@
-\n  }\n}'}
-Error in service generation: Got invalid return object. Expected key `request_body` to be present, but got {'code': "```python\nclass AirQualityData(BaseModel):\n    location: str\n    timestamp: str\n    AQI: float\n    'PM2.5': float\n    PM10: float\n    NO2: float\n    O3: float\n\nclass ServiceAirQuality(MicroserviceBase):\n    def __init__(self):\n        super().__init__("}
-
-
-Error in service generation: Got invalid JSON object. Error: Expecting ',' delimiter: line 2 column 12 (char 13)

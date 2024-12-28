@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+.conversation-card {
+    @apply bg-white rounded-lg shadow-md p-6 mb-6;
+  }
+  
+  .nav-button {
+    @apply px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400;
+  }
+  
+  .chat-modal {
+    @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4;
+  }
+  
+  .chat-container {
+    @apply bg-white rounded-lg max-w-3xl w-full max-h-[80vh] overflow-y-auto;
+  }
+  
+  .tourist-message {
+    @apply bg-blue-50 p-4 rounded-lg ml-8 mb-4;
+  }
+  
+  .guide-message {
+    @apply bg-gray-50 p-4 rounded-lg mr-8 mb-4;
+  }
+  
+  .service-tag {
+    @apply bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm mr-2;
+  }

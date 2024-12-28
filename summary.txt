@@ -1,0 +1,6 @@
+You are using a smart city guide system for Hyderabad that can assist you with various aspects of your visit.
+This system can help you navigate the city, find transportation options, and discover attractions.
+ It provides real-time information about crowd levels, air and water quality, and weather conditions. 
+ The system can also help you find restaurants, make reservations, and purchase tickets for events and attractions.
+  It offers updates on exhibitions, festivals, and cultural events happening in the city.
+This intelligent guide aims to enhance your experience by providing timely and relevant information as you explore the city.
