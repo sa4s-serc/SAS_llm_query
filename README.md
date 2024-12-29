@@ -1,5 +1,5 @@
 # City Companion Builder
-
+- For Goal Parser evaluations in standalone, please checkout `goal_parser` branch
 ## Installation
 
 1. Clone the repository:
