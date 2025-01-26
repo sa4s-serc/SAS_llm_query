@@ -1,7 +1,10 @@
 # City Companion Builder
+## Branches
 - The main Application resides in the `iot_prototype` branch
 - For Goal Parser evaluations in standalone, please checkout `goal_parser` branch
 - Backend Generation evaluations are done in the `generation_results` branch
+- For User Evaluation results refer to `human2` branch
+
 ## Installation
 
 1. Clone the repository:
@@ -67,3 +70,6 @@ Each service should implement:
 - `__init__`: Service initialization and registration
 - `register_routes`: API endpoint definitions
 - `process_request`: Request handling logic
+
+## Demo Video
+![YouTube](https://youtu.be/t5iSYytZdw4)
