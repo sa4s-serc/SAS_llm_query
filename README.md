@@ -1,5 +1,7 @@
 # City Companion Builder
+- The main Application resides in the `iot_prototype` branch
 - For Goal Parser evaluations in standalone, please checkout `goal_parser` branch
+- Backend Generation evaluations are done in the `generation_results` branch
 ## Installation
 
 1. Clone the repository:
