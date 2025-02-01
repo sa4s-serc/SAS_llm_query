@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="IoT systems face significant challenges in adapting to user needs, which are often under-specified and evolve with changing environmental contexts.">
+  <meta name="keywords" content="LLM, IoT, Mixed-Initiative Interaction">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Leveraging LLMs for Dynamic IoT Systems Generation through Mixed-Initiative Interaction</title>
+  
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/image/robot.svg">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">Leveraging LLMs for Dynamic IoT Systems Generation through Mixed-Initiative Interaction</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="#">Bassam Adnan</a><sup>1</sup>,</span>
+            <span class="author-block">
+              <a href="#">Sathvika Miryala</a><sup>1</sup>,</span>
+            <span class="author-block">
+              <a href="#">Aneesh Sambu</a><sup>1</sup>,</span>
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?user=qtITyHkAAAAJ&hl=en">Karthik Vaidhyanathan</a><sup>1</sup>,</span>
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?user=VaWnhK4AAAAJ&hl=en">Martina De Sanctis</a><sup>2</sup>,</span>
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?user=gXtk7Y0AAAAJ&hl=en">Romina Spalazzese</a><sup>3</sup></span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>1</sup>IIIT Hyderabad, India,</span>
+            <span class="author-block"><sup>2</sup>GSSI, L'Aquila, Italy,</span>
+            <span class="author-block"><sup>3</sup>Malmo University, Sweden</span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- PDF Link. -->
+              <span class="link-block">
+                <a href="<TODO Paperlink>.pdf" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                  </span>
+                  <span>Paper</span>
+                </a>
+              </span>
+              <!-- Video Link. -->
+              <span class="link-block">
+                <a href="https://youtu.be/t5iSYytZdw4" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-youtube"></i>
+                  </span>
+                  <span>Video</span>
+                </a>
+              </span>
+              <!-- Code Link. -->
+              <span class="link-block">
+                <a href="https://github.com/sa4s-serc/SAS_llm_query/tree/iot-prototype" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code</span>
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+
+    <!-- Three-Pass Dialogue Flow Figure -->
+    <div class="columns is-centered">
+      <div class="column is-full-width has-text-centered">
+        <h2 class="title is-3">Three-Pass Dialogue Flow</h2>
+        <figure class="image">
+          <img src="static/image/three_pass_diagram.png" alt="Three-Pass Dialogue Flow">
+          <figcaption class="is-size-6">Progressive Identification of User Goals and Service Parameters enabling Goal-Driven Architecture</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- Abstract -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            IoT systems face significant challenges in adapting to user needs, which are often under-specified and evolve with changing environmental contexts. To address these complexities, users should be able to explore possibilities, while IoT systems must learn and support users in the process of providing proper services, e.g., to serve novel experiences. The IoT-Together paradigm aims to meet this demand through the Mixed-Initiative Interaction (MII) paradigm that facilitates a collaborative synergy between users and IoT systems, enabling the co-creation of intelligent and adaptive solutions that are precisely aligned with user-defined goals.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Method -->
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Method: Three-Pass Dialogue Framework</h2>
+        
+        <!-- Three-Pass Framework -->
+        <h3 class="title is-4"></h3>
+        <div class="content">
+          <p>Our system employs a three-pass approach to understand and fulfill user needs:</p>
+          <div class="columns">
+            <div class="column">
+              <div class="box">
+                <h4 class="title is-5">Pass 1: Contextual Awareness</h4>
+                <p>Builds a picture by gathering environmental data (weather, traffic) along with user details (location, preferences) initially.</p>
+              </div>
+             </div>
+             <div class="column">
+              <div class="box">
+                <h4 class="title is-5">Pass 2: Goal Refinement</h4>
+                <p>Conducts a two-way conversation using smart suggestions and follow-up questions, helping match what you want with what's available.</p>
+              </div>
+             </div>
+             <div class="column">
+              <div class="box">
+                <h4 class="title is-5">Pass 3: Service Generation</h4>
+                <p>Puts together a package of services based on our earlier chat, and checks if they work for you asking for confirmation- if not, we start fresh from Pass 1.</p>
+              </div>
+             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Results</h2>
+      
+        <!-- Goal Parser Performance -->
+        <h3 class="title is-4">Goal Parser Performance</h3>
+        <div class="content">
+          <p>Our evaluation demonstrates the system's ability to interpret both concrete and ambiguous user queries:</p>
+          
+          <!-- Query Analysis Examples -->
+          <h4 class="title is-5">Query Analysis Examples</h4>
+          <div class="table-container">
+            <table class="table is-bordered is-striped is-hoverable is-fullwidth">
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>User Query</th>
+                  <th>Services</th>
+                  <th>Parameters</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="has-text-weight-bold">Concrete</td>
+                  <td>"I'd love to visit Charminar and understand its history. Wonder if it gets too crowded on weekends?"</td>
+                  <td>
+                    <ul style="margin-top: 0;">
+                      <li>historical_info</li>
+                      <li>crowd_monitor</li>
+                    </ul>
+                  </td>
+                  <td>
+                    <pre style="background: transparent; padding: 0; margin: 0;"><code class="language-python">{
+        "historical_info": {
+          "site_name": "charminar"
+        },
+        "crowd_monitor": {
+          "location_name": "charminar"
+        }
+      }</code></pre>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="has-text-weight-bold">Ambiguous</td>
+                  <td>"Love anything artsy with a story behind it. Places where I can learn about local culture while enjoying the atmosphere."</td>
+                  <td>
+                    <ul style="margin-top: 0;">
+                      <li>exhibition_tracker</li>
+                      <li>historical_info</li>
+                      <li>restaurant_finder</li>
+                    </ul>
+                  </td>
+                  <td>
+                    <pre style="background: transparent; padding: 0; margin: 0;"><code class="language-python">{
+        "exhibition_tracker": {
+          "exhibition_type": ["art", "cultural"]
+        },
+        "historical_info": {
+          "site_name": "salar jung museum"
+        },
+        "restaurant_finder": {
+          "cuisine_type": "hyderabadi"
+        }
+      }</code></pre>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+      
+          <!-- Performance Metrics -->
+          <h4 class="title is-5">Model Performance Metrics</h4>
+          <p>Performance comparison between DeepSeek-V2.5 and GPT-4o-mini across query categories:</p>
+          <div class="table-container">
+            <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
+              <thead>
+                <tr>
+                  <th>Model</th>
+                  <th>Category</th>
+                  <th>Precision</th>
+                  <th>Recall</th>
+                  <th>F1</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td rowspan="3">GPT-4o-mini</td>
+                  <td>Ambiguous</td>
+                  <td>0.683</td>
+                  <td>0.795</td>
+                  <td>0.730</td>
+                </tr>
+                <tr>
+                  <td>Concrete</td>
+                  <td>0.467</td>
+                  <td>0.773</td>
+                  <td>0.559</td>
+                </tr>
+                <tr>
+                  <td>Overall</td>
+                  <td>0.523</td>
+                  <td>0.778</td>
+                  <td>0.603</td>
+                </tr>
+                <tr>
+                  <td rowspan="3">DeepSeek-V2.5</td>
+                  <td>Ambiguous</td>
+                  <td>0.681</td>
+                  <td>0.788</td>
+                  <td>0.725</td>
+                </tr>
+                <tr>
+                  <td>Concrete</td>
+                  <td>0.492</td>
+                  <td>0.830</td>
+                  <td>0.591</td>
+                </tr>
+                <tr>
+                  <td>Overall</td>
+                  <td>0.554</td>
+                  <td>0.816</td>
+                  <td>0.635</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      
+        <!-- System Performance Analysis -->
+        <h3 class="title is-4">System Performance Analysis</h3>
+        <div class="content">
+          <div class="columns is-multiline">
+            <!-- Token Consumption Graph -->
+            <div class="column is-half">
+              <figure class="image">
+                <img src="static/image/input_tokens.png" alt="Token Consumption Graph">
+                <figcaption class="is-size-6">Token consumption scaling with increasing number of services</figcaption>
+              </figure>
+            </div>
+            <!-- Token Distribution Pie Chart -->
+            <div class="column is-half">
+              <figure class="image">
+                <img src="static/image/token_distribution.png" alt="Token Distribution">
+                <figcaption class="is-size-6">Token distribution during application generation</figcaption>
+              </figure>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Case Study -->
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Smart City Case Study</h2>
+        <div class="content has-text-justified">
+          <p>
+            Inspired by the Smart City Living Lab of The International Institute of Information Technology Hyderabad. The infrastructure integrates a network of IoT sensors monitoring crowd density in specific regions, air quality at public spaces, and water quality at heritage sites. Currently, visitors need to use multiple separate applications to access information about restaurant availability, cultural heritage site bookings, and other services - a fragmentation that becomes particularly challenging when visitors have uncertain or evolving objectives.
+          </p>
+          <p>
+            Our implementation builds upon this sensor infrastructure to provide a range of services, including event notifications, historical site information systems, crowd monitoring, air quality assessment tools, exhibition tracking, restaurant recommendation engines, ticket purchasing platforms, travel planning tools, and water quality monitoring services. To evaluate the system's effectiveness, we conducted user studies (n=15) with participants from diverse academic backgrounds, including Ph.D. students, Electronics/Communications Engineering students, and Computer Science students. Each participant interacted with the system for 10-15 minutes, with feedback collected through an integrated form in the user interface. The results showed high satisfaction rates with an average rating of 4.1/5 for service accuracy and 4.2/5 for service relevance.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BibTeX -->
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@inproceedings{adnan2024leveraging,
+  title={Leveraging LLMs for Dynamic IoT Systems Generation through Mixed-Initiative Interaction},
+  author={Adnan, Bassam and Miryala, Sathvika and Sambu, Aneesh and Vaidhyanathan, Karthik and De Sanctis, Martina and Spalazzese, Romina},
+  booktitle={},
+  year={2024}
+}</code></pre>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            Website template borrowed from <a
+            href="https://github.com/nerfies/nerfies.github.io">NeRFies</a>. 
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+</body>
+
+</html>
