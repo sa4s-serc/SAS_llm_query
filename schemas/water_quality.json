@@ -1,0 +1,20 @@
+{
+    "name": "water_quality_data",
+    "path": "data/water_quality_data.json",
+    "description": "Contains water quality measurements for various water bodies.",
+    "schema": {
+        "type": "array",
+        "items": {
+            "type": "object",
+            "properties": {
+                "location": {"type": "string"},
+                "timestamp": {"type": "string", "format": "date-time"},
+                "pH": {"type": "number"},
+                "Dissolved_Oxygen": {"type": "number"},
+                "Conductivity": {"type": "number"},
+                "Turbidity": {"type": "number"},
+                "Temperature": {"type": "number"}
+            }
+        }
+    }
+}

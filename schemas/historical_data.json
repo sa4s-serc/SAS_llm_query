@@ -1,0 +1,21 @@
+{
+    "name": "historic_data",
+    "path": "data/historic_data.json",
+    "description": "Contains historical and cultural information about monuments and historical sites including significance, year built, and cultural importance.",
+    "schema": {
+        "type": "object",
+        "patternProperties": {
+            ".*": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "year_built": {"type": "string"},
+                    "significance": {"type": "string"},
+                    "cultural_importance": {"type": "string"},
+                    "location": {"type": "string"},
+                    "description": {"type": "string"}
+                }
+            }
+        }
+    }
+}

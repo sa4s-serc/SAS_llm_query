@@ -1,0 +1,18 @@
+{
+    "name": "restaurant_data",
+    "path": "data/restaurant_data.json",
+    "description": "Contains restaurant information including location, cuisine type, price range, dietary restrictions, and group size capacity.",
+    "schema": {
+        "type": "array",
+        "items": {
+            "type": "object",
+            "properties": {
+                "location": {"type": "string"},
+                "cuisine_type": {"type": "string"},
+                "price_range": {"type": "string"},
+                "dietary_restrictions": {"type": "array", "items": {"type": "string"}},
+                "group_size": {"type": "integer"}
+            }
+        }
+    }
+}

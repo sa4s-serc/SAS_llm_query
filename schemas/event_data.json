@@ -1,0 +1,16 @@
+{
+    "name": "event_data",
+    "path": "data/event_notifier.json",
+    "description": "Contains information about upcoming events, shows, and festivals.",
+    "schema": {
+        "type": "array",
+        "items": {
+            "type": "object",
+            "properties": {
+                "event": {"type": "string"},
+                "time_required": {"type": "string"},
+                "details": {"type": "string"}
+            }
+        }
+    }
+}

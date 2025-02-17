@@ -1,0 +1,15 @@
+{
+    "name": "ticket_data",
+    "path": "data/event_ticket_prices.json",
+    "description": "Contains event ticket pricing information.",
+    "schema": {
+        "type": "array",
+        "items": {
+            "type": "object",
+            "properties": {
+                "Event Name": {"type": "string"},
+                "Ticket Price": {"type": "integer"}
+            }
+        }
+    }
+}

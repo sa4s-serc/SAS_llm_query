@@ -1,0 +1,16 @@
+{
+    "name": "travel_data",
+    "path": "data/travel.json",
+    "description": "Contains transportation options and routes to tourist destinations.",
+    "schema": {
+        "type": "array",
+        "items": {
+            "type": "object",
+            "properties": {
+                "destination": {"type": "string"},
+                "available_time": {"type": "integer"},
+                "preferred_mode": {"type": "string"}
+            }
+        }
+    }
+}

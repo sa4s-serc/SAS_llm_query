@@ -1,0 +1,20 @@
+{
+    "name": "air_quality_data",
+    "path": "data/air_quality_data.json",
+    "description": "Contains air quality measurements including AQI, PM2.5, PM10, NO2, and O3 levels for different locations.",
+    "schema": {
+        "type": "array",
+        "items": {
+            "type": "object",
+            "properties": {
+                "location": {"type": "string"},
+                "timestamp": {"type": "string", "format": "date-time"},
+                "AQI": {"type": "number"},
+                "PM2.5": {"type": "number"},
+                "PM10": {"type": "number"},
+                "NO2": {"type": "number"},
+                "O3": {"type": "number"}
+            }
+        }
+    }
+}

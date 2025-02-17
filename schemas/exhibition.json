@@ -1,0 +1,17 @@
+{
+    "name": "exhibition_data",
+    "path": "data/exhibition_data.json",
+    "description": "Contains information about ongoing and upcoming exhibitions including audience type, location, dates, and exhibition type.",
+    "schema": {
+        "type": "array",
+        "items": {
+            "type": "object",
+            "properties": {
+                "interested_audience": {"type": "string"},
+                "location": {"type": "string"},
+                "date_range": {"type": "string"},
+                "exhibition_type": {"type": "string"}
+            }
+        }
+    }
+}

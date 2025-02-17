@@ -1,0 +1,16 @@
+{
+    "name": "crowd_data",
+    "path": "data/crowd_quality_data.json",
+    "description": "Contains real-time crowd density information for various locations.",
+    "schema": {
+        "type": "array",
+        "items": {
+            "type": "object",
+            "properties": {
+                "location": {"type": "string"},
+                "timestamp": {"type": "string", "format": "date-time"},
+                "crowd_count": {"type": "integer"}
+            }
+        }
+    }
+}
